@@ -1,0 +1,120 @@
+mutation create_services(
+  $service_name: String,
+  $slug: String,
+  $sort_order: Int,
+  $list_view_icon: String,
+  $list_view_text: String,
+  $icon_1: String,
+  $sub_heading_1: String,
+  $content_block_1: String,
+  $icon_2: String,
+  $sub_heading_2: String,
+  $content_block_2: String,
+  $icon_3: String,
+  $sub_heading_3: String,
+  $content_block_3: String,
+  $icon_4: String,
+  $sub_heading_4: String,
+  $content_block_4: String,
+  $dropdown_1: String,
+  $dropdown_2: String,
+  $dropdown_3: String
+) {
+  items: model_create(
+    model: {
+      model_schema_name: "modules/website/services",
+      properties: [
+        { 
+          name: "service_name",
+          value: $service_name 
+        },
+        { 
+          name: "slug",
+          value: $slug 
+        },
+        { 
+          name: "sort_order",
+          value: $sort_order 
+        },
+        { 
+          name: "add_to_homepage",
+          value: "Yes"
+        },
+        { 
+          name: "is_enabled",
+          value_boolean: true
+        },
+        { 
+          name: "list_view_icon",
+          value: $list_view_icon
+        },
+        { 
+          name: "list_view_text",
+          value: $list_view_text
+        },
+        { 
+          name: "icon_1",
+          value: $icon_1
+        },
+        { 
+          name: "sub_heading_1",
+          value: $sub_heading_1
+        },
+        { 
+          name: "content_block_1",
+          value: $content_block_1
+        },
+        { 
+          name: "icon_2",
+          value: $icon_2
+        },
+        { 
+          name: "sub_heading_2",
+          value: $sub_heading_2
+        },
+        { 
+          name: "content_block_2",
+          value: $content_block_2
+        },
+        { 
+          name: "icon_3",
+          value: $icon_3
+        },
+        { 
+          name: "sub_heading_3",
+          value: $sub_heading_3
+        },
+        { 
+          name: "content_block_3",
+          value: $content_block_3
+        },
+        { 
+          name: "icon_4",
+          value: $icon_4
+        },
+        { 
+          name: "sub_heading_4",
+          value: $sub_heading_4
+        },
+        { 
+          name: "content_block_4",
+          value: $content_block_4
+        },
+        { 
+          name: "dropdown_1",
+          value: $dropdown_1
+        },
+        { 
+          name: "dropdown_2",
+          value: $dropdown_2
+        },
+        { 
+          name: "dropdown_3",
+          value: $dropdown_3
+        }
+      ]
+    }
+  ) {
+    id
+  }
+}

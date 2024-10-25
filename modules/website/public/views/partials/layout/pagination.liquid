@@ -1,0 +1,106 @@
+{% comment %} 
+    Parameters Needed from Parent 
+    - page_num
+    - per_page
+{% endcomment %}
+
+
+
+<div class="paginations grid-x grid-padding-x align-right align-middle">
+    <div class="shrink cell">
+        <span class="per__page font-color-head form-label"><strong>Items per page:</strong></span>
+        <ins-select id="page-size-select" placeholder="Select Size" small>
+            <ins-select-option label="6" value="6" {% if per_page <= 6 %}default{% endif %}></ins-select-option>
+            <ins-select-option label="15" value="15"  {% if per_page > 6 and per_page <= 15 %}default{% endif %}></ins-select-option>
+            <ins-select-option label="30" value="30"  {% if per_page > 15 and per_page <= 30 %}default{% endif %}></ins-select-option>
+        </ins-select>
+    </div>
+
+    {%  liquid
+        assign tmp_start_count = page_num | times: per_page
+        assign tmp_start_minus = per_page | minus: 1
+        assign start_count = tmp_start_count | minus: tmp_start_minus
+
+        assign tmp_end_count = page_num | times: per_page
+        if tmp_end_count > data.total_entries
+            assign end_count = data.total_entries
+        else
+            assign end_count = tmp_end_count
+        endif  
+    %}              
+
+    {% comment %} 
+        Create Next and Previous page link
+        - get all QUERY_STRING then delete page and per_page from them
+        - then append new page and per_page
+    {% endcomment %}
+    {%  liquid
+        assign tmp_page = 'page=' | append: page_num
+        assign tmp_per_page = 'per_page=' | append: per_page
+
+        assign query_string = context.headers.QUERY_STRING | split: '&'
+        assign query_string = query_string | array_delete: tmp_page
+        assign query_string = query_string | array_delete: tmp_per_page
+        assign query_string = query_string | join: '&'
+
+        if query_string.size > 0
+            assign ampersand = '&'
+        endif
+
+        assign next_page = page_num | plus: 1
+        assign tmp_next_page = 'page=' | append: next_page                    
+        assign next_link = context.headers.PATH_INFO | append: '?' | append: query_string | append: ampersand | append: tmp_next_page | append: "&" | append: tmp_per_page
+
+        assign prev_page = page_num | minus: 1
+        assign tmp_prev_page = 'page=' | append: prev_page            
+        assign prev_link = context.headers.PATH_INFO | append: '?' | append: query_string | append: ampersand | append: tmp_prev_page | append: "&" | append: tmp_per_page        
+    %}
+
+   
+    <div class="shrink cell">
+        <div class="paginate">
+            <span>{{ start_count }}</span>
+            <span>-</span>
+            <span>{{ end_count }}</span>
+            <span>of</span>
+            <span>{{ get_news.items.total_entries }}</span>
+            <div>
+                {%- if get_news.items.current_page > 1 -%}
+                <a href="{{prev_link}}">
+                <ins-button 
+                    id="previousPage"
+                    label=""
+                    title="Previous page"
+                    icon="icon-angle-left">
+                </ins-button>
+                </a>
+                {%- endif -%}
+            </div>
+            <div>
+                {%- if get_news.items.current_page < get_news.items.total_pages -%}
+                <a href="{{next_link}}">
+                <ins-button 
+                    id="nextPage"
+                    label=""
+                    title="Next page"
+                    class="btn-icon-right"
+                    icon="icon-angle-right">
+                </ins-button>
+                </a>
+                {%- endif -%}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let pageSizeSelect = document.getElementById('page-size-select');
+    
+    let per_page = "{{per_page}}";   
+    if (pageSizeSelect) {
+        pageSizeSelect.addEventListener('insValueChange', event => {
+            let url = window.location.href.replace("per_page="+per_page, "per_page="+event.detail);
+            window.location = url;
+        });
+    }  
+</script>

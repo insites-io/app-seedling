@@ -1,0 +1,40 @@
+mutation create_menu(
+  $label: String,
+  $order: String,
+  $slug: String,
+  $parent: String
+ 
+) {
+  items: model_create(
+    model: {
+      model_schema_name: "modules/website/menu",
+      properties: [
+        { 
+          name: "label",
+          value: $label 
+        },
+        { 
+          name: "order",
+          value: $order 
+        },
+        { 
+          name: "slug",
+          value: $slug 
+        },
+        { 
+          name: "show_in_menu",
+          value_boolean: true
+        },
+        { 
+          name: "parent",
+          value:  $parent
+        },
+
+       
+      ]
+    }
+  ) {
+    id
+    properties
+  }
+}

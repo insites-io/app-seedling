@@ -1,0 +1,266 @@
+---
+metadata: {
+    layout_name: contact
+}
+---
+{%- comment -%}
+By adding the global content to the top of the layout
+It can be accessed in the includes without calling the GraphQL again
+It IS NOT accessable in {{content_for_layout}} which includes the specific page
+{%- endcomment -%}
+
+
+{%- comment -%} Used by the fragment cache in the layout {%- endcomment -%}
+{% comment %} ? Enable Fragment cache after Installation {% endcomment %}
+{% comment %} {%- include "modules/website/cache/layout_fragment_cache_key" -%} {% endcomment %}
+
+{%- comment -%}
+Contact Us layout
+{%- endcomment -%}
+<!doctype html>
+<html class="no-js" lang="en">
+{%- if context.environment == "staging" -%}
+<!-- start layout: contact-us  -->
+{%- endif -%}
+
+<head>
+    {%- comment -%}
+    We try to limit assets that are part of the head / technical head to
+    minimize page size & improve page performance.
+
+    Assets like 'Google Map API', should only be referenced as needed.
+    - Managed on the 'page / layout' level
+    {%- endcomment -%}
+
+    {% comment %} 
+        ? Enable Caching for Head and Google Maps after Installation
+        ? Remove the comment once Installed and Menu Database is Populated 
+        {%- capture head_key -%} {{ context.exports.layout_cache_key.cache_key | append: "-head" }} {%- endcapture -%}
+        {%- cache head_key -%}
+             {% include 'modules/website/layout/head' %}
+            {% include 'modules/website/layout/googlemaps' %}
+        {%- endcache -%}
+    {% endcomment %}
+
+    {% comment %} ? Delete the next 2 line of codes below this comment once Installed and Menu Database is Populated {% endcomment %}
+    {% include 'modules/website/layout/head' %}
+    {% include 'modules/website/layout/googlemaps' %}
+
+    <script type="module" src="https://components.insites.io/v2/latest/insites.esm.js"></script>
+    <script nomodule src="https://components.insites.io/v2/latest/insites.js"></script>
+    {%- include 'modules/insites_forms/form_scripts' -%}
+    <title>Contact Us</title>
+</head>
+<body>
+
+    {% comment %} Globals {% endcomment %}
+    {%- include "modules/insites_cms/globals" -%}
+    {%- assign global = context.exports.global -%}
+    {% comment %} Set full address using loc_1 {% endcomment %}
+    {%  liquid
+        assign loc_1_address_full = ""
+        if global.loc_1_address_1 and global.loc_1_address_1 != ''
+            assign loc_1_address_full = global.loc_1_address_1 | append : ", "
+        endif
+        if global.loc_1_address_2 and global.loc_1_address_2 != ''
+            assign loc_1_address_full = loc_1_address_full | append: global.loc_1_address_2 | append : ", "
+        endif
+        if global.loc_1_city and global.loc_1_city != ''
+            assign loc_1_address_full = loc_1_address_full | append: global.loc_1_city | append : " "
+        endif
+        if global.loc_1_state and global.loc_1_state != ''
+            assign loc_1_address_full = loc_1_address_full | append: global.loc_1_state | append : " "
+        endif
+        if global.loc_1_postcode and global.loc_1_postcode != ''
+            assign loc_1_address_full = loc_1_address_full | append: global.loc_1_postcode | append : " "
+        endif
+        if global.loc_1_country and global.loc_1_country != ''
+            assign loc_1_address_full = loc_1_address_full | append: global.loc_1_country 
+        endif
+    %}
+
+    {% comment %} Google map key {% endcomment %}
+    {% graphql data = 'modules/website/trigger_api_call', name: 'modules/client/get_google_maps_api_key' %}
+    {% assign map_key = data.items.response.body | parse_json | dig: 'items', 'results' | first | dig: 'key' %}
+
+    <div class="main-wrap">
+        {% comment %} 
+            ? Enable Caching for Header after Installation
+            ? Remove the comment once Installed and Menu Database is Populated 
+                {%- capture header -%} {{ context.current_user.id }}-{{ context.exports.layout_cache_key.cache_key }}-header {%- endcapture -%}
+                {%- cache header -%}
+                    {% include 'modules/website/layout/header' %}
+                {%- endcache -%}
+        {% endcomment %}
+
+        {% comment %} ? Delete line of code below this comment once Installed and Menu Database is Populated {% endcomment %}
+        {% include 'modules/website/layout/header_default' %} 
+        
+        {% comment %} 
+            ? Enable Caching for Header after Installation
+            ? Remove the comment once Installed and Menu Database is Populated 
+                {%- capture header-mobile -%} {{ context.current_user.id }}-{{ context.exports.layout_cache_key.cache_key }}-header-mobile {%- endcapture -%}
+                {%- cache header-mobile -%}
+                    {% include 'modules/website/layout/header_mobile' %}
+                {%- endcache -%}
+        {% endcomment %}
+
+        {% comment %} ? Delete line of code below this comment once Installed and Menu Database is Populated {% endcomment %}
+        {% include 'modules/website/layout/header_mobile_default' %}
+        
+        {% include 'modules/website/content/hero_title' %} 
+
+        <div class="wrapper">
+            <div class="grid-container">
+                <div class="spacer section hide-for-small-only"></div> 
+                <div class="spacer xx-large show-for-small-only"></div> 
+                    
+                <div class="contact-us grid-x grid-padding-x" data-test="page-contact-us">                    
+                    <div class="large-7 medium-6 small-12 cell">
+                        {{ content_for_layout }}
+                    </div>                    
+                    <div class="small-12 cell spacer large show-for-small-only"></div>
+                    <div class="large-4 large-offset-1 medium-5 medium-offset-1 small-12 cell">  
+                        {%- if loc_1_address_full != "" -%}
+                            <a target="_blank"
+                            href="https://www.google.com/maps/place/{{ loc_1_address_full  | url_encode }}"
+                            class="color-main">
+                            {%- include 'modules/website/map/google-map-static', key: map_key, address: loc_1_address_full -%}
+                        </a>
+                        {% endif %}                                              
+                        <div class="spacer large"></div>                        
+                        <ul class="contact-details no-bullet color-main">
+                            <li class="address-container spacer">
+                                {%- if loc_1_address_full != "" -%}
+                                <a target="_blank" class="color-main subHeading" onclick="mapsSelector()">                                    
+                                    <i class="icon-map"></i>
+                                    {{ loc_1_address_full }}                                    
+                                </a>
+                                {% endif %}
+                            </li>
+                            {%- if global.loc_1_phone_number -%}
+                            <li class="phone-container spacer">
+                                {%- comment -%}
+                                IF the phone number is a '1800', or no country code, etc.. just remove regex
+                                Data needs to be standard. If it will contain the country code, or not.
+                                {%- endcomment -%}
+                                {%- assign contact_no = global.loc_1_phone_number | replace_regex: '[+() ]', '' | prepend: '+' -%}
+                                {% assign phone_number = global.loc_1_phone_number %}                                                               
+                                <a class="color-main subHeading" href="tel:{{ contact_no }}" data-test="contact-us-contact-number">
+                                    <i class="icon-phone1"></i>
+                                    +{{ global.loc_1_phone_country_code }}
+                                    {{ phone_number | slice: 0, 3 }} 
+                                    {{ phone_number | slice: 3, 4 }} 
+                                    {{ phone_number | slice: 6, 10 }}
+                                </a>
+                            </li>
+                            {%- endif -%}
+                            {%- if global.loc_1_email -%}
+                            <li class="email-container">
+                                <a class="color-main subHeading" href="mailto:{{ global.loc_1_email }}"
+                                    data-test="contact-us-contact-number">
+                                    <i class="icon-mail1"></i>
+                                    {{ global.loc_1_email }}
+                                </a>
+                            </li>
+                            {%- endif -%}
+                        </ul>
+
+                        {% if loc_1_mon_open != null and  loc_1_tue_open != null and loc_1_wed_open != null  
+                            and loc_1_thu_open != null  and loc_1_fri_open != null  and loc_1_sat_open != null  
+                            and loc_1_sun_close != null  
+                            %}
+                            
+                        {% else %}
+                                        
+                        <div class="spacer xxx-large"></div>
+                        <h3>Opening Hours</h3>
+                        <div class="spacer large"></div>
+                        <div class="grid-x opening-hours font-color-head">
+
+                            {%- assign days_name = "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday" | split: "," -%}
+                            {%- assign global_days = "sun,mon,tue,wed,thu,fri,sat" | split: "," -%}
+                            {%- assign current_day = "today" | date: "%A" -%}
+
+                            {%- for day in global_days -%}
+                            {%- assign key_enable = "loc_1_" | append: day | append: "_enable" -%}
+                            {%- assign key_open = "loc_1_" | append: day | append: "_open" -%}
+                            {%- assign key_close = "loc_1_" | append: day | append: "_close" -%}
+                         
+                            <div class="small-12 cell grid-x {% if days_name[forloop.index0] == current_day %}bold{% endif %}">
+                                <div class="small-4 cell">{{ days_name[forloop.index0] }}:</div>
+                                <div class="small-8 cell">
+                                    {% if global[key_enable] == 'false' or global[key_enable] == false or global[key_enable] == nil %}
+
+                                        {% comment %} ? THIS IS TO SET DEFAULT VALUE FOR OPENING HOURS {% endcomment %}
+                                        {% if global[key_enable] == nil %}
+                                            {% comment %} ? THIS VALUE MOSTLY AIMS TO POPULATE UPON INSTALLATION {% endcomment %}
+                                            {% if days_name[forloop.index0] == "Sunday" or days_name[forloop.index0] == "Saturday"  %}
+                                                Closed
+                                            {% else %}                                        
+                                                <p>7:00 AM - 4:00 PM</p>
+                                            {% endif %}
+                                        {% else %}
+                                            {% comment %} ? THIS VALUE TARGETS IF THE SETTING OF OPENING HOURS IS FALSE {% endcomment %}
+                                            Closed       
+                                        {% endif %}
+                                    {% else %}
+                                        <p>{{ global[key_open] | date: "%I:%M %p" }} - {{ global[key_close] | date: "%I:%M %p" }}</p>
+                                    {% endif %}                                
+                                </div>
+                            </div>
+                            <div class="small-12 cell spacer x-small"></div>
+                            {%- endfor -%}
+                        </div>
+                        {% endif %}
+              
+                    </div>
+                </div>
+
+                <link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+
+                {%- if context.environment == "staging" -%}
+                    <script src="{{ 'modules/website/services/formServices.js' | asset_url }}"></script>
+                    <script src="{{ 'modules/website/scripts/forms/contact-us.js' | asset_url }}"></script>
+                {% else %}
+                    <!-- minified --> 
+                    <script src="{{ 'modules/website/services/formServices.min.js' | asset_url }}"></script>
+                    <script src="{{ 'modules/website/scripts/forms/contact-us.min.js' | asset_url }}"></script> 
+                {%- endif -%}
+    
+                <div class="spacer section"></div>
+            </div>
+        </div>  
+    </div>
+
+    {% comment %} 
+        ? Enable Caching for Footer after Installation
+        ? Remove the comment once Installed and Menu Database is Populated 
+        {%- capture foot_key -%} {{ context.exports.layout_cache_key.cache_key | append: "-footer_section"}} {%- endcapture -%}
+        {%- cache foot_key -%} 
+            {% include 'modules/website/layout/footer' %}
+        {%- endcache -%}
+    {% endcomment %}
+    
+    {% comment %} ? Delete line of code below this comment once Installed and Menu Database is Populated {% endcomment %}
+    {% include 'modules/website/layout/footer' %}
+
+    <script>
+        function mapsSelector() {
+            if /* if we're on iOS, open in Apple Maps */
+                ((navigator.platform.indexOf("iPhone") != -1) ||
+                (navigator.platform.indexOf("iPad") != -1) ||
+                (navigator.platform.indexOf("iPod") != -1))
+                window.open("maps://www.google.com/maps/place/{{ loc_1_address_full | url_encode }}");
+            else /* else use Google */
+                window.open("https://www.google.com/maps/place/{{ loc_1_address_full | url_encode}}");
+        }
+    </script>
+
+</body>
+{%- if context.environment == "staging" -%}
+<!-- end layout: contact-us  -->
+{%- endif -%}
+
+</html>

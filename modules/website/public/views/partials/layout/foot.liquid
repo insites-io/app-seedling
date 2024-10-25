@@ -1,0 +1,9 @@
+{%- if context.environment == "staging" -%}
+<!-- start partial:layout/foot  -->
+{%- endif -%}
+
+{%- include 'modules/website/layout/technical_foot' -%}
+
+{%- if context.environment == "staging" -%}
+<!-- end partial:layout/foot -->
+{%- endif -%}

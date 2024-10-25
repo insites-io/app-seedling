@@ -1,0 +1,20 @@
+---
+name: verify_email
+resource: User
+resource_owner: anyone
+fields:
+  email:
+  profiles:
+    modules/client/client:
+      properties:
+        is_enabled:
+          property_options:
+            default: true
+        is_activated:
+          property_options:
+            default: true
+---
+{% form %}
+    <input type="hidden" name="{{ form.fields.profiles['modules/client/client'].properties.is_enabled.name }}" value="{{ form.fields.profiles['modules/client/client'].properties.is_enabled.value }}">
+    <input type="hidden" name="{{ form.fields.profiles['modules/client/client'].properties.is_activated.name }}" value="true">
+{% endform %}

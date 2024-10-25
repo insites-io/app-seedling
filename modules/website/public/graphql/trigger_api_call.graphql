@@ -1,0 +1,17 @@
+mutation trigger_api_call($name: String!, $data:HashObject) {
+  items: api_call_send(
+      template: {
+          name: $name
+      },
+      data: $data
+  ) {
+      response {
+          body
+          headers
+          status
+      },
+      errors {
+          message
+      }
+  }
+}

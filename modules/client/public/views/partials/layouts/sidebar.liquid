@@ -1,0 +1,26 @@
+{% comment %} ? GET USER DETAILS {% endcomment %}
+{% function user_details = "modules/client/user_details" %}
+
+{% if user_details.is_primary_account_holder == false %}
+    {% assign is_user_tab_hidden = "hidden" %}
+{% endif %}
+
+<div class="spacer xxxx-large"></div>
+<div class="accordion-section-holder">
+    <div class="portal-sidebar">                            
+        <ins-accordion-link label="Overview" link="/client-portal" link-target="_self" {%if params.slug == 'client-portal'-%}active{%- endif-%} ></ins-accordion-link>
+        <ins-accordion menu>                    
+            <ins-accordion-item heading="My Forms" open-icon="icon-plus" close-icon="icon-minus" {%if params.slug == 'questionnaires'-%}active{%- endif-%} >
+                <ins-accordion-link label="Questionnaires" link="/questionnaires" link-target="_self" {%if params.slug == 'questionnaires'-%}active{%- endif-%}></ins-accordion-link>
+            </ins-accordion-item>                                                                             
+        </ins-accordion>
+        <ins-accordion-link label="My Documents" link="/documents" link-target="_self" {%if params.slug == 'documents'-%}active{%- endif-%} ></ins-accordion-link>
+        <ins-accordion-link label="My Details" link="/my-details" link-target="_self" {%if params.slug == 'my-details'-%}active{%- endif-%}></ins-accordion-link>
+        <ins-accordion-link label="My Company Details" link="/my-company-details" link-target="_self" {%if params.slug == 'my-company-details'-%}active{%- endif-%}></ins-accordion-link>
+        <ins-accordion-link label="Feedback" link="/feedback" link-target="_self" {%if params.slug == 'feedback'-%}active{%- endif-%}></ins-accordion-link>
+        <ins-accordion-link label="Payment Methods" link="/payment-methods" link-target="_self" {%if params.slug == 'payment-methods'-%}active{%- endif-%}></ins-accordion-link>
+        <ins-accordion-link label="Pay a Bill" link="/pay-bills" link-target="_self" {%if params.slug == 'pay-bills'-%}active{%- endif-%}></ins-accordion-link>
+        <ins-accordion-link {{ is_user_tab_hidden }} label="Users" link="/users" link-target="_self" {%if params.slug == 'users'-%}active{%- endif-%}></ins-accordion-link>
+    </div>
+</div>
+<div class="spacer xxxx-large"></div>

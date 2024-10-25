@@ -1,0 +1,21 @@
+{%- parse_json models -%}
+    [
+        "modules/insites_site_manager/insites_global_content",
+        "modules/website/main_menu",
+        "modules/insites_core/insites_system_fields",
+        "modules/website/header",
+        "modules/website/testimonials",
+        "modules/website/services",
+        "modules/website/news",
+        "modules/website/menu",
+        "modules/website/faqs"
+    ]
+{%- endparse_json -%}
+
+{% liquid
+    capture cache_key 
+        include "modules/website/cache/generate_cache_key", models: models 
+    endcapture
+
+    export cache_key, namespace: 'layout_cache_key'
+ %}

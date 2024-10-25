@@ -1,0 +1,22 @@
+{%- comment -%}
+Vendor Assets holds all 3rd party assets references.
+Any assets such as scripts, css, etc. that is not made by the developer.
+{%- endcomment -%}
+
+{%- if context.environment == "staging" -%}
+    {%- comment -%} Staging exclusive codes {%- endcomment -%}
+{%- endif -%}
+
+    <!-- Preload assets to improve performance -->
+    <link rel="preload" href="{{ 'modules/website/styles/vendor/foundation.min.css' | asset_url }}" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" as="style">
+
+    <!-- Foundation -->
+    <link rel="stylesheet" href="{{ 'modules/website/styles/vendor/foundation.min.css' | asset_url }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" defer></script>
+    
+
+    

@@ -1,0 +1,33 @@
+<ins-modal 
+  id="cancel-modal"
+  with-backdrop 
+  confirmation value="DATA"
+  width="400px" 
+  height="auto"  
+  no-button
+  prevent-click-outside
+  class="no-close-icon">
+
+  <div id="myModalContent" class="text-center">    
+    <div class="warning"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168.33 168.33"><defs></defs><title>warning</title><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path class="cls-1" d="M84.16,0a84.16,84.16,0,1,0,84.16,84.16A84.26,84.26,0,0,0,84.16,0Zm0,162.33a78.16,78.16,0,1,1,78.16-78.16A78.25,78.25,0,0,1,84.16,162.33ZM87.6,98.86,89,50.27H79.31l1.42,48.58Zm-3.44,8.2a6.28,6.28,0,0,0,0,12.55c3.64,0,6-2.73,6-6.28S87.81,107.05,84.16,107.05Z"></path></g></g></svg></div>
+    <div class="spacer"></div>
+    <h3 class="heading-3">Unsaved Field</h3>
+    <div class="spacer"></div>
+    <p>You have unsaved changes. Would you like to continue and discard changes?</p>  
+    <div class="spacer"></div>
+    <ins-button type="submit" label="CANCEL" outlined icon="icon-close-1" onclick="cancelModal.close()" ></ins-button>
+    <span class="pl-16"></span>
+    <a href="/questionnaires"><ins-button type="submit" label="Discard Changes" solid color="information-1" icon="icon-check-2" ></ins-button></a>
+  </div>
+</ins-modal>
+
+<script>
+  let cancelModal = document.getElementById('cancel-modal');
+  let cancelBtn = document.querySelectorAll('.cancel-btn');
+
+  cancelBtn.forEach(field => {
+      field.addEventListener('insClick', () => {
+        cancelModal.open();          
+      });            
+  });
+</script>  

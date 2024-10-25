@@ -1,0 +1,21 @@
+query check_user_email_signup($email:String){
+  items: users(
+    page: 1,
+    per_page: 100,
+    filter: {
+      deleted_at: { exists:false }
+      email: { value: $email }
+    }
+  ){
+    total_entries
+    results{
+      id
+      email
+      deleted_at
+      profiles{
+        id
+        profile_type
+      }
+    }
+  }
+} 

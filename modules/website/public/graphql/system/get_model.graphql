@@ -1,0 +1,31 @@
+query get_model ($id: ID!) {
+  items: records(
+    page: 1
+    per_page: 1
+    filter: {
+      id: { value: $id }
+    }
+  ){
+   	results {
+      id
+      user_id
+      created_at
+      updated_at
+      deleted_at
+      name: table
+      user: related_user(
+        foreign_property: "id"
+        join_on_property: "user_id"
+      ) {
+        first_name
+        last_name
+        email
+      }
+      properties
+      document: property_upload(name: "document") {
+        url
+        file_name
+      }
+    } 
+  }
+}

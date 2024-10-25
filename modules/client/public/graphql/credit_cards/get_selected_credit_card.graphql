@@ -1,0 +1,45 @@
+query get_selected_credit_card (
+  $id: ID,
+  $page: Int = 1,
+  $size: Int = 1,
+  $payment_method_token: String,
+  $contact_uuid: String,
+  $user_id: String
+) {
+  items: records(
+    page: $page
+    per_page: $size
+    filter: {
+      id: { value: $id }
+      deleted_at: { exists: false }
+      table: { value: "modules/insites_ecommerce/payment_method" }
+      properties: [
+        { name: "user_id", value: $user_id }
+        { name: "payment_method_token", value: $payment_method_token }
+        { name: "contact_uuid", value: $contact_uuid }
+      ] 
+    }
+    sort: { updated_at: { order: DESC } }
+  ) {
+    total_entries
+    total_pages
+    current_page
+    results {
+      id      
+      uuid:property(name:"uuid")
+      currency:property(name:"currency")
+      bank_name:property(name:"bank_name")
+      card_brand:property(name:"card_brand")
+      company_uuid:property(name:"company_uuid")
+      contact_uuid:property(name:"contact_uuid")
+      bank_account_bsb:property(name:"bank_account_bsb")
+      card_expiry_year:property(name:"card_expiry_year")
+      bank_account_name:property(name:"bank_account_name")
+      card_expiry_month:property(name:"card_expiry_month")
+      payment_method_name:property(name:"payment_method_name")
+      payment_method_token:property(name:"payment_method_token")
+      card_last_four_digits:property(name:"card_last_four_digits")
+      bank_account_last_four_digits:property(name:"bank_account_last_four_digits")
+    }
+  }
+}

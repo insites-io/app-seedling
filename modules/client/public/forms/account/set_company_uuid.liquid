@@ -1,0 +1,12 @@
+---
+name: set_company_uuid
+resource: User
+resource_owner: anyone
+fields:
+  email:
+  profiles:
+    modules/client/client:
+      properties:
+        company_uuid:
+          validation: { presence: true }
+---

@@ -1,0 +1,26 @@
+mutation create_contact_custom_field(
+  $contact_uuid: String!,
+  $permission_level: String
+) {
+  items: record_create(
+    record: {
+      table: "modules/ins_core/crm_contact_custom_field",
+    	properties: [
+        { name: "contact_uuid", value: $contact_uuid }
+        { name: "primary_account_holder", value_boolean: false }
+        { name: "permission_level", value: $permission_level }
+      ]
+    }
+  ) {
+    id
+    contact: related_user (
+      foreign_property: "external_id"
+      join_on_property: "contact_uuid"
+    ) {
+      id
+      uuid: external_id
+      name
+      email
+    }
+  }
+}

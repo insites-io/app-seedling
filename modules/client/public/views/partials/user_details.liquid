@@ -1,0 +1,35 @@
+{% comment %} ? GET USER {% endcomment %}
+{%- graphql user = 'modules/client/account/get_current_user' | dig: 'current_user' -%}
+{% graphql get_user_custom_field = 'modules/client/account/get_contact_custom_fields', contact_uuid: user.external_id  | dig: 'items', 'results' | first %}
+
+{% comment %} ? GET COMPANY DETAILS {% endcomment %}
+{% assign get_company_details = user | dig: 'crm_contact' | first %}
+
+{% parse_json data %} 
+{
+  "id": "{{ get_company_details.company_uuid }}"
+}
+{% endparse_json %}
+
+{% liquid
+    graphql get_company = 'modules/website/trigger_api_call', name: 'modules/client/get_company', data: data 
+    assign company_details = get_company.items.response.body | parse_json | dig: 'items','results' | first
+%}
+
+{% assign user_name = user.name %}
+{% assign user_external_id = user.external_id %}
+{% assign company_name = company_details.properties.company_name %}
+{% assign company_uuid = company_details.properties.uuid %}
+{% assign is_primary_account_holder = get_user_custom_field.primary_account_holder %}
+
+{% parse_json user_and_company_details %} 
+{
+  "user_name": "{{ user_name }}",
+  "user_external_id": "{{ user_external_id }}",
+  "company_name": "{{ company_name }}",
+  "company_uuid": "{{ company_uuid }}",
+  "is_primary_account_holder": {{ is_primary_account_holder | default: false }}
+}
+{% endparse_json %}
+
+{% return user_and_company_details %}

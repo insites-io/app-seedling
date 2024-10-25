@@ -1,0 +1,17 @@
+query get_user_uuid($id: ID!) {
+  items: users(
+    per_page: 1, 
+    page: 1,
+    filter: {
+        deleted_at: { exists: false }
+        id: { value: $id } 
+    }
+  ) {
+    total_entries
+    results {
+      id
+      email
+      uuid: external_id
+    }
+  }
+}

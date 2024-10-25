@@ -1,0 +1,17 @@
+query get_contact_custom_fields($contact_uuid: String) {
+  items: records(
+    page: 1
+    per_page: 10
+    filter: {table: {value: "modules/ins_core/crm_contact_custom_field"}, 
+      deleted_at: {exists: false}, 
+      properties: [{name: "contact_uuid", value: $contact_uuid}]}
+  ) {
+    results {
+      id
+      contact_uuid: property(name: "contact_uuid")
+      account_status: property(name: "account_status")
+      primary_account_holder: property(name: "primary_account_holder")
+      permission_level: property(name: "permission_level")
+    }
+  }
+}

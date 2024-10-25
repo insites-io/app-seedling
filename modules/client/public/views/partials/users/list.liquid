@@ -1,0 +1,733 @@
+{% assign page_num = context.params.page | default: 1 %}
+{% assign per_page = context.params.per_page | default: 9 %}
+{% assign search_user = context.params.search | default: '' %}
+
+{% assign total_entries = 0 %}
+
+{% comment %} ? PAH - ARGS FOR GRAPHQL FILTER {% endcomment %}
+{% parse_json pah_filters %}
+{
+    "page": 1,
+    "size": 1,
+    "company_uuid": "{{ user_details.company_uuid }}",
+    "search": "{{ search_user }}"
+}
+{% endparse_json %}
+
+{% comment %} ? GRAPHQL FOR PAH {% endcomment %}
+{% graphql get_pah_users = 'modules/client/users/get_pah_users', args: pah_filters | dig: 'items' %}
+{% assign pah_array = get_pah_users %}
+{% assign pah_total_entries = pah_array.total_entries %}
+{% assign pah_array = get_pah_users | dig: "results" %}
+ 
+{% comment %} ? NON PAH - ARGS FOR GRAPHQL FILTER {% endcomment %}
+{% parse_json non_pah_filters %}
+{
+    "page": {{ page_num }},
+    "size": {{ per_page }},
+    "company_uuid": "{{ user_details.company_uuid }}",
+    "search": "{{ search_user }}"
+}
+{% endparse_json %}
+
+{% comment %} ? GRAPHQL FOR NON PAH {% endcomment %}
+{% graphql get_non_pah_users = 'modules/client/users/get_non_pah_users', args: non_pah_filters | dig: 'items' %}
+{% assign non_pah_array = get_non_pah_users %}
+{% assign non_pah_total_entries = non_pah_array.total_entries %}
+{% assign non_pah_array = get_non_pah_users | dig: "results" %}
+
+{% comment %} ? Merge 2 arrays {% endcomment %}
+{% assign get_users = pah_array | concat: non_pah_array %}
+
+{% comment %} HIDDEN FIELDS FOR JAVASCRIPT {% endcomment %}
+<input type="hidden" id="total_entries" value="{{ pah_total_entries | plus: non_pah_total_entries }}">
+<input type="hidden" id="per_page" value="{{ per_page }}">
+<input type="hidden" id="page_num" value="{{ page_num }}">
+<input type="hidden" id="get-users" value='{{ get_users | parse_json }}'>
+<input type="hidden" id="search-user" value="{{ search_user }}">
+<input type="hidden" id="company-name" value="{{ user_details.company_name }}">
+<input type="hidden" id="company-uuid" value="{{ user_details.company_uuid }}">
+
+{% comment %} SEARCH {% endcomment %}
+
+<div class="user-actions-container">
+    <div class="userSearch">
+        <ins-input                 
+            id="search-description"
+            class="search-user"
+            placeholder="Search by email, first or last name"
+            icon="icon-search-1">
+        </ins-input>
+    </div>
+
+    <div class="userAddButton">
+        <ins-button type="button" id="user-invite-button" label="Invite new user" icon="icon-user-plus" solid ></ins-button>
+    </div>
+</div>
+
+{% comment %} ? Add user modal {% endcomment %}
+<ins-modal id="add-user-modal"
+    data=""
+    with-backdrop
+    no-button
+    class="addUserModal">
+
+    <div class="inviteUserModalBodyContainer">
+        <div class="add-user-details">
+            <h3 class="heading-3">Invite new user</h3>
+            <div class="spacer xx-small"></div>
+            <p class="p-body">
+                Please fill in the details below to invite a new user to your company account.
+            </p>
+            <div class="spacer"></div>
+
+            {% comment %} ? EMAIL / CONTACT{% endcomment %}
+            <div class="add-user-details-div">
+                <div class="userDetails">
+                    <ins-input
+                        id="user-email"
+                        label="Email Address*"
+                        name=""
+                        value=""
+                        placeholder="Enter Email Address">
+                    </ins-input>
+                    <span id="emailRequired" class="user-error-txt-red body-x-small is_not_visible">Required</span>
+            
+                    {% comment %} ? ERROR MESSAGE {% endcomment %}
+                    <div id="emailExists" class="emailExistsMessage is_not_visible">
+                        <div class="emailExistsMessageIcon">
+                            <i class="icon-warning"></i>
+                        </div>
+                        <div class="emailExistsMessageDetails">
+                            <span class="body-x-small">
+                                This email already exists in our system. If you send an invite, an invitation link will be sent to the registered address to create a new password and their details will be updated based on what you enter here. 
+                            </span>
+                        </div>
+                    </div>
+                    <span id="emailInvalid" class="user-error-txt-red body-x-small is_not_visible">Invalid Email.</span>
+                </div>
+            </div>
+
+            <div class="spacer small"></div>
+
+            {% comment %} ? NAME {% endcomment %}
+            <div class="add-user-details-div">
+                <div class="userDetails">
+                    {% comment %} ? FIRST NAME {% endcomment %}
+                    <ins-input 
+                        id="user-first-name"
+                        label="First Name*"
+                        name="" 
+                        value=""
+                        class=""
+                        placeholder="Enter First Name">
+                    </ins-input>
+                    <span id="firstNameRequired" class="user-error-txt-red body-x-small is_not_visible">Required</span>
+                </div>
+                <div class="spacer small"></div>
+                <div class="userDetails">
+                    {% comment %} ? Last NAME {% endcomment %}
+                    <ins-input 
+                        id="user-last-name"
+                        label="Last Name*"
+                        name="" 
+                        value=""
+                        placeholder="Enter Last Name">
+                    </ins-input>
+                    <span id="lastNameRequired" class="user-error-txt-red body-x-small is_not_visible">Required</span>
+                </div>
+            </div>
+
+            <div class="spacer small"></div>
+
+            <div class="add-user-details-div">
+                {% comment %} ? Contact Number {% endcomment %}
+                <div class="userDetails">
+                    <ins-input-tel
+                        id="user-mobile-phone"
+                        label="Phone" 
+                        phonenum-value="" 
+                        country-code=""
+                        phonenum-placeholder="1300 000 000" 
+                        no-areacode>
+                    </ins-input-tel>
+                </div>
+                <div class="spacer small"></div>
+            
+                {% comment %} ? Position {% endcomment %}
+                <div class="userDetails">
+                    <ins-input-select 
+                        class="" 
+                        label="Permission Level"
+                        id="user-permission-level"
+                        value="Manager">
+                            
+                        <ins-input-select-option class="form-placeholder"
+                        label="Manager" 
+                        value="Manager">
+                        <span></span>
+                        </ins-input-select-option>
+                    
+                        <ins-input-select-option 
+                        label="Staff" 
+                        value="Staff">
+                        </ins-input-select-option>
+                    
+                        <ins-input-select-option 
+                        label="No Access" 
+                        value="No Access">
+                        </ins-input-select-option>       
+                    </ins-input-select>
+         
+                </div>
+            </div>
+        </div>
+        
+        <div class="spacer small"></div>
+
+        <div class="addUserModalButton">
+            <div class="cancelModalButton">
+                <ins-button 
+                    id="cancel"
+                    type="button" 
+                    class="card-form-cancel"
+                    label="Cancel"
+                    outlined
+                    icon="icon-x">
+                </ins-button>
+            </div>
+            <div class="inviteUserModalButton">
+                <ins-button 
+                    type="submit" 
+                    id="submit-btn" 
+                    label="Send invite" 
+                    solid
+                    icon="icon-send">
+                </ins-button>
+            </div>
+        </div>
+    </div>
+</ins-modal>
+
+
+{% comment %} ? LOADER {% endcomment %}
+<div class="spacer"></div>
+<ins-loader
+    id="users-loader"
+    hidden
+    state-title="Processing"
+    state-message="Please wait, we're processing your data."
+    state-icon="processing">
+</ins-loader>
+
+<ins-table id="insBaseTable"
+    static-table
+    without-search
+    class="users-table">
+
+    {% if get_users.size == 0 %}
+        {% comment %} ? EMPTY STATE {% endcomment %}
+        <div class="empty-state text-center empty-box p-body">
+            <p>No records available.</p>
+        </div> 
+    {% else %}
+        {% comment %} ? NOT EMPTY STATE {% endcomment %}
+        <ins-table-row class="users-table-header">
+            <ins-table-th>
+                <span class="hide-for-small-medium p-body-small-bold">
+                    Name
+                </span>
+            </ins-table-th>
+
+            <ins-table-th class="hide-for-small-medium p-body-small-bold">
+                Email Address
+            </ins-table-th>
+
+            <ins-table-th class="hide-for-small-medium p-body-small-bold">
+                Permission Level
+            </ins-table-th>
+        </ins-table-row>
+        
+        {% for item in get_users %}
+  
+            <ins-table-row class="users-table-data">
+
+                <ins-table-td class="body-small">
+                    <span class="show-for-small-medium"> <b>Name: </b> {{ item.first_name }} {{ item.last_name }} </span>
+                    <span class="hide-for-small-medium p-body"> {{ item.first_name }} {{ item.last_name }} </span>
+
+                    <div class="show-for-small-medium">
+                        <div class="spacer x-small"></div>
+                        <span><b>Email:</b> {{ item.email}}</span>
+                        <div class="spacer x-small"></div>
+                    </div>
+                    
+                    <div class="show-for-small-medium">
+                        <span><b>Permission Level:</b></span>
+                        <div class="spacer x-small"></div>
+                        {% if item.custom_fields.primary_account_holder == true %}
+                            <ins-input-select class="account_owner_select" value="Account Owner" disabled="true">
+                                <ins-input-select-option 
+                                label="Account Owner" 
+                                value="Account Owner" 
+                                Disabled>
+                                </ins-input-select-option>
+                            </ins-input-select>
+                        {% else %}
+                            <ins-input-select 
+                                class="selectPermission" 
+                                value="{{ item.custom_fields.permission_level }}"
+                                data-id="{{ item.id }}"
+                                data-contact-uuid="{{ item.custom_fields.contact_uuid }}"
+                                data-name="{{ item.first_name }} {{ item.last_name }}"
+                                data-email="{{ item.email }}"
+                                data-custom-field-id="{{ item.custom_fields.id }}"
+                                data-permission-level-previous-value="{{ item.custom_fields.permission_level }}">
+                                    
+                                <ins-input-select-option class="form-placeholder"
+                                label="Manager" 
+                                value="Manager">
+                                <span></span>
+                                </ins-input-select-option>
+                            
+                                <ins-input-select-option 
+                                label="Staff" 
+                                value="Staff">
+                                </ins-input-select-option>
+                            
+                                <ins-input-select-option 
+                                label="No Access" 
+                                value="No Access">
+                                </ins-input-select-option>       
+                            </ins-input-select>
+                        {% endif %}
+                    </div>
+
+                    {% if item.custom_fields.primary_account_holder == true %}
+                        <div class="spacer x-small"></div>
+                        <span class="primary-account-holder">Account Owner</span>
+                        <div class="hide-for-small-medium">
+                            <div class="spacer small"></div>
+                        </div>
+                    {% endif %}
+
+                </ins-table-td>
+
+                <ins-table-td class="body-small hide-for-small-medium p-body">
+                    {{ item.email}}
+                </ins-table-td>
+                
+                <ins-table-td class="hide-for-small-medium">
+                    {% if item.custom_fields.primary_account_holder == true %}
+                        <ins-input-select class="account_owner_select" value="Account Owner" disabled="true">
+                            <ins-input-select-option 
+                            label="Account Owner" 
+                            value="Account Owner" 
+                            Disabled>
+                            </ins-input-select-option>
+                        </ins-input-select>
+                    {% else %}
+                        <ins-input-select 
+                            class="selectPermission" 
+                            id="{{ item.id }}"
+                            value="{{ item.custom_fields.permission_level }}"
+                            data-id="{{ item.id }}"
+                            data-contact-uuid="{{ item.custom_fields.contact_uuid }}"
+                            data-name="{{ item.first_name }} {{ item.last_name }}"
+                            data-email="{{ item.email }}"
+                            data-custom-field-id="{{ item.custom_fields.id }}"
+                            data-permission-level-previous-value="{{ item.custom_fields.permission_level }}">
+
+                            <ins-input-select-option
+                            label="Manager" 
+                            value="Manager"
+                            id="option-manager">
+                            </ins-input-select-option>
+                          
+                            <ins-input-select-option 
+                            label="Staff" 
+                            value="Staff"
+                            id="option-staff">
+                            </ins-input-select-option>
+                        
+                            <ins-input-select-option 
+                            label="No Access" 
+                            value="No Access"
+                            id="option-no-access">
+                            </ins-input-select-option>      
+                        </ins-input-select>
+                    {% endif %}
+                </ins-table-td>
+
+            </ins-table-row>
+        {% endfor %}
+    {% endif %}
+    
+</ins-table>
+
+<script>
+    // hidden fields
+    let total_entries = document.getElementById('total_entries');
+    let page_num = document.getElementById('page_num');
+    let per_page = document.getElementById('per_page');
+    let company_name = document.getElementById('company-name');
+    let company_uuid = document.getElementById('company-uuid');
+    let current_permission_level = document.getElementById('current-permission-level');
+
+    // table
+    let insBaseTable = document.getElementById('insBaseTable');
+    let getusers = document.getElementById('get-users');
+    getusers = getusers.value;
+
+    // loader
+    let usersLoader = document.getElementById('users-loader');
+
+    // modal
+    var cancelButton = document.getElementById("cancel");
+    var sendInviteButton = document.getElementById("submit-btn");
+
+    sendInviteButton.loading = false;
+
+    insBaseTable.addEventListener('insPaginationChange', tablePaginationHandler);
+
+    insBaseTable.pageSizeOptions = [10,20,30];
+    insBaseTable.totalCount = total_entries.value;
+    insBaseTable.pageNumber = page_num.value;
+    insBaseTable.pageSize = per_page.value;
+
+    function processTableData(){
+        // Get the current URL
+        const currentUrl = window.location.href;
+
+        // Remove any existing `page` and `per_page` query parameters
+        const newUrl = currentUrl.replace(/[?&]page=\d+/, '').replace(/[?&]per_page=\d+/, '').replace(/events&/, "events?");
+
+        // Set the new `page` and `per_page` values
+        const newPage = pageNumber;
+        const newPerPage = pageSize;
+     
+        var updatedUrl = `${newUrl}?page=${newPage}&per_page=${newPerPage}`;
+     
+        // Navigate to the updated URL
+        window.location.href = updatedUrl;
+    }
+
+    function tablePaginationHandler(event){
+        pageSize = event.detail.pageSize;
+        pageNumber = event.detail.pageNumber;
+        processTableData();
+    }
+
+    // CANCEL
+    cancelButton.addEventListener('insClick', event => {
+        modal.close();
+    });
+
+    // SEARCH
+    const searchUser = document.getElementById('search-user');
+    let search = searchUser.value;
+    let keywordInput = document.getElementById("search-description");
+    if(search) {
+        keywordInput.value = search
+    }
+   
+    if (keywordInput) {
+        keywordInput.addEventListener('insInput', this.keywordInputEvent);
+        keywordInput.addEventListener('insIconClick', this.keywordInputEvent);
+    }
+    function keywordInputEvent(event) {        
+        if (event.detail.keyCode === 13) {            
+            let currentURL = new URL(window.location.href);
+            currentURL.searchParams.set("search", event.detail.value);
+            currentURL.searchParams.set("page", "1");
+            currentURL.searchParams.set("per_page", per_page.value);
+            window.location.href = currentURL.toString();
+        }
+    }
+
+    // Permission Level
+    
+    // options
+    var option_manager = document.querySelectorAll("#option-manager")
+    var option_staff = document.querySelectorAll("#option-staff")
+    var option_no_access = document.querySelectorAll("#option-no-access")
+    var previousPermissionLevelValue = ''
+    
+    var field = document.querySelectorAll('.selectPermission')
+    field.forEach(e => {
+        e.addEventListener('insChange', async (event) => {
+
+            // previous value
+            previousPermissionLevelValue = e.getAttribute('data-permission-level-previous-value');
+      
+            // Contact ID
+            let contactId = e.getAttribute('data-id');
+            
+            // Contact UUID
+            let contactUuid = e.getAttribute('data-contact-uuid');
+
+            // Contact Name
+            let contactName = e.getAttribute('data-name');
+
+            // Contact Email
+            let contactEmail = e.getAttribute('data-email');
+
+            // Contact Custom Field ID
+            let contactCustomFieldId = e.getAttribute('data-custom-field-id');
+
+            // Permission Level Selected Value 
+            let permissionLevelSelectedValue = event.detail
+
+            if(permissionLevelSelectedValue == "No Access"){
+                // REVOKE
+                let confirm = await Swal.fire({
+                    icon: 'warning',
+                    title: `Revoke Access?`,
+                    html: `Are you sure you want to revoke <b>${contactName}'s</b> access to your company account?`,
+                    confirmButtonText: `<i class="icon-trash"></i> Remove access`,
+                    showCancelButton: true,
+                    cancelButtonText: `<i class="icon-close-1"></i> Cancel`,
+                    allowOutsideClick: false,
+                    customClass: "swal-user-account swal-remove-access"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            processingLoader();
+                            // update
+                            url = '/update-user-account?' + 'custom_field_id=' + contactCustomFieldId + '&permission_level=' + permissionLevelSelectedValue + '&actions=change_permission_level';
+                            setTimeout(async() => {
+                                let response = await apiServices.processRequest('post', url);
+                                if(response.state == true) {
+                                    App.events.notyf('success', "Successfully removed access");
+                                    window.location.href = '/users';
+                                }
+                            }, 500);
+                        } else {
+                            resetSelect(e)
+                        }
+                    });
+            }else{
+                // GRANT
+                let confirm = await Swal.fire({
+                    icon: 'warning',
+                    title: `Grant ${permissionLevelSelectedValue} Access?`,
+                    html: `Are you sure you want to invite <b>${contactName}</b> to have ${permissionLevelSelectedValue} access to your company account?`,
+                    confirmButtonText: `<i class="icon-send"></i> Send invite`,
+                    showCancelButton: true,
+                    cancelButtonText: `<i class="icon-close-1"></i> Cancel`,
+                    allowOutsideClick: false,
+                    customClass: "swal-user-account"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            processingLoader();
+
+                            // update
+                            url = '/update-user-account?' + 'custom_field_id=' + contactCustomFieldId + '&permission_level=' + permissionLevelSelectedValue + '&email=' + contactEmail + '&name=' + contactName + '&company=' + company_name.value + '&actions=change_permission_level' + '&company_uuid=' + company_uuid.value;
+                            setTimeout(async() => {
+                                let response = await apiServices.processRequest('post', url);
+                                if(response.state == true) {
+                                    App.events.notyf('success', "Your invitation has been sent successfully.");
+                                    window.location.href = '/users';
+                                }
+                            }, 500);
+                        } else {
+                            resetSelect(e)
+                        }
+                    });
+                }            
+            })
+        });
+
+    // User Invite Modal
+    let userInviteButton = document.getElementById('user-invite-button')
+    userInviteButton.addEventListener('click', () => {
+        modal = document.getElementById('add-user-modal');
+        modal.open()
+    })
+
+    // DETAILS
+    var userFirstName = document.getElementById('user-first-name');
+    var userLastName = document.getElementById('user-last-name');
+    var userEmail = document.getElementById('user-email');
+    var userContact = document.getElementById('user-mobile-phone');
+    var userPermission = document.getElementById('user-permission-level');
+    let is_email_found = false;
+    let user_id = '';
+    let user_email = '';
+
+    // VALIDATAIONS
+    let is_email_valid = false;
+
+    // REQUIRED FIELDS - ALERTS
+    var requiredFirstName = document.getElementById("firstNameRequired");
+    var requiredLastName = document.getElementById("lastNameRequired");
+    var requiredEmail = document.getElementById("emailRequired");
+    var invalidEmail = document.getElementById("emailInvalid");
+    var existEmail = document.getElementById("emailExists");
+   
+    userEmail.addEventListener('insInput', async (event) => {
+        let url = '/check-user-email?'+ 'email='+ event.detail.value ;
+        let response = await apiServices.processRequest('get', url);
+     
+        if(response.data.has_email == true) {
+            // EMAIL EXISTS
+            is_email_found = true;
+
+            user_id = response.data.id;
+
+            // Show Error message = Email Exists
+            errorOnEmailFound();
+            is_email_valid = true;
+        }else{
+            // EMAIL DOES NOT EXIST
+            is_email_found = false;
+
+            // Check if inputed email is valid
+            is_email_valid = isValidEmail(userEmail.value);
+
+            if(userEmail.value == ''){
+                errorOnEmailRequired();
+                is_email_valid = false;
+            }else{
+                if(is_email_valid == false){
+                    errorOnInvalidEmail();
+                }else{
+                    noErrorOnEmail();
+                    is_email_valid = true;
+                }
+            }
+        }
+
+        // save input email
+        user_email = userEmail.value.toLowerCase();
+    });
+
+    // TEL
+    let mobile_phone_number = '';
+    let mobile_phone_country_code = '';
+    userContact.addEventListener('insInput', event => {
+        if(event.detail.field == "phone_number"){
+            mobile_phone_number = event.detail.value;
+        }else{
+            mobile_phone_country_code = event.detail.value.dialCode;
+        }
+    });
+
+    sendInviteButton.addEventListener('insClick', async (event) => {
+        sendInviteButton.loading = true;
+        if (userFirstName.value != '' && userLastName.value != '' && is_email_valid == true){
+            setTimeout(async() => {
+                url = '/update-user-account?' + 'company_uuid=' + company_uuid.value + '&company=' + company_name.value + '&user_id=' + user_id + '&email=' + user_email + '&is_email_found=' + is_email_found + '&actions=add_user' + '&userFirstName=' + userFirstName.value + '&userLastName=' + userLastName.value + '&mobile_phone_country_code=' + mobile_phone_country_code + '&mobile_phone_number=' + mobile_phone_number + '&userPermission=' + userPermission.value;
+                setTimeout(async() => {
+                    let response = await apiServices.processRequest('post', url);
+                    processingLoader();
+                    if(response.state == true) {
+                        App.events.notyf('success', "Your invitation has been sent successfully.");
+                        window.location.href = '/users';
+                    }
+                }, 500);
+            }, 500);
+        }else{
+            hasError();
+            sendInviteButton.loading = false;
+        }
+    });
+
+    function hasError(){
+
+        // FIRST NAME
+        if(userFirstName.value == ''){
+            requiredFirstName.classList.remove('is_not_visible');
+            requiredFirstName.classList.add('is_visible');
+            userFirstName.classList.add('has-error');
+        }else{
+            requiredFirstName.classList.remove('is_visible');
+            requiredFirstName.classList.add('is_not_visible');
+            userFirstName.classList.remove('has-error');
+        }
+
+        // LAST NAME
+        if(userLastName.value == ''){
+            requiredLastName.classList.remove('is_not_visible');
+            requiredLastName.classList.add('is_visible');
+            userLastName.classList.add('has-error');
+        }else{
+            requiredLastName.classList.remove('is_visible');
+            requiredLastName.classList.add('is_not_visible');
+            userLastName.classList.remove('has-error');
+        }
+
+        // EMAIL
+        if(userEmail.value == '' ){
+            errorOnEmailRequired();
+        }else{
+            if(is_email_valid == false){
+                errorOnInvalidEmail();
+            }else{
+                if(is_email_found == true){
+                    errorOnEmailFound();
+                }
+            }
+        }
+    }
+
+    function isValidEmail(email) {
+        // Regular expression for validating an Email
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    function errorOnEmailFound(){
+        requiredEmail.classList.add('is_not_visible');
+        invalidEmail.classList.add('is_not_visible');
+        existEmail.classList.remove('is_not_visible');
+        existEmail.classList.add('is_visible');
+        userEmail.classList.remove('has-error');
+    }
+
+    function errorOnEmailRequired(){
+        existEmail.classList.add('is_not_visible');
+        invalidEmail.classList.add('is_not_visible');
+        requiredEmail.classList.remove('is_not_visible');
+        requiredEmail.classList.add('is_visible');
+        userEmail.classList.add('has-error');
+    }
+
+    function errorOnInvalidEmail(){
+        existEmail.classList.add('is_not_visible');
+        requiredEmail.classList.add('is_not_visible');
+        invalidEmail.classList.remove('is_not_visible');
+        invalidEmail.classList.add('is_visible');
+        userEmail.classList.add('has-error');
+    }
+
+    function noErrorOnEmail(){
+        existEmail.classList.remove('is_visible');
+        existEmail.classList.add('is_not_visible');
+        requiredEmail.classList.remove('is_visible');
+        requiredEmail.classList.add('is_not_visible');
+        invalidEmail.classList.remove('is_visible');
+        invalidEmail.classList.add('is_not_visible');
+        userEmail.classList.remove('has-error');
+    }
+
+    function processingLoader(){
+        usersLoader.removeAttribute("hidden");
+        insBaseTable.setAttribute("hidden", true);
+    }
+
+    function cancellingLoader(){
+        usersLoader.removeAttribute("state-title");
+        usersLoader.removeAttribute("state-message");
+        usersLoader.setAttribute("state-title", "Canceling");
+        usersLoader.setAttribute("state-message", "Please wait, we're reverting your changes.");
+
+        usersLoader.removeAttribute("hidden");
+        insBaseTable.setAttribute("hidden", true);
+
+        window.location.href = '/users';
+    }
+
+    function resetSelect(e){
+        e.setValue(previousPermissionLevelValue);
+    }
+</script>

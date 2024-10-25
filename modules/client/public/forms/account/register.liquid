@@ -1,0 +1,212 @@
+---
+name: register
+resource: User
+resource_owner: anyone
+flash_alert: Sorry-Signup
+flash_notice: Congratulations-Signup
+redirect_to: account-created
+fields:
+  # User Fields
+  email:
+    validation: 
+      unique:
+        message: Email already exist
+      presence:
+        message: Please use a valid email address
+      email: 
+        message: Please use a valid email address      
+  password:
+    validation: 
+      presence: 
+        message: Invalid Password
+  first_name:
+    validation: 
+      presence: 
+        message: First name is required
+  last_name:
+    validation: 
+      presence: 
+        message: Last name is required
+  
+  properties:
+    # Profile - CRM Contact Fields
+    mobile_phone_country_code:
+      property_options:
+        virtual: true
+    mobile_phone_number:
+      property_options:
+        virtual: true
+
+    # CRM Address - Contact Fields              
+    address_1:
+      property_options:
+        virtual: true
+    address_2:
+      property_options:
+        virtual: true
+    suburb:
+      property_options:
+        virtual: true
+    state:
+      property_options:
+        virtual: true
+    postcode:
+      property_options:
+        virtual: true
+    country:
+      property_options:
+        virtual: true
+    latitude:
+      property_options:
+        virtual: true
+    longitude:
+      property_options:
+        virtual: true
+
+    # CRM Company Fields          
+    company_name:
+      presence: true
+      property_options:
+        virtual: true
+    registered_business_number:
+      presence: true
+      property_options:
+        virtual: true
+    email_1:
+      presence: true
+      property_options:
+        virtual: true
+
+    # CRM Address - Company Fields
+    company_mobile_phone_country_code:
+      property_options:
+        virtual: true
+    company_mobile_phone_number:
+      property_options:
+        virtual: true
+    company_address_1:
+      property_options:
+        virtual: true
+    company_address_2:
+      property_options:
+        virtual: true
+    company_suburb:
+      property_options:
+        virtual: true
+    company_state:
+      property_options:
+        virtual: true
+    company_postcode:
+      property_options:
+        virtual: true
+    company_country:
+      property_options:
+        virtual: true
+    company_latitude:
+      property_options:
+        virtual: true
+    company_longitude:
+      property_options:
+        virtual: true
+    
+
+  # Confirmation Fields
+  agreement:
+    presence: true
+    property_options:
+      virtual: true
+      
+async_callback_actions:
+  delay: 0
+  priority: high
+  max_attempts: 2
+  content: >
+    {% comment %}
+      Steps:
+        1. Add Company
+        2. Update company_uuid on Client Profile
+        3. Update Contact
+        4. Add Contact Address    
+    {% endcomment %}
+    {% assign data = form | json %}
+    {% graphql add_company = 'modules/website/trigger_api_call', name: 'modules/client/add_company', data: data | dig: 'items','response','body' | parse_json %}
+    {% parse_json update_contact_data %}
+    {
+      "id": "{{form.id}}",
+      "email": "{{form.email}}",
+      "company_uuid": "{{add_company.items.properties.uuid}}",
+      "mobile_phone_country_code": "{{form.properties.mobile_phone_country_code}}",
+      "mobile_phone_number": "{{form.properties.mobile_phone_number}}"
+    }
+    {% endparse_json %}
+    {%  liquid                      
+        graphql set_company_uuid = 'modules/client/account/set_company_uuid', id: form.id, company_uuid: add_company.items.properties.uuid 
+        graphql update_contact = 'modules/website/trigger_api_call', name: 'modules/client/update_contact', data: update_contact_data | dig: 'items','response','body' | parse_json        
+        graphql add_contact_address = 'modules/website/trigger_api_call', name: 'modules/client/add_contact_address', data: data | dig: 'items','response','body' | parse_json
+    %} 
+    
+    {% comment %} Verification Token {% endcomment %}
+    {%  liquid
+        graphql g = 'modules/client/account/generate_user_temporary_token', email: form.email 
+        if g.items.results[0]
+          graphql res = 'modules/client/account/set_email_verification_token', id: g.items.results[0].id, token: g.items.results[0].temporary_token
+        endif
+    %}
+   
+    {% comment %} Create Event Stream {% endcomment %}
+    {% parse_json info %}
+    {
+      "description": "New Registration",
+      "log": {
+        "first_name": "{{ form.first_name }}",
+        "last_name": "{{ form.last_name }}",
+        "email": "{{ form.email }}",
+        "mobile_phone_country_code": "{{ form.properties.mobile_phone_country_code }}",
+        "mobile_phone_number": "{{ form.properties.mobile_phone_number }}",
+        "contact_address":{
+          "address_1": "{{ form.properties.address_1 }}",
+          "address_2": "{{ form.properties.address_2 }}",
+          "suburb": "{{ form.properties.suburb }}",
+          "state": "{{ form.properties.state }}",
+          "postcode": "{{ form.properties.postcode }}",
+          "country": "{{ form.properties.country }}"
+        },
+        "company":{
+          "company_name": "{{ form.properties.company_name }}",
+          "registered_business_number": "{{ form.properties.registered_business_number }}",
+          "email_1": "{{ form.properties.email_1 }}",
+          "mobile_phone_country_code": "{{ form.properties.company_mobile_phone_country_code }}",
+          "mobile_phone_number": "{{ form.properties.company_mobile_phone_number }}"
+        },
+        "company_address":{
+          "address_1": "{{ form.properties.company_address_1 }}",
+          "address_2": "{{ form.properties.company_address_2 }}",
+          "suburb": "{{ form.properties.company_suburb }}",
+          "state": "{{ form.properties.company_state }}",
+          "postcode": "{{ form.properties.company_postcode }}",
+          "country": "{{ form.properties.company_country }}"
+        }        
+      }
+    }
+    {% endparse_json %}
+    {% include 'modules/client/events/log_event', info %}
+---
+
+{%- form 
+    html-id: "register-form"
+    html-class: 'insites-form insites-form-code' 
+    html-novalidate: true
+    html-enctype="multipart/form-data"
+    html-onsubmit:"return Session.events.signUpHandler(event, 'personal-details-container');" -%}
+
+  <div class="insites-form-grid">
+
+  {% include 'modules/client/account/registration_personal_details' %}
+
+  {% include 'modules/client/account/registration_company_details' %}
+
+  {% include 'modules/client/account/registration_confirmation' %}
+            
+  </div>
+
+{%- endform -%}

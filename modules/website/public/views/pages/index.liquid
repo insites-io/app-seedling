@@ -1,0 +1,41 @@
+---
+slug: /
+layout: modules/website/default
+searchable: true
+max_deep_level: 1
+metadata: {
+    "status": "published",
+    "page_name": "Client Portal",
+    "open_graph:url": "",
+    "open_graph:type": "",
+    "open_graph:image": "",
+    "open_graph:title": "Client Portal",
+    "open_graph:description": "Client Portal",
+    "open_graph:site_name": "",
+    "meta_title": "Client Portal",
+    "page_title": "Client Portal",
+    "meta_description": "Client Portal",
+    "canonical_url": "",
+    "is_visible_to_search_engines": true,
+    "sitemap_enabled": true,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "1", ## secondary order (ASC)
+    "sitemap_changefreq": "monthly"
+}
+---
+{%comment%} get device type {%endcomment%}
+{%- assign device_used = context.device.device_type -%}
+
+{% include 'modules/website/content/index/carousel' %} 
+{% include 'modules/website/content/index/overlap_section' %} 
+{% include 'modules/website/content/index/client_section' %}
+{% include 'modules/website/content/index/testimonials' %} 
+
+{%- if context.environment == "staging" -%}
+    <link rel="preload" as="script" href="{{ 'modules/website/scripts/app.js' | asset_url }}" >
+    <script src="{{ 'modules/website/scripts/app.js' | asset_url }}"></script>
+{% else %}
+    <!-- minified --> 
+    <link rel="preload" as="script" href="{{ 'modules/website/scripts/app.min.js' | asset_url }}" >
+    <script src="{{ 'modules/website/scripts/app.min.js' | asset_url }}"></script>
+{%- endif -%}

@@ -1,0 +1,23 @@
+query get_order (
+  $id: ID,
+  $page: Int = 1,
+  $size: Int = 1
+) {
+  items: records(
+    page: $page
+    per_page: $size
+    filter: {
+      id: { value: $id }
+      deleted_at: { exists: false }
+      table: { value: "modules/insites_ecommerce/order" }
+    }
+  ) {
+    total_entries
+    total_pages
+    current_page
+    results {
+      id
+      properties       
+    }
+  }
+}

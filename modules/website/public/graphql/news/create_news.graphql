@@ -1,0 +1,62 @@
+mutation create_news(
+  $meta_title: String,
+  $meta_description: String,
+  $status: String,
+  $title: String,
+  $slug: String,
+  $published_date: String,
+  $tag: String,
+  $list_view_text: String,
+  $author: String,
+  $content: String
+) {
+  items: model_create(
+    model: {
+      model_schema_name: "modules/website/news",
+      properties: [
+        { 
+          name: "meta_title",
+          value: $meta_title 
+        },
+        { 
+          name: "meta_description",
+          value: $meta_description
+        },
+        { 
+          name: "status",
+          value: $status 
+        },
+        { 
+          name: "title",
+          value: $title 
+        },
+        { 
+          name: "slug",
+          value: $slug 
+        },
+        { 
+          name: "published_date",
+          value: $published_date 
+        },
+        { 
+          name: "tag",
+          value: $tag 
+        },
+        { 
+          name: "list_view_text",
+          value: $list_view_text 
+        },
+        { 
+          name: "author",
+          value: $author 
+        },
+        { 
+          name: "content",
+          value: $content 
+        }
+      ]
+    }
+  ) {
+    id
+  }
+}

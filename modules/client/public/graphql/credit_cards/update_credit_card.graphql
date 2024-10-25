@@ -1,0 +1,34 @@
+mutation update_credit_card (
+  $id: ID!
+  $payment_method_token: String
+  $gateway_customer_id: String
+  $user_id: String
+  $external_id: String
+  $brand: String
+  $exp_month: String
+  $exp_year: String
+  $last4: String
+  $is_enabled: Boolean
+) {
+  items: record_update(
+    id: $id
+    record: {
+      table: "modules/insites_ecommerce/payment_method"
+      properties: [
+        { name: "payment_method_token", value: $payment_method_token }
+        { name: "gateway_customer_id", value: $gateway_customer_id }
+        { name: "user_id", value: $user_id }
+        { name: "external_id", value: $external_id }
+        { name: "brand", value: $brand }
+        { name: "exp_month", value: $exp_month }
+        { name: "exp_year", value: $exp_year }
+        { name: "last4", value: $last4 }
+        { name: "is_enabled", value_boolean: $is_enabled }
+      ]
+    }
+  ) {
+    id
+    created_at
+    properties
+  }
+}

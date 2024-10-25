@@ -1,0 +1,14 @@
+---
+name: set_email_verification_token
+resource: User
+resource_owner: anyone
+fields:
+  email:
+  profiles:
+    modules/client/client:
+      properties:
+        verification_token:
+          validation: { presence: true }
+email_notifications:
+  - modules/client/send_verification_email
+---

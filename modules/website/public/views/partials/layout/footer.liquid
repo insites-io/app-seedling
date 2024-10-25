@@ -1,0 +1,216 @@
+<hr>
+<footer class="blocks-footer-05 footer bg-color-ui-01">
+    <div class="spacer xxxx-large"></div>
+    <div class="wrapper top-footer footerSubItems">
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x gutter-medium">
+                <div class="large-4 medium-6 small-12 cell text-left">
+                    <div class="img-logo img-full">
+                        {% comment %} ? SETTING LOGO BY DEFAULT {% endcomment %}
+                        {% if context.exports.global.company_logo == nil or context.exports.global.company_logo contains "client-logo.png" %}
+                            {% comment %} ? DEFAULT {% endcomment %}
+                            <img class="logo" src="{{ 'modules/website/images/default-images/logo/insites-logo.png' | asset_url }}" alt="Logo">
+                        {% else %}
+                            {% comment %} ? FETCHED FROM IIA -> CMS -> GLOBALS {% endcomment %}
+                            <img class="logo" src="{{ context.exports.global.company_logo }}" alt="Logo">
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="small-12 cell spacer xxx-large hide-for-medium"></div>
+
+                <!-- QUICK LINKS -->
+                <div class="large-2 medium-6 small-12 cell">
+                    <ul class="vertical menu">
+                        <li>
+                            <p class="navigation-level-1 color-font-head subHeading-2 colorBlack" data-test="">Quick Links</p>
+                            <div class="spacer"></div>
+                        </li>
+                        <li class="">
+                            <a class="footer-links color-font-head" data-test="" href="/about">About</a>
+                            <div class="spacer small"></div>
+                        </li>
+                        <li>
+                            <a class="footer-links color-font-head" data-test="" href="/faqs">FAQs</a>
+                            <div class="spacer small"></div>
+                        </li>
+                        <li>
+                            <a class="footer-links color-font-head" data-test="" href="/news">News</a>
+                            <div class="spacer small"></div>
+                        </li>
+                        <li>
+                            <a class="footer-links color-font-head" data-test="" href="/contact">Contact</a>
+                            <div class="spacer small"></div>
+                        </li>
+                    </ul>
+                </div>
+    
+                <!-- SERVICES -->
+                <div class="large-3 medium-6 small-12 cell">
+                    <div class="spacer show-for-small-only"></div>
+                    <div class="spacer xxxx-large show-for-small-only"></div>
+                    
+                    <ul class="vertical menu">
+                        <li>
+                            <p class="navigation-level-1 color-font-head subHeading-2 colorBlack" data-test="">Services</p>
+                            <div class="spacer"></div>
+                        </li>
+                        {% comment %} connect services to graphql {% endcomment %}
+                        {%- graphql get_services = 'modules/website/services/get_services' -%}
+                        {% comment %} assign var to fetch the result {% endcomment %}
+                        {%- assign res_services = get_services | dig: 'items', 'results' -%}
+                        
+                        {% for item in res_services %}
+                          <li>
+                              <a href="/services/{{ item.slug }}" class="footer-links color-font-head" data-test="">{{ item.service_name }}</a>
+                              <div class="spacer small"></div>
+                          </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+
+                <!-- EXTERNAL LINKS -->
+                <div class="large-2 medium-6 small-12 cell">
+                    <div class="spacer show-for-small-only"></div>
+                    <div class="spacer xxxx-large show-for-small-only"></div>
+                    
+                    <ul class="vertical menu">
+                    <li><p class="navigation-level-1 color-font-head subHeading-2 colorBlack" data-test="">External Links</p>
+                        <div class="spacer"></div>
+                    </li>
+                    <li>
+                        <a href="https://www.insites.io/" target="_blank" class="footer-links color-font-head" data-test="">
+                        <span>Website</span>
+                        <i class="icon-external-link1"></i>
+                        </a>
+                        <div class="spacer small"></div>
+                    </li>
+                    <li>
+                        <a href="https://console.insites.io/" target="_blank" class="footer-links color-font-head" data-test="">
+                        <span>Console</span>
+                        <i class="icon-external-link1"></i>
+                        </a>
+                        <div class="spacer small"></div>
+                    </li>
+                    <li>
+                        <a href="https://docs.insites.io/" target="_blank" class="footer-links color-font-head" data-test="">
+                        <span>Resources</span>
+                        <i class="icon-external-link1"></i>
+                        </a>
+                    </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="spacer xxxx-large show-for-medium"></div>
+    <div class="spacer x-large hide-for-medium"></div>
+
+    <div class="wrapper bottom-footer footerSubItems" >
+        <div class="grid-container">
+            <hr>
+            <div class="spacer"></div>
+            <div class="grid-x align-justify">
+                <div class="large-6 medium-6 small-12 cell medium-text-left text-center grid-x grid-margin-x">
+                    <div class="medium-shrink cell">
+                        <a href="/privacy-policy">Privacy Policy</a>
+                    </div>
+                    <div class="cell spacer show-for-small-only"></div>
+                    <div class="medium-shrink cell">
+                        <a href="/terms-and-conditions">Terms and Conditions</a>
+                    </div>
+                </div>
+                <div class="cell spacer show-for-small-only"></div>
+                <div class="large-6 medium-6 small-12 cell medium-text-right text-center">
+                    <div>
+                    <ul class="menu social">
+
+                        {% if context.exports.global.facebook_link %}
+                        <li>
+                            <a class="footer-links iconHover" href="{{ context.exports.global.facebook_link }}" data-test="footer-link-facebook" target="_blank" title="facebook" rel="noreferrer">
+                                <i class="icon-facebook-stroke "></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if context.exports.global.twitter_link %}
+                        <li>
+                            <a class="footer-links iconHover" href="{{ context.exports.global.twitter_link }}" data-test="" target="_blank" title="twitter" rel="noreferrer">
+                                <i class="icon-social-x"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if context.exports.global.linkedin_link %}
+                        <li>
+                            <a class="footer-links iconHover" href="{{ context.exports.global.linkedin_link }}" data-test="" target="_blank" title="linkedin" rel="noreferrer">
+                                <i class="icon-linkedin-stroke "></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if context.exports.global.instagram_link %}
+                        <li>
+                            <a class="footer-links iconHover" href="{{ context.exports.global.instagram_link }}" data-test="" target="_blank" title="instagram" rel="noreferrer">
+                                <i class="icon-instagram"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if context.exports.global.youtube_link  %}
+                        <li>
+                            <a class="footer-links iconHover" href="{{ context.exports.global.youtube_link }}" data-test="" target="_blank" title="youtube" rel="noreferrer">
+                                <i class="icon-youtube-stroke"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if context.exports.global.pinterest_link  %}
+                            <li>
+                                <a class="footer-links iconHover" href="{{ context.exports.global.pinterest_link }}" data-test="" target="_blank" title="pinterest" rel="noreferrer">
+                                    <i class="icon-pinterest"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                        {% if context.exports.global.other_1_link  %}
+                            <li>
+                                <a class="footer-links iconHover" href="{{ context.exports.global.other_1_link }}" data-test="" target="_blank" title="other link 1" rel="noreferrer">
+                                    <i class="icon-share-2"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% if context.exports.global.other_2_link  %}
+                            <li>
+                                <a class="footer-links iconHover" href="{{ context.exports.global.other_2_link }}" data-test="" target="_blank" title="other link 2" rel="noreferrer">
+                                    <i class="icon-share-2"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="spacer"></div>
+            <div class="grid-x">
+                <div class="large-6 medium-6 small-12 cell medium-text-left text-center">
+                    <p class="subHeading footer-p">Copyright © <span id="year-container"></span> </p>
+                </div>
+                <div class="small-12 cell spacer show-for-small-only"></div>
+                <div class="large-6 medium-6 small-12 cell medium-text-right text-center">
+                    <p class="subHeading footer-p"> Powered by <a class="footer-links"target="_blank" href="https://www.insites.io/">Insites</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="spacer"></div>
+</footer>
+
+<script>
+    document.getElementById("year-container").innerHTML = new Date().getFullYear();
+</script>
+
+{%- include 'modules/website/layout/foot' -%}
