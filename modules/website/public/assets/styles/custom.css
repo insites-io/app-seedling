@@ -13,7 +13,7 @@
     /* Font colors */
     --font-color-head: #000000;
     --font-color-sub: #323232;
-    --font-color-body: #575757;
+    --font-color-body: #B9C5D6;
     --font-color-link: #436CF2;
     --font-color-visited: #670099;
     --font-color-inv: #FFFFFF;
@@ -29,6 +29,7 @@
     --color-ui-06: #575757;
     --color-ui-07: #436CF2;
     --color-ui-08: #000000;
+    --color-ui-bg: #0F172A;
     --ui-border: #E1E1E1;
     /* Support/Notification Colors */
     --success: #048801;
@@ -47,9 +48,9 @@
     --color-gradiant2: linear-gradient(90deg, #8C1EE3 0%, #C71EE3 100%);
     --color-gradiant3: linear-gradient(90deg, #E3351E 0%, #F07B26 100%);
     /* Font family */
-    --font-family-01: 'Roboto', sans-serif;
+    --font-family-01: 'Inter', sans-serif;
     /* usually on heading */
-    --font-family-02: 'Work Sans', sans-serif;
+    --font-family-02: 'Inter', sans-serif;
     /* usually on sub-heading */
     --font-family-03: 'Cabin', sans-serif;
     --font-family-04: 'Roboto', condensed;
@@ -60,6 +61,134 @@
     --shadow-level-3: 0px 12px 12px rgba(0, 0, 0, 0.05), 0px 2px 5px rgba(0, 0, 0, 0.1);
     --shadow-level-4: 0px 24px 38px rgba(0, 0, 0, 0.05), 0px 11px 15px rgba(0, 0, 0, 0.1);
 }
+
+body {
+    background-color: var(--color-ui-bg);
+}
+
+.home-card-list-container {
+    border-radius: 16px;
+    border: solid 1px #0B1120;
+    background: var(--UI---color-ui-08, #0B1120);
+    padding: 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    justify-content: space-around;
+    position: relative;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.home-card-list-container:hover {
+    cursor: pointer;
+    border-color: transparent; /* Make border invisible on hover */
+}
+
+.home-card-list-container:after { 
+    position: absolute;
+    top: -2px; bottom: -2px;
+    left: -2px; right: -2px;
+    background: linear-gradient(98deg, #436CF2 -5.12%, #436CF2 47.44%, #FC2976 100%);
+    content: '';
+    z-index: -1;
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.home-card-list-container:hover:after { 
+    opacity: 1;
+}
+
+
+.home-banner {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.home-banner h1 {
+    color: var(--font-color-inv, #FFF);
+    text-align: center;
+    /* heading-1 */
+    font-family: Inter;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 130%; /* 52px */
+}
+
+.home-card-list-container {
+    padding: 40px;
+    height: 100%;
+}
+
+.home-card-list-container i,
+.home-card-list-container h3,
+.home-card-list-container p,
+.home-card-list-container a {
+    color: var(--font-color-inv);
+    font-family: "Work Sans";
+}
+
+.home-card-list-container h3 {
+    font-family: var(--font-family-01);
+}
+
+.home-card-list-container i {
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 120%;
+    padding: 10px;
+    border-radius: var(----border-radius, 4px);
+    background:  rgba(67, 108, 242, 0.10);
+}
+
+.home-card-list-container p {
+    font-size: 16px;
+    color: var(--font-color-body, #B9C5D6);
+}
+
+.home-card-list-container a,
+.home-card-link i {
+    font-size: 12px !important;
+    color: var(--font-color-inv) !important
+}
+
+.home-card-list-container a {
+    position: relative;
+}
+
+.home-card-link i {
+    padding: 0 !important;
+    background: none !important;
+}
+
+.home-card-link:hover  a,
+.home-card-link:hover  i{
+    color: #FC2976 !important;
+}
+
+.home-main-wrapper {
+    position: relative;
+}
+
+.blurred-top,
+.blurred-bottom {
+    position: absolute;
+}
+
+.blurred-bottom {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+
+
+
+
 
 
 /*********************************************** [Foundation Style Customization / Overwrite] *************************************************/
@@ -398,7 +527,7 @@ ins-tag span.ins-tag.blue {
     display: block;
     position: relative;
     z-index: 9999;
-    background-color: var(--color-ui-01, #FFFFFF);
+    background-color: var(--color-ui-bg);
     width: 100%;
     transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg);
     transform-style: preserve-3d;
@@ -423,9 +552,7 @@ ins-tag span.ins-tag.blue {
     font-family: var(--font-family-01);
     font-size: 14px;
     font-weight: 700;
-    /* color: var(--color-font-body, #595959); */
     padding: 8px 24px;
-    /* margin-left: 8px; */
 }
 
 .navigation-04 ins-drawer#mobile-menu .menu li a {
@@ -440,11 +567,6 @@ ins-tag span.ins-tag.blue {
     height: unset;
     padding-top: 24px;
     padding-bottom: 24px;
-}
-
-.navigation-04.header {
-    border-bottom: 1px solid var(--color-ui-03, #F2F4F8);
-    ;
 }
 
 .navigation-04 .header-top-bar ins-button.hide-for-small-only {
@@ -1041,7 +1163,7 @@ ins-accordion .inner-content {
 .footerSubItems .footer-p,
 .footerSubItems span {
     font-family: var(--font-family-02)!important;
-    color: var(--color-font-body) !important;
+    color: var(--color-font-inv) !important;
     font-size: 14px!important;
 }
 

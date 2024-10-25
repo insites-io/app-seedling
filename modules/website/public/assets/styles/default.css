@@ -2,11 +2,11 @@
     font-size: 16px;
     /* Brand colors */
     --color-main: #436CF2;
-    --color-sub1: #8C1EE3;
+    --color-sub1: #FC2976;
     --color-sub2: #E3361E;
     /* Buttons & Links */
     --color-main-hover: #436CF2;
-    --color-sub1-hover: #7E16D0;
+    --color-sub1-hover: #D32F19;
     --color-sub2-hover: #D32F19;
     --color-main-hover-light: rgba(17, 110, 195, 0.1);
     --color-sub1-hover-light: rgba(126, 22, 208, 0.1);
@@ -39,14 +39,15 @@
     --color-ui-06: #575757;
     --color-ui-07: #436CF2;
     --color-ui-08: #000000;
+    --color-ui-bg: #0B1120;
     /* Gradiant Background */
     --color-gradiant1: linear-gradient(90deg, #1E4AA2 0%, #1B78CC 100%);
     --color-gradiant2: linear-gradient(90deg, #8C1EE3 0%, #C71EE3 100%);
     --color-gradiant3: linear-gradient(90deg, #E3351E 0%, #F07B26 100%);
     /* Font family */
-    --font-family-01: 'Lato', sans-serif;
+    --font-family-01: 'Inter', sans-serif;
     /* usually on heading */
-    --font-family-02: 'Lato', sans-serif;
+    --font-family-02: 'Inter', sans-serif;
     /* usually on sub-heading */
     --font-family-03: 'Cabin', sans-serif;
     /* usually on paragraph & buttons */
@@ -548,7 +549,7 @@ ins-button button[type=button].blue,
 ins-button button[type=button].primary,
 ins-button button.blue,
 ins-button button.primary {
-    color: var(--color-main);
+    color: var(--font-color-inv);
 }
 
 ins-button button[type=reset].negative,
@@ -723,7 +724,7 @@ ins-button button[type=reset].blue.solid,
 ins-button button[type=reset].primary.solid,
 ins-button button[type=submit].blue.solid,
 ins-button button[type=submit].primary.solid {
-    background-color: var(--color-main);
+    background-color: var(--color-sub2);
     color: var(--font-color-inv);
 }
 
@@ -735,7 +736,7 @@ ins-button button[type=button].blue.solid:not([disabled]):hover,
 ins-button button[type=button].primary.solid:not([disabled]):hover,
 ins-button button.blue.solid:not([disabled]):hover,
 ins-button button.primary.solid:not([disabled]):hover {
-    background-color: var(--color-main-hover);
+    background-color: var(--color-sub2-hover);
     color: var(--font-color-inv);
 }
 
@@ -758,8 +759,8 @@ ins-button button.blue:not([disabled]):hover,
 ins-button button.blue:not([disabled]):active,
 ins-button button.primary:not([disabled]):hover,
 ins-button button.primary:not([disabled]):active {
-    background-color: var(--color-main-hover-light);
-    color: var(--color-main-hover);
+    background-color: rgba(255,255,255, .2);
+    color: var(--font-color-inv);
 }
 
 
@@ -1486,7 +1487,7 @@ ins-tag span.ins-tag {
 
 .top-bar,
 .header-top-bar {
-    background-color: var(--color-ui-01);
+    background-color: var(--color-ui-bg);
     padding: 24px .9375rem;
 }
 

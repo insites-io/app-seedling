@@ -5,16 +5,16 @@ searchable: true
 max_deep_level: 1
 metadata: {
     "status": "published",
-    "page_name": "Client Portal",
+    "page_name": "Insites | Seedling",
     "open_graph:url": "",
     "open_graph:type": "",
     "open_graph:image": "",
-    "open_graph:title": "Client Portal",
-    "open_graph:description": "Client Portal",
+    "open_graph:title": "Insites | Seedling",
+    "open_graph:description": "Insites | Seedling",
     "open_graph:site_name": "",
-    "meta_title": "Client Portal",
-    "page_title": "Client Portal",
-    "meta_description": "Client Portal",
+    "meta_title": "Insites | Seedling",
+    "page_title": "Insites | Seedling",
+    "meta_description": "Insites | Seedling",
     "canonical_url": "",
     "is_visible_to_search_engines": true,
     "sitemap_enabled": true,
@@ -26,10 +26,7 @@ metadata: {
 {%comment%} get device type {%endcomment%}
 {%- assign device_used = context.device.device_type -%}
 
-{% include 'modules/website/content/index/carousel' %} 
-{% include 'modules/website/content/index/overlap_section' %} 
-{% include 'modules/website/content/index/client_section' %}
-{% include 'modules/website/content/index/testimonials' %} 
+{% include 'modules/website/content/index/home_cards' %} 
 
 {%- if context.environment == "staging" -%}
     <link rel="preload" as="script" href="{{ 'modules/website/scripts/app.js' | asset_url }}" >

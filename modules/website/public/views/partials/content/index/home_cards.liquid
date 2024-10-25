@@ -1,0 +1,112 @@
+<div class="wrapper home-main-wrapper">
+
+<img class="blurred-top" src="{{ 'modules/website/images/home/background/blurred-top.svg' | asset_url }}" alt="">
+<img class="blurred-bottom" src="{{ 'modules/website/images/home/background/blurred-bottom.svg' | asset_url }}" alt="">
+
+
+   <div class="grid-container">
+    <div class="grid-x grid-padding-x grid-padding-y home-main-container">
+
+        <div class="large-12 medium-12 small-12 cell">
+            <div class="spacer section"></div>
+            <div class="home-banner">
+                <h1 class="text-center">
+                    Get started quickly with this seedling application as your starting point
+                </h1>
+            </div>
+            <div class="spacer xxxx-large"></div>
+        </div>
+
+
+        <div class="large-6 medium-6 small-12 cell">
+            <div class="home-card-list-container" data-link="https://docs.insites.io/">
+                <div class="home-card-title">
+                    <i class="icon-book"></i>
+                    <div class="spacer medium"></div>
+                    <h3>Documentation</h3>
+                    <div class="spacer small"></div>
+                    <p>Insites simplifies web app development with tools for building, deploying, and managing apps, catering to both beginners and advanced developers.</p>
+                </div>
+                <div class="home-card-img">
+                    <img src="{{ 'modules/website/images/home/documentation-img.svg' | asset_url }}" alt="">
+                </div>
+                <div class="home-card-link">
+                    <a>Explore The Documentation</a>
+                    <i class="icon-arrow-forward"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="large-6 medium-6 small-12 cell">
+            <div class="home-card-list-container" data-link="https://docs.insites.io/developers-guide/developer-guide-overview">
+                <div class="home-card-title">
+                    <i class="icon-book-open"></i>
+                    <div class="spacer medium"></div>
+                    <h3>Developer Guide</h3>
+                    <div class="spacer small"></div>
+                    <p>This section of the developer guide contains tutorials, references, and examples for implementing various features on Insites.</p>
+                </div>
+                <div class="home-card-img">
+                    <img src="{{ 'modules/website/images/home/guide-img.svg' | asset_url }}" alt="">
+                </div>
+                <div class="home-card-link">
+                    <a>Explore The Developer Guide </a>
+                    <i class="icon-arrow-forward"></i>
+                </div>
+            </div>
+        </div>
+         
+        <div class="large-6 medium-6 small-12 cell">
+            <div class="home-card-list-container" data-link="https://docs.insites.io/developers-app/overview-apps">
+                <div class="home-card-title">
+                    <i class="icon-box"></i>
+                    <div class="spacer medium"></div>
+                    <h3>Apps</h3>
+                    <div class="spacer small"></div>
+                    <p>Providing specific functions or services to meet user needs, enhancing convenience and productivity in digital experiences.</p>
+                </div>
+                <div class="home-card-img">
+                    <img src="{{ 'modules/website/images/home/apps-img.svg' | asset_url }}" alt="">
+                </div>
+                <div class="home-card-link">
+                    <a>Explore The Apps</a>
+                    <i class="icon-arrow-forward"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="large-6 medium-6 small-12 cell">
+            <div class="home-card-list-container" data-link="https://docs.insites.io/developers-liquid/liquid-developers-overview">
+                <div class="home-card-title">
+                    <i class="icon-droplet"></i>
+                    <div class="spacer medium"></div>
+                    <h3>Liquid</h3>
+                    <div class="spacer small"></div>
+                    <p>Liquid (or Liquid Markup) is a template language used by Insites to build dynamic pages and to provide dynamic configuration.</p>
+                </div>
+                <div class="home-card-img">
+                    <img src="{{ 'modules/website/images/home/liquid-img.svg' | asset_url }}" alt="">
+                </div>
+                <div class="home-card-link">
+                    <a>Explore The Liquid Overview</a> 
+                    <i class="icon-arrow-forward"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+   </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.home-card-list-container').forEach(card => {
+            card.addEventListener('click', function() {
+                const link = card.getAttribute('data-link');
+                if (link) {
+                    window.open(link, '_blank');
+                }
+            });
+        });
+    });
+</script>
