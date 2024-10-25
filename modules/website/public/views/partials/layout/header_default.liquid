@@ -3,7 +3,7 @@
   ? THIS FILE CAN BE DELETED ONCE MENU DATABASE IS POPULATED
 {% endcomment %}
 
-<header class="navigation-04 header colorBlack" data-test="main-header" id="main-header">
+<header class="navigation-04 header" data-test="main-header" id="main-header">
   <div class="wrapper">
     <div class="header-top-bar grid-container grid-x align-middle">
       <div class="large-2 medium-3 small-9 cell">
@@ -21,62 +21,12 @@
       <div class="large-1 medium-3 small-0"></div>
 
       <div class="show-for-large large-9 medium-6 small-12 cell text-right">
-        <div class="header-links">
-
-          <a class="colorBlack" href="/about">
-            About
-          </a>
-        
-          <a class="" href="/services">
-            <ins-dropdown 
-              label="Services"
-              class="customNav">
-                  <ins-dropdown-item
-                    link="/services/customisable-style-guide"
-                    label="Customisable Style Guide">
-                  </ins-dropdown-item>
-                  <ins-dropdown-item
-                    link="/services/web-block-variations"
-                    label="Web Block Variations">
-                  </ins-dropdown-item>
-                  <ins-dropdown-item
-                    link="/services/web-components"
-                    label="Web Components">
-                  </ins-dropdown-item>
-                  <ins-dropdown-item
-                    link="/services/content-types"
-                    label="Content Types">
-                  </ins-dropdown-item>
-                  <ins-dropdown-item
-                    link="/services/fully-responsive"
-                    label="Fully Responsive">
-                  </ins-dropdown-item>
-                  <ins-dropdown-item
-                    link="/services/pre-built-pages"
-                    label="Pre Built Pages">
-                  </ins-dropdown-item>
-            </ins-dropdown>
-          </a>
-
-          <a class="colorBlack" href="/faqs">
-            FAQ
-          </a>
-
-          <a class="colorBlack" href="/news">
-            News
-          </a>
-
-          <a class="colorBlack" href="/contact">
-            Contact
-          </a>
-
-         
-        {% if context.current_user == nil %}
-         
-    
+        <div class="header-links">   
         </div>
+        {% if context.current_user == nil %}
+
               <a class="" href="/sign-in">           
-                <ins-button label="SIGN IN" icon="icon-user"></ins-button>
+                <ins-button label="SIGN IN"></ins-button>
               </a>
               
               <a href="/register">

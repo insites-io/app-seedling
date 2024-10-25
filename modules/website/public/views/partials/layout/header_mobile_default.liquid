@@ -7,49 +7,6 @@
 <ins-drawer no-padding id="mobile-menu" show-header="false" class="mobileNav hide-for-large hide-for-small" >
     <div>
         <ul class="vertical menu">
-          <li class="no-submenu mobile-menu-style">
-              <a class="colorBlack" href="/about">
-              about
-              </a>
-          </li>
-
-          <li class="mobile-menu-style">
-              <ins-accordion menu>
-                <ins-accordion-item class="colorBlack" heading="Services" link="#" open-icon="icon-plus" close-icon="icon-minus" link-target="_self" class="has-subitems">  
-                  <ins-accordion-link class="colorBlack" label="Customisable Style Guide" link="/services/customisable-style-guide" link-target="_self">
-                  </ins-accordion-link>
-                  <ins-accordion-link class="colorBlack" label="Web Block Variations" link="/services/web-block-variations" link-target="_self">
-                  </ins-accordion-link>
-                  <ins-accordion-link class="colorBlack" label="Web Components" link="/services/web-components" link-target="_self">
-                  </ins-accordion-link>
-                  <ins-accordion-link class="colorBlack" label="Content Types" link="/services/content-types" link-target="_self">
-                  </ins-accordion-link>
-                  <ins-accordion-link class="colorBlack" label="Fully Responsive" link="/services/fully-responsive" link-target="_self">
-                  </ins-accordion-link>
-                  <ins-accordion-link class="colorBlack" label="Pre Built Pages" link="/services/pre-built-pages" link-target="_self">
-                  </ins-accordion-link>
-                </ins-accordion-item>
-              </ins-accordion>
-            </li>
-          
-            <li class="no-submenu mobile-menu-style">
-              <a class="colorBlack" href="/faqs">
-              FAQ
-              </a>
-          </li>
-
-          <li class="no-submenu mobile-menu-style">
-            <a class="colorBlack" href="/news">
-            News
-            </a>
-        </li>
-
-        <li class="no-submenu mobile-menu-style">
-          <a class="colorBlack" href="/contact">
-          Contact
-          </a>
-      </li>
-  
           <!-- /normal list -->     
           {% if context.current_user == nil %}
           <li class="no-submenu mobile-menu-style sign-in-button">
