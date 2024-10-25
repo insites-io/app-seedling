@@ -1,0 +1,54 @@
+---
+slug: api/check-user-email
+format: json
+method: get
+searchable: false
+metadata: {
+    "status": "published",
+    "open_graph:url": "",
+    "open_graph:type": "",
+    "open_graph:image": "",
+    "open_graph:title": "Invite User | Check User Email API",
+    "open_graph:description": "Invite User | Check User Email API",
+    "open_graph:site_name": "",
+    "meta_title": "Invite User | Check User Email API",
+    "page_title": "Invite User | Check User Email API",
+    "meta_description": "Invite User | Check User Email API",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "9999", ## secondary order (ASC)
+    "sitemap_changefreq": "never"
+}
+---
+{%- assign email = context.params.email | replace: " ", "+" | default: "noemail@combinate.me" -%}
+{%- graphql results = "modules/client/account/check_user_email_signup", email: email | dig: "items" -%}
+
+{%- assign email_check = '{}' | parse_json -%}
+{%- 
+    liquid
+    if results.total_entries > 0
+        assign item = results | dig: "results" | first
+        assign find_profile = item.profiles | array_find_index: profile_type: "modules/insites_core/crm_contact"
+        if find_profile.size > 0
+        assign email_check = email_check | add_hash_key: "id", item.id 
+            assign email_check = email_check | add_hash_key: "has_email", true
+            assign email_check = email_check | add_hash_key: "first_name", item.first_name
+            assign email_check = email_check | add_hash_key: "last_name", item.last_name
+            assign email_check = email_check | add_hash_key: "external_id", item.external_id
+            assign email_check = email_check | add_hash_key: "email", item.email
+        else
+            assign email_check = email_check | add_hash_key: "id", item.id 
+            assign email_check = email_check | add_hash_key: "has_email", true
+            assign email_check = email_check | add_hash_key: "first_name", item.first_name
+            assign email_check = email_check | add_hash_key: "last_name", item.last_name
+            assign email_check = email_check | add_hash_key: "external_id", item.external_id
+            assign email_check = email_check | add_hash_key: "email", item.email
+        endif      
+    else
+        assign email_check = email_check | add_hash_key: "has_email", false
+    endif
+-%}
+
+{{ email_check }}

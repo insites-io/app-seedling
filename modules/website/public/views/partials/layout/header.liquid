@@ -1,0 +1,131 @@
+{% comment %} ? GET GLOBAL CONTENT {% endcomment %}
+{%- include "modules/insites_cms/globals" -%}
+
+{%- if context.environment == "staging" -%}
+{% comment %} ? start partial:layout/header {% endcomment %}
+{%- endif -%}
+
+<header class="navigation-04 header colorBlack" data-test="main-header" id="main-header">
+  <div class="wrapper">
+    <div class="header-top-bar grid-container grid-x align-middle">
+      <div class="large-2 medium-3 small-9 cell">
+        <a href="/">
+          {% comment %} ? SETTING LOGO BY DEFAULT {% endcomment %}
+          {% if context.exports.global.company_logo == nil or context.exports.global.company_logo contains "client-logo.png" %}
+              {% comment %} ? DEFAULT {% endcomment %}
+              <img class="logo" src="{{ 'modules/website/images/default-images/logo/insites-logo.png' | asset_url }}" alt="Logo">
+          {% else %}
+              {% comment %} ? FETCHED FROM IIA -> CMS -> GLOBALS {% endcomment %}
+              <img class="logo" src="{{ context.exports.global.company_logo }}" alt="Logo">
+          {% endif %}
+        </a>
+      </div>
+      <div class="large-1 medium-3 small-0"></div>
+
+      {%- assign menus = '[]' | parse_json -%}
+      {%- graphql get_menu = 'modules/website/menu/get_parent_menu' | dig: 'items', 'results'-%}
+
+      {% assign menu_data = get_menu | parse_json %}
+
+      {% for menu_item in menu_data %}
+        {%- assign parent = '{}' | parse_json -%}
+        {%- assign parent = parent | add_hash_key: "label", menu_item.label -%}
+        {%- assign parent = parent | add_hash_key: "slug", menu_item.slug -%}
+
+        {%- graphql get_child_menu = 'modules/website/menu/get_child_menu', parent_id: menu_item.id | dig: 'items', 'results' -%}
+        {%- assign parent = parent | add_hash_key: "child", get_child_menu -%}
+        {%- assign menus = menus | add_to_array: parent -%}
+      {% endfor %}
+ 
+      {% comment %} ? FOR CHECKING ONLY {% endcomment %}
+      <input name="get_menu" type="hidden" hidden value="{{ get_menu }}">
+      <input name="get_child menu" type="hidden" hidden value="{{ menus }}">
+      {%- graphql get_menu_test = 'modules/website/menu/get_parent_menu' -%}
+  
+      <div class="show-for-large large-9 medium-6 small-12 cell text-right">
+        <div class="header-links">
+
+        {% for menu in menus %}
+
+          {%- if menu.child.size > 0 -%}
+            <a class="" href="/{{ menu.slug }}">
+            <ins-dropdown 
+              label="{{ menu.label }}"
+              class="customNav">
+                {%- assign res_services = menu.child -%}
+                
+                {% for item in res_services %}
+                  <ins-dropdown-item
+                    link="/{{ menu.slug }}/{{ item.slug }}"
+                    label="{{ item.label }}">
+                  </ins-dropdown-item>
+                {% endfor %} 
+            </ins-dropdown>
+          </a>
+          {% else %}
+ 
+          <a class="colorBlack" href="/{{ menu.slug }}">
+            {{ menu.label }}
+          </a>
+          {% endif %}
+         
+        {% endfor %}
+
+      
+
+          {% if context.current_user == nil %}
+         
+    
+        </div>
+              <a class="" href="/sign-in">           
+                <ins-button label="SIGN IN" icon="icon-user"></ins-button>
+              </a>
+              
+              <a href="/register">
+                <ins-button class="btnMain" solid label="Register">
+                </ins-button>
+              </a>
+          {% else %}        
+          {% if context.current_user != nil %}
+            {%- graphql user_with_token = 'modules/client/account/get_user_with_password_token', email: context.current_user.email | dig: 'users','results' | first -%}
+            {%- assign user_data_default = user_with_token.default | first -%}
+
+          {% endif %}
+              <a class="color-main color-font-head" href=""> 
+                <ins-dropdown 
+                label="{{ context.current_user.first_name }} {{ context.current_user.last_name }}"
+                class="profileNav">
+                    <ins-dropdown-item
+                      link="/my-details"
+                      label="My Details">
+                    </ins-dropdown-item>
+                
+                    <ins-dropdown-item
+                      link="/generate-password-token?email={{ user_with_token.email | url_encode }}"
+                      label="Change Password">
+                    </ins-dropdown-item>
+      
+                    <ins-dropdown-item
+                      link=""
+                      label="">
+                      {% include_form 'modules/client/sign_out' %}
+                    </ins-dropdown-item>
+                </ins-dropdown>
+              </a>
+            </div>
+          {% endif %}
+
+      </div>
+      <div class="hide-for-large mobile-menu-toggle large-0 medium-6 small-3 cell vertical-align-middle align-right">
+        <div id="mobile-menu-btn" class="icon-menu-1"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+
+{%- if context.environment == "staging" -%}
+{% comment %} ? end partial:layout/header {% endcomment %}
+{%- endif -%}
+

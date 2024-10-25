@@ -1,0 +1,172 @@
+---
+name: feedback
+resource: modules/website/testimonials
+resource_owner: anyone
+flash_alert: Error-Feedback
+flash_notice: Success-Feedback
+redirect_to: feedback
+fields:
+  properties:
+    user_id:
+      validation: 
+        presence: true
+    full_name:
+      validation: 
+        presence:
+          message: Full name is required
+    location:
+    message:
+      validation: 
+        presence:
+          message: Message is required
+    allow_display_on_website:
+      validation: 
+        presence:
+          message: Preference is required
+default_payload: |-
+  {
+    "properties_attributes": {
+      "user_id": "{{ context.current_user.id }}"
+    }
+  }
+async_callback_actions:
+  delay: 0
+  priority: low
+  max_attempts: 2
+  content: |-
+    {% comment %} Create Event Stream {% endcomment %}
+    {% parse_json info %}
+    {
+      "description": "Feedback Added",
+      "log": {
+        "user": {
+          "id": "{{ context.current_user.id }}",
+          "email": "{{ context.current_user.email }}",
+          "first_name": "{{ context.current_user.first_name }}",
+          "last_name": "{{ context.current_user.last_name }}"
+        },
+        "full_name": "{{ form.properties.full_name }}",
+        "location": "{{ form.properties.location }}",
+        "message": "{{ form.properties.message }}",
+        "allow_display_on_website": "{{ form.properties.allow_display_on_website }}"
+      }
+    }
+    {% endparse_json %}
+    {% include 'modules/client/events/log_event', info %}    
+email_notifications:
+  - modules/client/feedback_workflow 
+---
+
+{%- assign props = form.fields.properties -%}
+
+{%- form
+    html-id: "feedback-form"
+    html-class: 'insites-form insites-form-code' 
+    html-novalidate: true
+    html-onsubmit: "return validateForm(event)"   -%}
+
+
+  <div class="insites-form-grid">
+
+    <div class="column-1">
+        <h2 class="heading-2">How did we do? </h2>
+        <div class="spacer x-large"></div>
+        <p>Please share how your experience with us is going. We’d love to hear from you.</p>
+    </div>
+    <div class="spacer x-large"></div>
+    <!-- Field: Full Name -->
+    <div class="column-2">
+        <ins-input 
+            validate
+            data-type="string"
+            data-ui="text"
+            label="Full Name*"
+            name="{{ props.full_name.name }}"
+            value="{{ props.full_name.value }}"
+            error-message="{{ props.full_name.validation.rules.presence.message }}"            
+            {%- if form.errors['properties.full_name'] != nil -%} has-error {%- endif -%} >
+        </ins-input>
+    </div>
+
+    <!-- Field: Location -->
+    <div class="column-2">
+        <ins-input            
+            data-type="string"
+            data-ui="text"
+            label="Location"
+            name="{{ props.location.name }}"
+            value="{{ props.location.value }}"
+            error-message="{{ props.location.validation.rules.presence.message }}"            
+            {%- if form.errors['properties.location'] != nil -%} has-error {%- endif -%} >
+        </ins-input>
+    </div>
+
+    <!-- Field: Message -->
+    <div class="column-1">
+        <ins-textarea 
+            validate
+            data-type="string"
+            data-ui="multi_line"
+            label="Message*"
+            maxlength="200"
+            counter="increasing"
+            name="{{ props.message.name }}"
+            value="{{ props.message.value }}"
+            error-message="{{ props.message.validation.rules.presence.message }}"            
+            {%- if form.errors['properties.message'] != nil -%} has-error {%- endif -%} >
+        </ins-textarea>
+    </div>
+
+     <!-- Field: May we display your feedback on our website? -->
+     <div class="column-1">
+        <div class="list-field-wrap" 
+            validate
+            data-type="string"
+            data-ui="list_radio" 
+            data-name="{{ props.allow_display_on_website.name }}"
+            {%- if form.errors['properties.allow_display_on_website'] != nil -%} has-error="true" {%- endif -%}>
+            <label class="list-field_label">Allow Display on Website*</label>
+            <div class="list-radio-options">
+                <ins-radio
+                    label="Yes, of course." value="Yes, of course."
+                    name="{{ props.allow_display_on_website.name }}"
+                    error-message="req{{ props.allow_display_on_website.validation.rules.presence.message }}"
+                    {% if props.allow_display_on_website.value == 'Yes, of course.' %}checked{% endif %}>
+                </ins-radio>
+                <ins-radio
+                    label="No, I'd rather you didn’t." value="No, I'd rather you didn’t."
+                    name="{{ props.allow_display_on_website.name }}"
+                    {% if props.allow_display_on_website.value == "No, I'd rather you didn't." %}checked{% endif %}>
+                </ins-radio>
+            </div>
+            <div class="list-field_error">{{ props.allow_display_on_website.validation.rules.presence.message }}</div>
+        </div>
+    </div>
+            
+  </div>
+
+  <div class="insites-form-grid">
+    <div class="insites-form-buttons column-1 text-right">
+        <ins-button type="submit" id="submit-btn" label="Submit" icon="icon-check-2" solid></ins-button>
+    </div>
+  </div>
+
+{%- endform -%}
+
+<script>
+  let submitBtn = document.getElementById('submit-btn');
+  let form = document.getElementById('feedback-form');
+
+  async function validateForm(event) {
+    event.preventDefault();
+    submitBtn.loading = true;
+
+    if (await App.validation.validateForm(form)) {
+      form.submit();
+      return true;
+    } else {
+      submitBtn.loading = false;
+      return false;
+    }
+  }
+</script>

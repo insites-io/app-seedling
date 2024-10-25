@@ -1,0 +1,21 @@
+
+{%- comment -%}
+Project Assets - Holds app css and js
+{%- endcomment -%}
+
+{%- if context.environment == "staging" -%}
+    <link rel="preload" as="style" href="{{ 'modules/website/styles/default.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'modules/website/styles/default.css' | asset_url }}" > 
+    <link rel="preload" as="style" href="{{ 'modules/website/styles/custom.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'modules/website/styles/custom.css' | asset_url }}" >
+    <link rel="preload" as="style" href="{{ 'modules/website/styles/breakpoint.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'modules/website/styles/breakpoint.css' | asset_url }}" >
+{%- else -%}
+    {%- comment -%} Minified version will be used in the production environment {%- endcomment -%}
+    <link rel="preload" as="style" href="{{ 'modules/website/styles/default.min.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'modules/website/styles/default.min.css' | asset_url }}" >
+    <link rel="preload" as="style" href="{{ 'modules/website/styles/custom.min.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'modules/website/styles/custom.min.css' | asset_url }}" >
+    <link rel="preload" as="style" href="{{ 'modules/website/styles/breakpoint.min.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'modules/website/styles/breakpoint.min.css' | asset_url }}" >
+{%- endif -%}

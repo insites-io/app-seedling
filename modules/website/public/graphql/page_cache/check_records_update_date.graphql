@@ -1,0 +1,19 @@
+query check_records_update_date( $tables:[String!] ) {
+  items: records(
+    per_page: 3
+    sort: { 
+      updated_at: { order: DESC } 
+    }
+    filter: { 
+      table: { 
+        value_in: $tables 
+      } 
+    }
+  ) {
+    results {
+      id
+      updated_at
+      table
+    }
+  }
+}

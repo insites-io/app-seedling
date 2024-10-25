@@ -1,0 +1,48 @@
+---
+slug: users
+layout: modules/client/default
+searchable: true
+max_deep_level: 1
+metadata: {
+    "status": "published",
+    "page_name": "Client Portal - Users",
+    "open_graph:url": "",
+    "open_graph:type": "",
+    "open_graph:image": "",
+    "open_graph:title": "Users | Insites",
+    "open_graph:description": "Users | Insites",
+    "open_graph:site_name": "",
+    "meta_title": "Users | Insites",
+    "page_title": "Users | Insites",
+    "meta_description": "Users | Insites",
+    "canonical_url": "",
+    "is_visible_to_search_engines": true,
+    "sitemap_enabled": true,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "1", ## secondary order (ASC)
+    "sitemap_changefreq": "monthly"
+}
+authorization_policies:
+  - modules/client/is_user_logged_in    
+---
+{% comment %} ? GET USER DETAILS {% endcomment %}
+{% function user_details = "modules/client/user_details" %}
+
+{% if user_details.is_primary_account_holder == true %}
+    <h1>Users</h1>
+    <div class="spacer small"></div>
+    <p class="p-body">Manage your team’s access to your company account.</p>
+    <div class="spacer xxxx-large"></div>
+    {% include 'modules/client/users/list' %}
+{% else %}
+    {%- redirect_to '/403' -%}   
+{% endif %}
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/client/services/apiServices.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/client/services/apiServices.min.js' | asset_url }}"></script>
+{%- endif -%}
+

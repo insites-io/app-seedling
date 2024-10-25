@@ -1,0 +1,198 @@
+{%- assign props = form.fields.properties -%}
+{% assign contact = data.contact | first %}
+
+<div id="personal-details-container" class="form-group fadeIn" active>      
+      
+      <input type="hidden" id="contact_longitude" name="{{ form.fields.properties.longitude.name }}" value="{{ default_address.properties.longitude }}" >
+      <input type="hidden" id="contact_latitude" name="{{ form.fields.properties.latitude.name }}" value="{{ default_address.properties.latitude }}" >
+
+      <div class="column-1">
+        {% if context.params.slug != 'my-details' %}
+          <h2 class="heading-2">Personal Details</h2>
+        {% endif %}
+      </div>      
+
+      <div class="column-2">
+        <ins-input validate
+            id="first-name"
+            label="First Name*"
+            name="{{ form.fields.first_name.name }}" 
+            value="{{ form.fields.first_name.value }}" 
+            {% if form.errors['first_name'] %} has-error {% endif %}
+            error-message="{{ form.fields.first_name.validation.rules.presence.message }}"
+            placeholder="First Name">
+        </ins-input>
+      </div>
+
+      <div class="column-2">
+        <ins-input validate
+            id="last-name"
+            label="Last Name*"
+            name="{{ form.fields.last_name.name }}" 
+            value="{{ form.fields.last_name.value }}" 
+            {% if form.errors['last_name'] %} has-error {% endif %}
+            error-message="{{ form.fields.last_name.validation.rules.presence.message }}"
+            placeholder="Last Name">
+        </ins-input>
+      </div>
+      
+      <div class="column-2">
+        <ins-input validate
+            id="email"
+            label="Email*"
+            field="email"
+            name="{{ form.fields.email.name }}" 
+            value="{{ form.fields.email.value }}" 
+            {% if form.errors['email'] %} has-error {% endif %}
+            error-message="{{ form.errors['email'] }}"
+            placeholder="Email">
+        </ins-input>
+      </div>
+
+      <div class="column-2">
+        <ins-input-tel
+            id="mobile-phone"
+            label="Phone" 
+            phonenum-value="{{ contact.properties.mobile_phone_number }}" 
+            country-code="{{ contact.properties.mobile_phone_country_code }}"
+            phonenum-placeholder="Phone Number" 
+            no-areacode
+            error-message="Please use a valid phone number">
+        </ins-input-tel>
+
+        <input type="hidden" id="mobile_phone_number" 
+          name="{{ props.mobile_phone_number.name }}" 
+          value="">
+
+        <input type="hidden" id="mobile_phone_country_code" 
+            name="{{ props.mobile_phone_country_code.name }}"
+            value="61" >
+      </div>
+
+      <div class="column-1">
+        <ins-input 
+          address-lookup 
+          label="Search Address" 
+          id="shipping-address-search"
+          name="contact"
+          placeholder="Search Address"
+          icon="icon-map-pin">
+        </ins-input>
+      </div>
+
+      {%  liquid
+          if params.slug == 'my-company-details' 
+            assign default_address = data.default_address.properties
+          endif
+      %}
+
+      <div class="column-2">
+        <ins-input form-address-field 
+            id="contact_address_1"
+            label="Address 1"
+            name="{{ props.address_1.name }}" 
+            value="{{ default_address.properties.address_1 }}" 
+            {% if form.errors['address_1'] %} has-error {% endif %}
+            error-message="{{ props.address_1.validation.rules.presence.message }}"
+            placeholder="Address 1">
+        </ins-input>
+      </div>
+
+      <div class="column-2">
+        <ins-input form-address-field
+            id="contact_address_2"
+            label="Address 2"
+            name="{{ props.address_2.name }}" 
+            value="{{ default_address.properties.address_2 }}" 
+            {% if form.errors['address_2'] %} has-error {% endif %}
+            error-message="{{ props.address_2.validation.rules.presence.message }}"
+            placeholder="Address 2">
+        </ins-input>
+      </div>
+
+      <div class="column-2">
+        <ins-input form-address-field 
+            id="contact_suburb"
+            label="Suburb"
+            name="{{ props.suburb.name }}" 
+            value="{{ default_address.properties.suburb }}" 
+            {% if form.errors['suburb'] %} has-error {% endif %}
+            error-message="{{ props.suburb.validation.rules.presence.message }}"
+            placeholder="Suburb">
+        </ins-input>
+      </div>
+
+      <div class="column-2">
+        <ins-input form-address-field 
+            id="contact_state"
+            label="State"
+            name="{{ props.state.name }}" 
+            value="{{ default_address.properties.state }}" 
+            {% if form.errors['state'] %} has-error {% endif %}
+            error-message="{{ props.state.validation.rules.presence.message }}"
+            placeholder="State">
+        </ins-input>
+      </div>
+
+      <div class="column-2">
+        <ins-input form-address-field 
+            id="contact_postcode"
+            label="ZIP / Postal Code"
+            name="{{ props.postcode.name }}" 
+            value="{{ default_address.properties.postcode }}" 
+            {% if form.errors['postcode'] %} has-error {% endif %}
+            error-message="{{ props.postcode.validation.rules.presence.message }}"
+            placeholder="ZIP / Postal Code">
+        </ins-input>
+      </div>
+
+      <div class="column-2">
+        <ins-input form-address-field 
+            id="contact_country"
+            label="Country"
+            name="{{ props.country.name }}" 
+            value="{{ default_address.properties.country }}" 
+            {% if form.errors['country'] %} has-error {% endif %}
+            error-message="{{ props.country.validation.rules.presence.message }}"
+            placeholder="Country">
+        </ins-input>
+      </div>
+
+    {% if context.params.slug == 'my-details' %}
+    <div class="column-1">      
+      <div class="spacer small"></div>
+      <ins-button type="submit" id="submit-personal-details" label="Update Details" icon="icon-check-2" solid ></ins-button>
+    </div>
+    {% else %}
+
+      <div class="column-1">
+          <div class="spacer small"></div>
+          <h2 class="heading-2">Account Details</h2>
+      </div>
+
+      <div class="column-2">
+        <ins-input validate
+          id="password"
+          label="Password*"
+          field="password"
+          name="{{ form.fields.password.name }}" 
+          value="{{ form.fields.password.value }}" 
+          {% if form.errors['password'] %} has-error {% endif %}
+          error-message="{{ form.fields.password.validation.rules.presence.message }}"
+          placeholder="Password">
+        </ins-input>
+      </div>
+      
+         
+    <div class="column-1">      
+      <div class="spacer small"></div>
+      <div class="grid-x">
+        <div class="cell large-6 medium-6 small-12"> <a href="/"><ins-button type="button" id="cancel-button" label="CANCEL" icon="icon-close-1" outlined ></ins-button></a></div>
+        <div class="cell show-for-small-only spacer"></div>
+        <div class="cell large-6 medium-6 small-12 text-right"><ins-button type="submit" id="submit-personal-details" class="submit-btn" label="NEXT" icon-right="icon-arrow-forward" solid ></ins-button></div>
+      </div>  
+    </div>
+
+  {% endif %}
+
+</div>    

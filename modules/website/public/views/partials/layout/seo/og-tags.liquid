@@ -1,0 +1,15 @@
+{% liquid
+    capture og_image
+        yield 'og_image'
+    endcapture
+
+    if og_image == ''
+        assign og_image = 'modules/website/images/OG-Banner-Default.jpg' | asset_url
+    endif
+%}
+
+<meta property="og:image" content="{{ og_image }}" >
+
+{%- comment -%}
+    Insert more meta OG tags as needed.
+{%- endcomment -%}

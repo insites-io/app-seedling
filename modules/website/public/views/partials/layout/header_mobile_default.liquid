@@ -1,0 +1,96 @@
+{% comment %} 
+  ? THIS HEADER IS USED FOR INITIAL INSTALLATION OF TEMPLATE 
+  ? THIS FILE CAN BE DELETED ONCE MENU DATABASE IS POPULATED
+{% endcomment %}
+
+<div class="navigation-05b drawer-holder mobile-menu-container">
+<ins-drawer no-padding id="mobile-menu" show-header="false" class="mobileNav hide-for-large hide-for-small" >
+    <div>
+        <ul class="vertical menu">
+          <li class="no-submenu mobile-menu-style">
+              <a class="colorBlack" href="/about">
+              about
+              </a>
+          </li>
+
+          <li class="mobile-menu-style">
+              <ins-accordion menu>
+                <ins-accordion-item class="colorBlack" heading="Services" link="#" open-icon="icon-plus" close-icon="icon-minus" link-target="_self" class="has-subitems">  
+                  <ins-accordion-link class="colorBlack" label="Customisable Style Guide" link="/services/customisable-style-guide" link-target="_self">
+                  </ins-accordion-link>
+                  <ins-accordion-link class="colorBlack" label="Web Block Variations" link="/services/web-block-variations" link-target="_self">
+                  </ins-accordion-link>
+                  <ins-accordion-link class="colorBlack" label="Web Components" link="/services/web-components" link-target="_self">
+                  </ins-accordion-link>
+                  <ins-accordion-link class="colorBlack" label="Content Types" link="/services/content-types" link-target="_self">
+                  </ins-accordion-link>
+                  <ins-accordion-link class="colorBlack" label="Fully Responsive" link="/services/fully-responsive" link-target="_self">
+                  </ins-accordion-link>
+                  <ins-accordion-link class="colorBlack" label="Pre Built Pages" link="/services/pre-built-pages" link-target="_self">
+                  </ins-accordion-link>
+                </ins-accordion-item>
+              </ins-accordion>
+            </li>
+          
+            <li class="no-submenu mobile-menu-style">
+              <a class="colorBlack" href="/faqs">
+              FAQ
+              </a>
+          </li>
+
+          <li class="no-submenu mobile-menu-style">
+            <a class="colorBlack" href="/news">
+            News
+            </a>
+        </li>
+
+        <li class="no-submenu mobile-menu-style">
+          <a class="colorBlack" href="/contact">
+          Contact
+          </a>
+      </li>
+  
+          <!-- /normal list -->     
+          {% if context.current_user == nil %}
+          <li class="no-submenu mobile-menu-style sign-in-button">
+              <a href="/sign-in">     
+            <i class="icon-user"></i>  Sign In
+            </a>
+          </li>
+          <li class="no-submenu mobile-menu-style">
+              <a href="/register" class="colorBlack">
+              <ins-button class="register-mobile-button" label="REGISTER" type="submit" size="normal" solid></ins-button>
+            </a>
+          </li>
+          {% else %}
+              <li class="mobile-menu-style">
+                  <ins-accordion menu>
+                      <ins-accordion-item heading="{{ context.current_user.first_name }} {{ context.current_user.last_name }}" link="#" open-icon="icon-plus" close-icon="icon-minus"
+                        class="has-subitems">
+                        {%- graphql user_with_token = 'modules/client/account/get_user_with_password_token', email: context.current_user.email | dig: 'users','results' | first -%}
+                        {%- assign user_data_default = user_with_token.default | first -%}
+
+                              <ins-accordion-link label="My Details" link="/my-details">
+                              </ins-accordion-link>
+  
+                              <ins-accordion-link label="Change Password" 
+                              link="/generate-password-token?email={{ user_with_token.email | url_encode }}"
+                              >
+                              </ins-accordion-link>
+
+                              <div class="sign-out-wrapper">
+                                {% include_form 'modules/client/sign_out' %}
+                              </div>
+                        
+          
+                    
+                      </ins-accordion-item>
+                    </ins-accordion>
+              </li>
+          {% endif %}
+  
+        </ul>
+      </div>
+</ins-drawer>
+</div>
+

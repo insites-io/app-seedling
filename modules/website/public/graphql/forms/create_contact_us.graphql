@@ -1,0 +1,26 @@
+mutation create_contact_us (
+  $first_name: String!,
+  $last_name: String!,
+  $email: String!,
+  $mobile_phone: String,
+  $message: String!,
+  $document: String
+) {
+  items: record_create(
+    form_name: "modules/website/contact_us"
+    record: {
+      table: "modules/website/contact_us"
+      properties: [
+       	{ name: "first_name", value: $first_name }
+        { name: "last_name", value: $last_name }
+        { name: "email", value: $email }
+        { name: "mobile_phone", value: $mobile_phone }
+        { name: "message", value: $message }
+        { name: "document", value: $document }
+      ]
+    }
+  ) {
+    id
+    created_at
+  }
+}

@@ -1,0 +1,57 @@
+{%- comment -%}
+`models` (Array) argument are list of models that has the dynamic content on the page
+Add/remove model names as needed base on your page content
+
+For development phase you might want to turn the dynamic cache
+You might want to disable or comment out 'dynamic_cache' during development and testing phase.
+as your code updates will not reflect on the site when you sync/deploy
+because the page will be cached base on the cache key
+{%- endcomment -%}
+
+{% comment %} GraphQL will pull the latest updated data / record {% endcomment %}
+{%- graphql record_last_updated = "modules/website/page_cache/check_records_update_date", 
+    models: models 
+    | fetch: 'items' | fetch: 'results' | first -%}
+
+{% comment %} GraphQL will pull the latest updated files / assets {% endcomment %}
+{%- graphql site_last_updated = "modules/website/page_cache/check_site_update_date" -%}
+
+
+{% comment %} Set an array for the update dates {% endcomment %}
+{%- assign date_array = ',' | split: "," -%}
+
+{% comment %} Add values on the array for the update dates {% endcomment %}
+{%- assign date_array = date_array | add_to_array: record_last_updated.updated_at -%}
+
+{% liquid
+    if site_last_updated.admin_liquid_partials.results.size > 0
+        assign this_result = site_last_updated.admin_liquid_partials.results | first
+        assign date_array = date_array | add_to_array: this_result.updated_at
+    endif
+
+    if site_last_updated.admin_liquid_layouts.results.size > 0
+        assign this_result = site_last_updated.admin_liquid_layouts.results | first
+        assign date_array = date_array | add_to_array: this_result.updated_at
+    endif
+
+    if site_last_updated.admin_pages.results.size > 0
+        assign this_result = site_last_updated.admin_pages.results | first
+        assign date_array = date_array | add_to_array: this_result.updated_at
+    endif
+
+    if site_last_updated.admin_assets.results.size > 0
+        assign this_result = site_last_updated.admin_assets.results | first
+        assign date_array = date_array | add_to_array: this_result.updated_at
+    endif
+
+    if site_last_updated.admin_forms.results.size > 0
+        assign this_result = site_last_updated.admin_forms.results | first
+        assign date_array = date_array | add_to_array: this_result.updated_at
+    endif
+%}
+
+{% comment %} Sort the array so the latest date would be used {% endcomment %}
+{%- assign date_array = date_array | sort -%}
+
+{% comment %} Prepend context.location.url to be added in key as it contains all of the params (which allows for paginated caching) {% endcomment %}
+{{ date_array.last | date: '%s' | prepend: context.location.url }}

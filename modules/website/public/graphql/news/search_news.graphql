@@ -1,0 +1,79 @@
+query search_news (
+  $id: ID,
+  $page: Int = 1,
+  $size: Int = 6,
+  $keyword: String = "Mobile",
+  $schema: String,
+  $status: String
+) {
+  items: models(
+    page: $page,
+    per_page: $size,
+    filter: {
+      id: {
+        value: $id
+      },
+      deleted_at: { 
+        exists: false
+      },
+			properties: [
+        {
+          name: "status"
+          value: $status
+        }
+      ],
+      model_schema_name: {
+        value: $schema
+      },
+      or: [
+        {
+          properties: [
+            { 
+              name: "title",
+              contains: $keyword
+            }
+          ]
+        },
+        {
+          properties: [
+            { 
+              name: "content",
+              contains: $keyword
+            }
+          ]
+        },
+        {
+          properties:[
+            {
+              name: "list_view_text",
+              contains: $keyword
+            }
+          ]
+        }
+      ]
+    }
+  ) {
+    total_entries
+    total_pages
+    current_page
+    has_next_page
+    has_previous_page
+    per_page
+    results {
+      id 
+      slug: property(name: "slug")
+      tag: property(name: "tag")
+      title: property(name: "title")
+      published_date: property(name: "published_date")
+      author: property(name: "author")
+      list_view_text: property(name: "list_view_text")
+
+      list_view_image: property_upload(name: "list_view_image") {
+        url
+        file_name
+        extension
+        versions
+      }   
+    }
+  }
+}

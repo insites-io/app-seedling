@@ -1,0 +1,19 @@
+mutation update_document_value (
+  $id: ID!,
+  $document:[String]
+) {
+  items: record_update (
+    id: $id
+    record: {
+      table: "modules/website/contact_us",
+      properties: [
+        { name: "document", value_array: $document }
+      ]
+    }
+  ) {
+    id
+    created_at
+    updated_at
+    properties
+  }
+}

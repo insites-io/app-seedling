@@ -1,0 +1,37 @@
+mutation create_testimonials(
+  $full_name: String,
+  $location: String,
+  $message: String,
+  $allow_display_on_website: String,
+  $is_shown_on_webstie: Boolean
+) {
+  items: model_create(
+    model: {
+      model_schema_name: "modules/website/testimonials",
+      properties: [
+        { 
+          name: "full_name",
+          value: $full_name 
+        },
+        { 
+          name: "location",
+          value: $location 
+        },
+        { 
+          name: "message",
+          value: $message 
+        },
+        { 
+          name: "allow_display_on_website",
+          value: $allow_display_on_website 
+        },
+        { 
+          name: "is_shown_on_webstie",
+          value_boolean: $is_shown_on_webstie 
+        }
+      ]
+    }
+  ) {
+    id
+  }
+}

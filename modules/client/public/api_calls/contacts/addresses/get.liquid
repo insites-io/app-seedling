@@ -1,0 +1,12 @@
+---
+name: get_contact_address
+to: 'https://{{context.location.host}}/core/api/v1/contacts/addresses/'
+format: http
+request_type: GET
+request_headers: >
+    {% include 'modules/client/api_headers' %}
+---
+{
+    "contact_uuid": "{{data.contact_uuid}}", //REQUIRED    
+    "search": "{{data.search}}" //Filter (address_label)
+}

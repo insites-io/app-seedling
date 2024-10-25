@@ -1,0 +1,45 @@
+---
+slug: api/stripe/delete-credit-card
+format: json
+method: post
+searchable: false
+searchable: false
+metadata: {
+  status: "published",
+  "open_graph:title": "Delete Credit Card",
+  "open_graph:description": "Delete Credit Card",
+  "meta_title": "Delete Credit Card",
+  "page_title": "Delete Credit Card",
+  "meta_description": "Delete Credit Card",
+  "canonical_url": "",
+  is_visible_to_search_engines: "false",
+  sitemap_priority: 0.0, ## primary order (DESC)
+  sitemap_order: 9999, ## secondary order (ASC)
+  sitemap_changefreq: "never"
+}
+
+authorization_policies:
+  - modules/client/is_user_logged_in
+---
+
+{%- assign payload = context.params.payload | parse_json -%}
+{%- assign status = 200 -%}
+
+{%- graphql response = 'modules/client/credit_cards/delete_credit_card',
+    id: payload.id-%}
+
+{%- comment -%}Status code 400: API or GraphQL error{%- endcomment -%}
+{%- assign result = '{}' | parse_json -%}
+{%- if response == blank %}
+  {%- assign status = 400 -%}
+  {%- assign result = result | add_hash_key: "message", response -%}
+{%- else -%}
+  {%- assign result = result | add_hash_key: "message", "Card delete Successfully" -%}
+{%- endif -%}
+
+{%- comment -%}
+  Return GraphQL reposponse & status code 200 or 400
+  {{ response }}
+{%- endcomment -%}
+{{ result }}
+{%- response_status status -%}

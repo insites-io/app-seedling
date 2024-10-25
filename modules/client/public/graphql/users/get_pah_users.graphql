@@ -1,0 +1,70 @@
+query get_pah_users(
+    $page: Int = 1, 
+    $size: Int = 1,
+    $company_uuid: String,
+    $search: String
+
+) {
+  items: users(
+    page: $page
+    per_page: $size
+    filter: {
+        deleted_at: { exists:false }
+        or: [
+            { email: { contains: $search } }
+            { first_name: { contains: $search } }
+            { last_name: { contains: $search } }
+            { name: { contains: $search } }
+        ]
+        profiles: {
+            name: "modules/insites_core/crm_contact"
+            properties:[
+                { name: "company_uuid", value: $company_uuid }
+                { name: "is_archived", value_boolean: false }
+            ]
+        }
+        related_records: {
+            join: {foreign_property: "contact_uuid", join_on_property: "external_id"}, 
+            filter: {
+                properties: {name: "primary_account_holder", value_boolean: true}, 
+                table: {value: "modules/ins_core/crm_contact_custom_field"}
+            }
+        }
+    }
+    sort:{
+        first_name:{ order:ASC }
+    }
+  ){
+    total_entries
+    results{
+        id
+        email
+        first_name
+        last_name
+        external_id      
+        deleted_at
+        created_at
+
+        #Profiles
+        profiles(profile_type: "modules/insites_core/crm_contact"){
+            id
+            profile_type
+            company_uuid:property(name:"company_uuid")
+            is_archived:property_boolean(name:"is_archived")
+        }
+
+        #Custom Fields
+        custom_fields: related_record(
+            table: "modules/ins_core/crm_contact_custom_field"
+            foreign_property: "contact_uuid"
+            join_on_property: "external_id"
+        ) {
+            id
+            contact_uuid:property(name: "contact_uuid")
+            account_status:property(name: "account_status")
+            primary_account_holder:property_boolean(name: "primary_account_holder")
+            permission_level:property(name: "permission_level")
+        }
+    }
+  }
+} 

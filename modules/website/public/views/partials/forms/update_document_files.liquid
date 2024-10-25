@@ -1,0 +1,6 @@
+{%- assign id = id -%}
+{%- assign document = document | replace: '["', "" -%}
+{%- assign document = document | replace: '"]', "" -%}
+{%- assign document = document | split: "," -%}
+
+{%- graphql result = 'modules/website/forms/update_document_value', id: id, document: document -%}

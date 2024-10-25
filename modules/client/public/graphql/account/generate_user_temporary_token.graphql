@@ -1,0 +1,15 @@
+query generate_user_temporary_token($email: String) {
+  items: users(
+    per_page: 1
+    filter: {
+      email: {
+        value: $email
+      }
+    }
+  ) {
+    results{
+      id
+      temporary_token(valid_for: 24)
+    }
+  }
+}

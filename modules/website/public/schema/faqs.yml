@@ -1,0 +1,123 @@
+name: modules/website/faqs
+metadata:
+  label: "Faqs"
+  groups: [{"id":"0aba0268-a2bf-40c3-962e-4ada9a8e0fd5","name":"FAQ Content","weight":0}]
+  is_archived: false
+properties:
+- name: answer
+  type: string
+  metadata:
+    label: "Answer"
+    weight: 3
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "multi_line"
+    is_required: true
+- name: category
+  type: string
+  metadata:
+    label: "category"
+    weight: 0
+    options: ["FAQ Topic 1","FAQ Topic 2","FAQ Topic 3","FAQ Topic 4"]
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "select"
+    is_required: true
+    is_sortable: true
+    is_searchable: true
+    is_shown_in_table: true
+- name: question
+  type: string
+  metadata:
+    label: "Question"
+    weight: 1
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "input"
+    is_required: true
+    is_sortable: true
+    is_searchable: true
+    is_shown_in_table: true
+- name: slug
+  type: string
+  metadata:
+    label: "Slug"
+    weight: 2
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "input"
+    is_required: true
+    is_shown_in_table: false
+- name: sort_order
+  type: integer
+  metadata:
+    label: "Sort Order"
+    weight: 4
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "number"
+    is_required: false
+    is_shown_in_table: false
+- name: sub_topic_details_1
+  type: string
+  metadata:
+    label: "Sub Topic Details 1"
+    weight: 6
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "multi_line"
+    is_required: false
+- name: sub_topic_details_2
+  type: string
+  metadata:
+    label: "Sub Topic Details 2"
+    weight: 8
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "multi_line"
+    is_required: false
+- name: sub_topic_details_3
+  type: string
+  metadata:
+    label: "Sub Topic Details 3"
+    weight: 10
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "multi_line"
+    is_required: false
+- name: sub_topic_details_4
+  type: string
+  metadata:
+    label: "Sub Topic Details 4"
+    weight: 12
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "multi_line"
+    is_required: false
+- name: sub_topic_title_1
+  type: string
+  metadata:
+    label: "Sub Topic Title 1"
+    weight: 5
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "input"
+    is_required: false
+    is_shown_in_table: false
+- name: sub_topic_title_2
+  type: string
+  metadata:
+    label: "Sub Topic Title 2"
+    weight: 7
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "input"
+    is_required: false
+    is_shown_in_table: false
+- name: sub_topic_title_3
+  type: string
+  metadata:
+    label: "Sub Topic Title 3"
+    weight: 9
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "input"
+    is_required: false
+    is_shown_in_table: false
+- name: sub_topic_title_4
+  type: string
+  metadata:
+    label: "Sub Topic Title 4"
+    weight: 11
+    group_id: "0aba0268-a2bf-40c3-962e-4ada9a8e0fd5"
+    ui_element: "input"
+    is_required: false
+    is_shown_in_table: false
