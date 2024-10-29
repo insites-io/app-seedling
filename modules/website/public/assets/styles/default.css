@@ -39,7 +39,7 @@
     --color-ui-06: #575757;
     --color-ui-07: #436CF2;
     --color-ui-08: #000000;
-    --color-ui-bg: #0B1120;
+    --color-ui-bg: #0F172A;
     /* Gradiant Background */
     --color-gradiant1: linear-gradient(90deg, #1E4AA2 0%, #1B78CC 100%);
     --color-gradiant2: linear-gradient(90deg, #8C1EE3 0%, #C71EE3 100%);
@@ -129,7 +129,7 @@ footer {
 
 a,
 .body-link {
-    font-family: var(--font-family-03);
+    font-family: var(--font-family-02);
     color: var(--font-color-link);
     font-weight: 400;
     cursor: pointer;
@@ -724,7 +724,7 @@ ins-button button[type=reset].blue.solid,
 ins-button button[type=reset].primary.solid,
 ins-button button[type=submit].blue.solid,
 ins-button button[type=submit].primary.solid {
-    background-color: var(--color-sub2);
+    background-color: var(--color-main);
     color: var(--font-color-inv);
 }
 
@@ -736,7 +736,7 @@ ins-button button[type=button].blue.solid:not([disabled]):hover,
 ins-button button[type=button].primary.solid:not([disabled]):hover,
 ins-button button.blue.solid:not([disabled]):hover,
 ins-button button.primary.solid:not([disabled]):hover {
-    background-color: var(--color-sub2-hover);
+    background-color: var(--color-main-hover);
     color: var(--font-color-inv);
 }
 
@@ -1115,7 +1115,7 @@ ins-steps.hydrated[clickable] ins-step:not([disabled]) .ins-step_details:hover .
 }
 
 .font-color-body {
-    color: var(--font-color-body);
+    color: var(--font-color-inv);
 }
 
 .font-color-link {
@@ -2719,8 +2719,7 @@ Notyf
 }
 
 .system-page .header {
-    border-bottom: 1px solid var(--color-ui-03);
-    background-color: var(--color-ui-01);
+    background-color: var(--color-ui-bg);
 }
 
 .system-page .system-content {
@@ -2746,7 +2745,7 @@ Notyf
     font-style: normal;
     font-weight: bold;
     font-size: 2.5rem;
-    color: var(--font-color-head);
+    color: var(--font-color-inv);
     line-height: 48px;
 }
 
@@ -2766,3 +2765,16 @@ Notyf
 .icon-alert-triangle {
     font-size: 64px!important;
 }
+
+#headerRegister button{
+    border: 1px solid var(--color-sub2);
+    background-color:   var(--color-sub2)!important;
+}
+
+
+#headerRegister button:hover{
+    border: 1px solid var(--color-sub2-hover);
+    background-color:   var(--color-sub2-hover)!important;
+}
+
+
