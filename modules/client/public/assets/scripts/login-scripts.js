@@ -105,18 +105,7 @@ let LoginScript = (function () {
                     //Validation for Sign Up Form
                     this.validateTelField();
                     if(await this.validationForm(groupElem)){
-
-                        if(formId == 'submit-personal-details'){
-                            let values = await mobileFields.inputTel.getValues();
-                            mobileFields.country_code.value = values.country_code;
-                            mobileFields.phone_number.value = values.phone_number;
-                        }else if(formId == 'submit-company-details'){
-                            let values = await companyMobileFields.inputTel.getValues();
-                            companyMobileFields.country_code.value = values.country_code;
-                            companyMobileFields.phone_number.value = values.phone_number;
-                        }
-                        
-                        
+   
                         switch(emailInputInfo.status){
                             case 'clean':{ //email is clean
                                 //formElem.submit();

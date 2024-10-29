@@ -27,12 +27,13 @@ Default 'success / thank you' page
 Design & content changes per project as needed
 {%- endcomment -%}
 
-{% assign heading = value | default: "Success Heading" %}
-{% assign message = value | default: "You can now sign in to the client portal"%}
-{% assign button_label = value | default: "Button Label Here" %}
+{% assign heading = value | default: "Account Created" %}
+{% assign message = value | default: "You can now sign in to the seedling app. "%}
+{% assign button_label = value | default: "VIew Dashboard" %}
 {% assign redirect_link = value | default: "/" %}
 
 <div class="thank-you">
+    <div class="spacer section"></div>
     <div class="spacer xxxx-large"></div>
         <div class="grid-x grid-padding-x text-center">
             <div class="large-12 medium-12 small-12 cell">

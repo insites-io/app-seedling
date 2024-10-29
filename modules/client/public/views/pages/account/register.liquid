@@ -12,7 +12,7 @@ metadata: {
     "open_graph:description": "Register",
     "open_graph:site_name": "{{ context.exports.global.company_name | strip }}",
     "meta_title": "Register",
-    "page_title": "Register | Insites",
+    "page_title": "Register | Seedling",
     "meta_description": "Register",
     "canonical_url": "",
     "is_visible_to_search_engines": false,
@@ -29,12 +29,13 @@ metadata: {
     
 {%- endif -%} 
 
-<div class="sign-up">
-    <h1 class="text-center">Registration</h1>
-    <div class="spacer xxx-large"></div>
-    {%- include 'modules/client/account/registration_steps' -%}
-    <div class="spacer x-large"></div>    
+<div class="sign-up grid-x grid-padding-x">
+    <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">  
+        <h1 class="heading-1 text-center">Create Account</h1>
+        <div class="spacer x-large"></div>
     {%- include_form 'modules/client/register' -%}
+    
+    </div>
 </div>
 
 
@@ -57,16 +58,9 @@ metadata: {
     const registerForm = document.getElementById('register-form');
     const cancelButton = document.getElementById('cancel-button');
 
-    const backToStep1 = document.getElementById("back-to-step-1");
-    const backToStep2 = document.getElementById("back-to-step-2");
-
     const step1 = document.getElementById("submit-personal-details");
-    const step2 = document.getElementById("submit-company-details");
-    const step3 = document.getElementById("submit-confirmation");
-
-    //const stepper1 = document.getElementById("stepper-personal-details");
-    //const stepper2 = document.getElementById("stepper-company-details");
     
+ 
     const step1Container = document.getElementById('personal-details-container');
     const step2Container = document.getElementById('company-details-container');
     const step3Container = document.getElementById('confirmation-container');
@@ -104,84 +98,15 @@ if(registerForm){
 
     //Stepper
     if(step1) {
-        step1.addEventListener('insClick', async function(event) {
-            steps = await registerStepper.getAllSteps();
-            firstStep = steps[0];
-            secondStep = steps[1];
-            
+        step1.addEventListener('insClick', async function(event) {            
             const isValid = await LoginScript.methods.validateForm(event, step1Container); 
             if(isValid){
-                step1Container.classList.add('hide');
-                firstStep.hasError = false;
-                firstStep.removeAttribute("has-error");
-                registerStepper.next();
-                step2Container.classList.remove('hide');
-            } else {
-                firstStep.hasError = true;
-                firstStep.setAttribute("has-error", true);
-            }
-        });
-    }
-
-    if(step2) {
-        step2.addEventListener('insClick', async function(event) {
-            steps = await registerStepper.getAllSteps();
-            firstStep = steps[0];
-            secondStep = steps[1];
-            
-            const isValid = await LoginScript.methods.validateForm(event, step2Container); 
-            if(isValid){
-                step2Container.classList.add('hide');
-                secondStep.hasError = false;
-                secondStep.removeAttribute("has-error");
-                registerStepper.next();
-                step3Container.classList.remove('hide');
-            } else {
-                secondStep.hasError = true;
-                secondStep.setAttribute("has-error", true);
-            }
-        });
-    }
-
-    if(step3) {
-        step3.addEventListener('insClick', async function(event) {
-            steps = await registerStepper.getAllSteps();
-            firstStep = steps[0];
-            secondStep = steps[1];
-            thirdStep = steps[2];
-            
-            const isValid = await LoginScript.methods.validateForm(event, step3Container); 
-            let checkBox = document.getElementById('agreement')
-            if(checkBox.checked){
-                step3Container.classList.add('hide');
-                thirdStep.hasError = false;
-                thirdStep.removeAttribute("has-error");
-                registerStepper.next();
-                step4Container.classList.remove('hide');
                 registerForm.submit();
-            }else {
-                thirdStep.hasError = true;
-                thirdStep.setAttribute("has-error", true);
+            } else {
+            
             }
-
         });
     }
 
-
-    if(backToStep1) {
-        backToStep1.addEventListener('insClick', async function(event) {
-            registerStepper.prev();
-            step1Container.classList.remove('hide');
-            step2Container.classList.add('hide');
-        });
-    }
-
-    if(backToStep2) {
-        backToStep2.addEventListener('insClick', async function(event) {
-            registerStepper.prev();
-            step1Container.classList.add('hide');
-            step2Container.classList.remove('hide');
-            step3Container.classList.add('hide');
-        });
-    }    
+    
 </script>

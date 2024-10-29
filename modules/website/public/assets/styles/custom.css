@@ -2,7 +2,7 @@
     /* Brand colors */
     --color-main: #436CF2;
     --color-sub1: #000000;
-    --color-sub2: #E3361E;
+    --color-sub2: #FC2976;
     /* Buttons & Links */
     --color-main-hover: #3159DB;
     --color-sub1-hover: #373737;
@@ -50,7 +50,7 @@
     /* Font family */
     --font-family-01: 'Inter', sans-serif;
     /* usually on heading */
-    --font-family-02: 'Inter', sans-serif;
+    --font-family-02: 'Work Sans', sans-serif;
     /* usually on sub-heading */
     --font-family-03: 'Cabin', sans-serif;
     --font-family-04: 'Roboto', condensed;
@@ -61,6 +61,9 @@
     --shadow-level-3: 0px 12px 12px rgba(0, 0, 0, 0.05), 0px 2px 5px rgba(0, 0, 0, 0.1);
     --shadow-level-4: 0px 24px 38px rgba(0, 0, 0, 0.05), 0px 11px 15px rgba(0, 0, 0, 0.1);
 }
+
+/*********************************************** [Homepage] *************************************************/
+
 
 body {
     background-color: var(--color-ui-bg);
@@ -128,7 +131,7 @@ body {
 .home-card-list-container p,
 .home-card-list-container a {
     color: var(--font-color-inv);
-    font-family: "Work Sans";
+    font-family: var(--font-family-02);
 }
 
 .home-card-list-container h3 {
@@ -186,9 +189,64 @@ body {
 }
 
 
+/*********************************************** [Sign In/Register/Forgot password/ Forms] *************************************************/
 
+.seedling-form-container {
+    background: #0B1120;
+    padding: 40px !important;
+    display: block;
+    margin: 0 auto;
+}
 
+.seedling-form-container h1 {
+    color: var(--font-color-inv);
+}
 
+.seedling-form-container ins-input .ins-input-wrap .input-wrap input {
+    background: rgba(0, 0, 0, 0.60);
+    border-color: rgba(0, 0, 0, 0.60) !important
+}
+
+.seedling-form-container ins-input .ins-input-wrap .input-wrap input::placeholder { 
+    font-family: var(--font-family-02);
+    font-size: 14px;
+    color: var(--font-color-inv);
+}
+
+#register-btn button div span{
+    color: var(--font-color-inv);
+}
+
+#register-btn button:hover {
+    background-color: rgba(255, 255, 255, .2);
+    color: var(--font-color-inv)
+}
+
+.thank-you h1 {
+    color: var(--font-color-inv);
+}
+
+.thank-you p {
+    color: #B9C5D6 !important;
+    font-family: "Work Sans";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+}
+
+.seedling-form-container-link {
+    color: var(--font-color-inv);
+    font-family: "Work Sans";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px; 
+}
+
+.seedling-form-container-link a {
+    color:  #FC2976 !important;
+}
 
 
 /*********************************************** [Foundation Style Customization / Overwrite] *************************************************/
@@ -1318,7 +1376,7 @@ ins-card .ins-card-wrap {
 }
 
 .ins-form-field-wrap .ins-form-field {
-    color: var(--color-font-body) !important;
+    color: var(--font-color-inv);
 }
 
 .footer-p {
@@ -1522,9 +1580,6 @@ ins-drawer#mobile-menu .ins-accordion-item_content .ins-accordion-link {
     background-color: var(--color-ui-01) !important;
 }
 
-.ins-form-field {
-    background: var(--color-ui-01) !important;
-}
 
 #services_static_content .ins-accordion-item.open>.ins-accordion-item_header>.inner-head,
 #services_static_content .ins-accordion.menu .ins-accordion-item.open>.ins-accordion-item_header>.inner-head:hover,
@@ -1741,7 +1796,7 @@ ins-checkbox .ins-radio-checkbox {
     font-weight: 700 !important;
     font-size: 12px !important;
     line-height: 16px !important;
-    color: var(--font-color-head) !important;
+    color: var(--font-color-inv) !important;
     margin-bottom: 8px;
 }
 
