@@ -1,0 +1,76 @@
+name: documentations
+metadata:
+  label: "Documentations"
+  groups: [{"id":"fa93191e-5aa3-47ae-8b3c-8218796e8e8b","name":"Documentation Information","weight":0}]
+  is_archived: false
+properties:
+- name: description
+  type: string
+  metadata:
+    label: "Description"
+    weight: 3
+    group_id: "fa93191e-5aa3-47ae-8b3c-8218796e8e8b"
+    ui_element: "input"
+    is_required: true
+    is_shown_in_table: false
+- name: enabled
+  type: boolean
+  metadata:
+    label: "Enabled"
+    weight: 0
+    group_id: "fa93191e-5aa3-47ae-8b3c-8218796e8e8b"
+    ui_element: "toggle"
+    is_sortable: false
+    is_shown_in_table: false
+- name: image
+  type: upload
+  metadata:
+    label: "Image"
+    weight: 2
+    group_id: "fa93191e-5aa3-47ae-8b3c-8218796e8e8b"
+    ui_element: "media_image"
+    is_required: true
+    max_file_size: 10
+  options:
+    acl: public
+    cache_control: ""
+    content_disposition: inline
+- name: link
+  type: string
+  metadata:
+    label: "Link"
+    weight: 5
+    group_id: "fa93191e-5aa3-47ae-8b3c-8218796e8e8b"
+    ui_element: "input"
+    is_required: true
+    is_shown_in_table: false
+- name: link_label
+  type: string
+  metadata:
+    label: "Link Label"
+    weight: 4
+    group_id: "fa93191e-5aa3-47ae-8b3c-8218796e8e8b"
+    ui_element: "input"
+    is_required: false
+    is_shown_in_table: false
+- name: sort_order
+  type: integer
+  metadata:
+    label: "Sort Order"
+    weight: 6
+    group_id: "fa93191e-5aa3-47ae-8b3c-8218796e8e8b"
+    ui_element: "number"
+    is_required: false
+    is_sortable: true
+    is_shown_in_table: true
+- name: title
+  type: string
+  metadata:
+    label: "Title"
+    weight: 1
+    group_id: "fa93191e-5aa3-47ae-8b3c-8218796e8e8b"
+    ui_element: "input"
+    is_required: true
+    is_sortable: true
+    is_searchable: true
+    is_shown_in_table: true

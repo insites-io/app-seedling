@@ -1,0 +1,27 @@
+mutation disable_two_fa (
+    $id: ID!,
+) {
+    items: user_update (
+    id: $id,
+    user: {
+        profiles: [
+            {
+                name: "modules/dashboard/client",
+                values: {
+                    deleted_at: null,
+                    properties: [
+                        { name: "otp_configured", value_boolean: false }
+                    ]
+                }
+            }
+        ]
+    }
+    ) {
+        id
+        name
+        email
+        user_details: profiles(profile_type: "modules/dashboard/client") {
+            otp_configured: property(name: "otp_configured")
+        }
+    }
+}

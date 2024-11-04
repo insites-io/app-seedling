@@ -249,6 +249,226 @@ body {
 }
 
 
+/*********************************************** [Dashboard] *************************************************/
+.dashboard-card-list-container {
+    padding: 24px;
+    background:  #E3EAF7;
+    border-radius: 8px;
+    gap: 24px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.dashboard-card-list-container:hover {
+    background:  #fff;
+}
+
+.dashboard-card-list-container h4 {
+    color: var(--font-color-head);
+    margin-bottom: 8px;
+}
+
+.dashboard-card-list-container p {
+    color:  #323232;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; 
+}
+
+.dashboard-card-link a,
+.dashboard-card-link i{
+    color:  #323232;
+    font-family: Inter;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 18px; /* 150% */
+    letter-spacing: 0.5px;
+}
+
+.dashboard-card-link:hover  a,
+.dashboard-card-link:hover  i{
+    color: #FC2976 !important;
+}
+
+.nav-link-dashboard {
+    color: var(--font-color-inv) !important;
+    font-family: Inter;
+    font-size: 16px !important;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; 
+}
+
+.nav-link-dashboard:hover {
+    color: #436CF2 !important;
+}
+
+/*********************************************** [Profile] *************************************************/
+
+.profile-form-left {
+    padding-right: 9;
+    border-right: 1px solid #436CF220;
+}
+
+.profile-form-right { 
+    padding-left: 9%;
+}
+
+.profile-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.seedling-form-container-profile {
+    padding: 32px !important;
+}
+@media screen and (max-width: 639px) { 
+    .profile-form-right { 
+        padding-left: 0;
+        margin-top: 32px;
+    }
+}
+
+/*********************************************** [2FA] *************************************************/
+
+
+.qr-code svg{
+    filter: invert(1);
+}
+
+.otp_input_fields {
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+}
+
+.otp-input-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.otp_input,
+.otp_input:disabled {
+    height: 40px;
+    width: 40px;
+    outline: none;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 4px;
+    background:  rgba(0, 0, 0, 0.60);
+    border: 1px solid  rgba(0, 0, 0, 0.60);
+    outline: none;
+    -moz-appearance: textfield;
+    margin: 0;
+    color: var(--font-color-inv);
+}
+
+.otp_input:focus {
+    background:  rgba(0, 0, 0, 0.60);
+    color: var(--font-color-inv);
+}
+
+.setup-2fa-container {
+    background: #0B1120;
+    padding: 40px;
+    border-radius: var(----border-radius, 4px);
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.04)
+}
+
+.verification {
+    width: 40%;
+    display: block;
+    margin: 0 auto;
+}
+
+.fa-btn button{
+    margin-top: 24px;
+}
+
+.manual-code-content {
+    display: flex;
+    justify-content: center;
+    cursor: pointer
+}
+
+.manual-code-content  pre,
+.manual-code-content  .copy-btn {
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.60);
+}
+
+
+
+.manual-code-content .copy-btn {
+    position: relative;
+}
+
+.manual-code-content .copy-btn::before {
+    content: "Copied";
+    position: absolute;
+    width: min-content;
+    top: -30px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--ins-color-primary);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: none;
+}
+
+.manual-code-content .copy-btn::after {
+    content: "";
+    position: absolute;
+    top: -18px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    background: var(--ins-color-primary);
+    transform: rotate(45deg);
+    display: none;
+}
+
+.manual-code-content .copy-btn.active::before,
+.manual-code-content .copy-btn.active::after {
+    display: block;
+}
+
+.manual-code-content .copy-btn span {
+    color: var(--ins-color-primary);
+}
+
+
+.text-left {
+    text-align: left !important;
+}
+
+.manual-code-content-left {
+    justify-content: left !important;
+}
+
+.qr-code-left {
+    display: flex;
+}
+
+#turn-off-2fa button {
+    border: 1px solid #DF1F1F;
+    color: #DF1F1F;
+    border-radius: 4px;
+}
+
+
+#turn-off-2fa button:hover {
+    background: #DF1F1F20;
+}
+
+
 /*********************************************** [Foundation Style Customization / Overwrite] *************************************************/
 
 .blocks-sc-3col-02.wrapper {
@@ -1028,6 +1248,23 @@ ins-table .ibt-table-wrap .pagination-wrap .ibt-table-wrap__page {
     color: #000000;
 }
 
+.profileNav .ins-dropdown_menu-card a:hover {
+    color: #436CF2;
+}
+
+.profileNav .ins-dropdown .ins-dropdown_label span {
+    color: var(--font-color-inv);
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; 
+}
+
+.profileNav .ins-dropdown .ins-dropdown_label span:hover {
+    color: #436CF2;
+}
+
 .signOutCustom .ins-button div .btn__label {
     font-size: 14px!important;
     color: #000000;
@@ -1105,7 +1342,7 @@ ins-button .ins-button div .btn__label {
 }
 
 .header-top-bar a {
-    padding-right: 16px;
+    padding-right: 24px;
 }
 
 .colorWhite {
@@ -1986,12 +2223,10 @@ ul {
     font-size: 16px;
 }
 
-.client-portal {
-    background: linear-gradient( to right, var(--color-ui-02) 0%, var(--color-ui-02) 50%, var(--color-ui-01) 50%, var(--color-ui-01) 100%);
-}
 
 .wrapper .main-content {
     padding: 0px 24px !important;
+    background-color: var(--color-ui-bg);
 }
 
 .main-wrap {

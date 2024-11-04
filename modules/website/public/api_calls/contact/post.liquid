@@ -8,7 +8,7 @@ request_type: POST
 callback: >
   {% assign response_hash = response.body | parse_json %}
 request_headers: >
-    {% include 'modules/client/api_headers' %}
+    {% include 'modules/dashboard/api_headers' %}
 ---
 
 {

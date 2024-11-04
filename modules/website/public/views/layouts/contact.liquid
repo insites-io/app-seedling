@@ -80,7 +80,7 @@ Contact Us layout
     %}
 
     {% comment %} Google map key {% endcomment %}
-    {% graphql data = 'modules/website/trigger_api_call', name: 'modules/client/get_google_maps_api_key' %}
+    {% graphql data = 'modules/website/trigger_api_call', name: 'modules/dashboard/get_google_maps_api_key' %}
     {% assign map_key = data.items.response.body | parse_json | dig: 'items', 'results' | first | dig: 'key' %}
 
     <div class="main-wrap">

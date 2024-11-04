@@ -1,0 +1,38 @@
+query get_documentations(
+    $page: Int = 1, 
+    $size: Int = 10,
+) {
+    items: records(
+        page: $page
+        per_page: $size
+        filter: {
+            table: { value: "modules/dashboard/documentations" }
+            deleted_at: { exists: false }
+            properties: [
+                { name: "enabled", value_boolean: true }
+            ]
+        }
+        sort: [
+             { properties: { name: "sort_order", order: DESC } }
+        ]
+    ) {
+        total_entries
+        total_pages
+        per_page
+        current_page
+        has_next_page
+        results {
+            id
+            updated_at
+            created_at
+            properties
+            ## Images
+            image: property_upload(name: "image") {
+                url
+                file_name
+                extension
+                versions
+            }
+        }
+    }
+}

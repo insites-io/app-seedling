@@ -1,0 +1,36 @@
+query get_user_by_email (
+  $page: Int = 1, 
+  $size: Int = 1, 
+  $email: String!
+) {
+  items: users(
+    page: $page
+    per_page: $size
+    filter: {
+      deleted_at: { exists: false }
+      email: { value: $email }
+    }
+    sort: {
+      updated_at: { order: DESC }
+    }
+  ) {
+    total_entries
+    total_pages
+    results {
+      id
+      uuid: external_id
+      created_at
+      updated_at
+      email
+      first_name
+      last_name
+      
+      client: profiles(
+        profile_type: "modules/dashboard/client"
+      ) {
+        is_enabled: property_boolean(name: "is_enabled")
+        is_activated: property_boolean(name: "is_activated")
+      }
+    }
+  }
+}

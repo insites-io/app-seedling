@@ -1,0 +1,11 @@
+{
+    current_user {
+        id
+        name
+        email
+        client: profiles(profile_type: "modules/dashboard/client") {
+            otp_configured: property_boolean(name: "otp_configured")
+            is_currently_logged_in: property_boolean(name: "is_currently_logged_in")
+        }
+    }
+}

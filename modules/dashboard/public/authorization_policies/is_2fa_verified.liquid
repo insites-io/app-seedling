@@ -1,0 +1,14 @@
+---
+name: is_2fa_verified
+redirect_to: 401
+---
+
+{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
+{% assign user = check_2fa_setup.current_user.client | first %}
+{% assign is_currently_logged_in = user.is_currently_logged_in %}
+
+{% if context.session.two_factor_verified == "true" %}
+  true
+{% elsif is_currently_logged_in == true %}
+  true
+{% endif %}

@@ -1,0 +1,27 @@
+query get_current_user {
+  current_user {
+    id
+    first_name
+    last_name
+    name
+    email
+    external_id
+
+    crm_contact: profiles(
+      profile_type: "modules/insites_core/crm_contact"
+    ) {
+      id
+      company_uuid: property(name: "company_uuid")
+      mobile_phone_number: property(name: "mobile_phone_number")
+      mobile_phone_country_code: property(name: "mobile_phone_country_code")
+    }
+    
+    client: profiles(
+      profile_type: "modules/dashboard/client"
+    ) {
+      is_enabled: property_boolean(name: "is_enabled")
+      is_activated: property_boolean(name: "is_activated")
+      company_uuid: property(name: "company_uuid")
+    }
+  }
+}
