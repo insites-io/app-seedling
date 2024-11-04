@@ -64,7 +64,7 @@
                   <ins-accordion menu>
                       <ins-accordion-item heading="{{ context.current_user.first_name }} {{ context.current_user.last_name }}" link="#" open-icon="icon-plus" close-icon="icon-minus"
                         class="has-subitems">
-                        {%- graphql user_with_token = 'modules/client/account/get_user_with_password_token', email: context.current_user.email | dig: 'users','results' | first -%}
+                        {%- graphql user_with_token = 'modules/dashboard/account/get_user_with_password_token', email: context.current_user.email | dig: 'users','results' | first -%}
                         {%- assign user_data_default = user_with_token.default | first -%}
 
                               <ins-accordion-link label="My Details" link="/my-details">
@@ -76,7 +76,7 @@
                               </ins-accordion-link>
 
                               <div class="sign-out-wrapper">
-                                {% include_form 'modules/client/sign_out' %}
+                                {% include_form 'modules/dashboard/sign_out' %}
                               </div>
                         
           

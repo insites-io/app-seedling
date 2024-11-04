@@ -1,0 +1,11 @@
+---
+name: is_user_logged_in
+redirect_to: 401
+---
+{%  liquid
+    graphql data = 'modules/dashboard/account/get_current_user'
+
+    if data.current_user.client != blank
+        echo true
+    endif
+%}

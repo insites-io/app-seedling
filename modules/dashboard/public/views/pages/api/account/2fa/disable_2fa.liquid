@@ -1,0 +1,11 @@
+---
+slug: api/disable-2fa
+layout: application
+format: json
+method: post
+searchable: false
+--- 
+
+{% liquid
+    graphql configure_user_otp = 'modules/dashboard/account/2fa/configure_user_otp', id: context.current_user.id, otp_configured: false, is_currently_logged_in: true
+%}

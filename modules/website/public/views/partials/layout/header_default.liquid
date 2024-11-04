@@ -35,31 +35,34 @@
               </a>
           {% else %}        
           {% if context.current_user != nil %}
-            {%- graphql user_with_token = 'modules/client/account/get_user_with_password_token', email: context.current_user.email | dig: 'users','results' | first -%}
+            {%- graphql user_with_token = 'modules/dashboard/account/get_user_with_password_token', email: context.current_user.email | dig: 'users','results' | first -%}
             {%- assign user_data_default = user_with_token.default | first -%}
 
           {% endif %}
-              <a class="color-main color-font-head" href=""> 
+          {% if context.params.slug != 'setup-2fa' and context.params.slug != 'verify-2fa'  %}
+        
+       
+              <a class="nav-link-dashboard" href="/dashboard">           
+                Dashboard
+              </a>
+
+              <a  href=""> 
                 <ins-dropdown 
                 label="{{ context.current_user.first_name }} {{ context.current_user.last_name }}"
                 class="profileNav">
                     <ins-dropdown-item
-                      link="/my-details"
-                      label="My Details">
+                      link="/profile"
+                      label="Profile">
                     </ins-dropdown-item>
-                
-                    <ins-dropdown-item
-                      link="/generate-password-token?email={{ user_with_token.email | url_encode }}"
-                      label="Change Password">
-                    </ins-dropdown-item>
-      
+                      
                     <ins-dropdown-item
                       link=""
                       label="">
-                      {% include_form 'modules/client/sign_out' %}
+                      {% include_form 'modules/dashboard/sign_out' %}
                     </ins-dropdown-item>
                 </ins-dropdown>
               </a>
+            {% endif %}
             </div>
           {% endif %}
 

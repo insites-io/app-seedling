@@ -1,0 +1,23 @@
+mutation set_company_uuid(
+  $id: ID!
+  $company_uuid: String!
+) {
+  user_update(
+    id: $id
+    user: {
+      profiles: [
+        {
+          name: "modules/dashboard/client",
+          values: {
+            properties: [
+              { name: "company_uuid", value: $company_uuid }
+            ]
+          }
+        }
+      ]
+    }
+    form_name: "modules/dashboard/set_company_uuid"
+  ) {
+    id
+  }
+}

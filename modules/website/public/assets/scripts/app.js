@@ -68,7 +68,7 @@ let App = (function () {
                 let windowWidth = window.innerWidth;
                 let fillerContainer = document.getElementById("head-filler");
                 let fillerHeight = 0;
-                //clientHeight includes the padding only
+                //dashboardHeight includes the padding only
                 if (windowWidth <= mobileWindowWidthLimit) {
                     fillerHeight = fillerContainer.getElementsByClassName("mobile")[0].clientHeight;
                 } else {
@@ -214,8 +214,8 @@ let App = (function () {
                                     btnLabel.indexOf("Remove") >= 0
                                     ? "negative" : "",
                         },
-                        confirmButtonText: `<i class="${iconConfirm}"></i>  ${btnLabel}`,
-                        cancelButtonText: '<i class="icon-close-1"></i> Cancel'
+                        confirmButtonText: `${btnLabel}`,
+                        cancelButtonText: 'Cancel'
                     }).then(result => {
                         result.value
                             ? resolve(true)

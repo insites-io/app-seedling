@@ -1,5 +1,0 @@
-{% graphql data = 'modules/website/trigger_api_call', name: 'modules/client/get_google_maps_api_key' %}
-{% assign key = data.items.response.body | parse_json | dig: 'items','results' | first | dig: 'key' %}
-
-<!-- Google Maps API -->
-<script defer src="//maps.googleapis.com/maps/api/js?key={{key}}&libraries=places&v=3.exp"></script>

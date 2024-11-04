@@ -1,0 +1,30 @@
+mutation configure_user_otp (
+    $id: ID!,
+    $otp_configured: Boolean,
+    $is_currently_logged_in: Boolean
+) {
+    items: user_update (
+    id: $id,
+    user: {
+        profiles: [
+            {
+                name: "modules/dashboard/client",
+                values: {
+                    deleted_at: null,
+                    properties: [
+                        { name: "otp_configured", value_boolean: $otp_configured }
+                        { name: "is_currently_logged_in", value_boolean: $is_currently_logged_in}
+                    ]
+                }
+            }
+        ]
+    }
+    ) {
+        id
+        name
+        email
+        user_details: profiles(profile_type: "modules/dashboard/client") {
+            otp_configured: property(name: "otp_configured")
+        }
+    }
+}

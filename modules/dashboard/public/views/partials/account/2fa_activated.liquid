@@ -1,0 +1,41 @@
+<div class="seedling-form-container seedling-form-container-profile">
+    <h4>Your account is protected with two-factor authentication</h4>
+    <div class="spacer small"></div>
+    <p>Turning off this two-factor authentication will make your account less secure, as it will no longer require a second step to verify your identity.</p>
+    <div class="spacer medium"></div>
+    <ins-button id="turn-off-2fa" label="Turn Off Two-Factor Authentication"  outlined  type="submit" ></ins-button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+
+{%- if context.environment == "staging" -%}
+    <script src="{{ 'modules/dashboard/services/apiServices.js' | asset_url }}"></script>
+{%- else -%}
+    <script src="{{ 'modules/dashboard/services/apiServices.min.js' | asset_url }}"></script>
+{%- endif -%}
+
+<script>
+    let twoFactorButton = document.getElementById('turn-off-2fa')
+
+    twoFactorButton.addEventListener('insClick', async ()=> {
+        let confirm = await Swal.fire({
+                    icon: 'warning',
+                    title: `Turn Off Two-Factor Authentication`,
+                    html: `Turning off two-factor authentication will remove the extra security on your account.`,
+                    confirmButtonText: `TURN OFF`,
+                    showCancelButton: true,
+                    cancelButtonText: `Cancel`,
+                    allowOutsideClick: false,
+                    customClass: "swal-user-account swal-remove-access"
+                    }).then( async (result) => {
+                        if (result.isConfirmed) {
+                            let url = '/disable-2fa'
+                            let response = await apiServices.processRequest('post', url); 
+                            window.location.href = "/profile";            
+
+                        } else {
+                            console.log('test2')
+
+                        }
+                    });
+    })
+</script>
