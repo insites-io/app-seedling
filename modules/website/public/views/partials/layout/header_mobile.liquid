@@ -60,6 +60,11 @@
             </a>
           </li>
           {% else %}
+              <li class="no-submenu mobile-menu-style">
+                <a class="colorBlack" href="/dashboard">
+                  Dashboard
+                </a>
+              </li>
               <li class="mobile-menu-style">
                   <ins-accordion menu>
                       <ins-accordion-item heading="{{ context.current_user.first_name }} {{ context.current_user.last_name }}" link="#" open-icon="icon-plus" close-icon="icon-minus"

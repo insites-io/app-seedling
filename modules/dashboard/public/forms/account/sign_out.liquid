@@ -5,6 +5,9 @@ resource: Session
 flash_notice: Success-SignOut
 callback_actions: >
   {% include 'modules/dashboard/account/clear_session' %}
+  {% liquid
+      graphql configure_user_otp = 'modules/dashboard/account/2fa/configure_user_otp', id: context.current_user.id , is_currently_logged_in: false
+  %}
 ---
 
 {% form method: 'delete' %}

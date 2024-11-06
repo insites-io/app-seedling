@@ -25,7 +25,6 @@ metadata: {
 }
 authorization_policies:
   - modules/dashboard/is_user_logged_in
-  - modules/dashboard/is_2fa_verified
 ---
 
 {%- if context.environment == "staging" -%}
@@ -33,6 +32,15 @@ authorization_policies:
 {%- endif -%}
 
 {%- graphql user = 'modules/dashboard/account/get_current_user' | dig: 'current_user' -%}  
+
+{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
+{% assign user2fa = check_2fa_setup.current_user.client | first %}
+{% assign is_currently_logged_in = user.is_currently_logged_in %}
+{% assign otp_configured = user2fa.otp_configured %}
+
+{% if otp_configured == true and is_currently_logged_in == false  %}
+  {% redirect_to '/verify-2fa' %}
+{% endif %}
 
 {% comment %} Check if CRM Contact was assigned already to CRM Company {% endcomment %}
 {%- if user.crm_contact[0].company_uuid != user.client[0].company_uuid -%}
@@ -98,7 +106,7 @@ authorization_policies:
 %}
 
 
-<div class="my-details">    
+<div id="myDetails" class="my-details">    
 
     
      {%- if verified == false -%}
@@ -112,6 +120,7 @@ authorization_policies:
       <div class="grid-x">
         <div class="large-4 medium-4 small-12 cell profile-form-left">
           <h3 class="heading-3">Personal Information</h3>
+          <div class="spacer x-small"></div>
           <p>Update your account’s profile information and email address.</p>
         </div>
         <div class="large-8 medium-8 small-12 cell profile-form-right">
@@ -123,6 +132,7 @@ authorization_policies:
       <div class="grid-x">
           <div class="large-4 medium-4 small-12 cell profile-form-left"> 
             <h3 class="heading-3">Update Password</h3>
+            <div class="spacer x-small"></div>
             <p>Ensure your account is using a long, random password to stay secure.</p>
           </div>
           <div class="large-8 medium-8 small-12 cell profile-form-right">
@@ -134,6 +144,7 @@ authorization_policies:
       <div class="grid-x">
           <div class="large-4 medium-4 small-12 cell profile-form-left"> 
             <h3 class="heading-3">Two-Factor Authentication</h3>
+            <div class="spacer x-small"></div>
             <p>Add additional security to your account using two-factor authentication.</p>
           </div>
           <div class="large-8 medium-8 small-12 cell profile-form-right">
@@ -169,10 +180,8 @@ authorization_policies:
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 {%- if context.environment == "staging" -%}
-  <script src="{{ 'modules/dashboard/scripts/address-lookup.js' | asset_url }}"></script>
   <script src="{{ 'modules/dashboard/scripts/user-profile.js' | asset_url }}"></script>
 {%- else -%}
-  <script src="{{ 'modules/dashboard/scripts/address-lookup.min.js' | asset_url }}"></script>
   <script src="{{ 'modules/dashboard/scripts/user-profile.min.js' | asset_url }}"></script>
 {%- endif -%}
 

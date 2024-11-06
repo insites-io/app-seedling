@@ -15,11 +15,11 @@
 
 <script>
     let twoFactorButton = document.getElementById('turn-off-2fa')
-
+    const customIcon = `<i class="icon-alert-circle"></i>`; 
+    
     twoFactorButton.addEventListener('insClick', async ()=> {
         let confirm = await Swal.fire({
-                    icon: 'warning',
-                    title: `Turn Off Two-Factor Authentication`,
+                    title: customIcon + `Turn Off Two-Factor Authentication`,
                     html: `Turning off two-factor authentication will remove the extra security on your account.`,
                     confirmButtonText: `TURN OFF`,
                     showCancelButton: true,
@@ -31,9 +31,6 @@
                             let url = '/disable-2fa'
                             let response = await apiServices.processRequest('post', url); 
                             window.location.href = "/profile";            
-
-                        } else {
-                            console.log('test2')
 
                         }
                     });

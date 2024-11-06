@@ -43,7 +43,7 @@ searchable: false
                             Invalid code please try again.
                         </p>
                     {% endif %}
-                    <ins-button type="submit" class="hide fa-btn" label="Submit" id="submit_buttom" solid color="blue" size="large"></ins-button>
+                    <ins-button type="submit" class="hide fa-btn" label="Submit" id="submit_button" solid color="blue" size="large"></ins-button>
                 </div>
             </div>
         </div>
@@ -54,7 +54,7 @@ searchable: false
 <div class="spacer xx-large"></div>
 
 {%- if context.environment == "staging" -%}
-    <script nonce="{{ page_nonce }}" src="{{ 'modules/insites_core/insites_admin/scripts/two_factor_auth/otp.js' | asset_url }}"></script>
+    <script nonce="{{ page_nonce }}" src="{{ 'modules/dashboard/scripts/2fa/otp.js' | asset_url }}"></script>
 {% else %}
-    <script nonce="{{ page_nonce }}" src="{{ 'modules/insites_core/insites_admin/scripts/two_factor_auth/otp.min.js' | asset_url }}"></script>
+    <script nonce="{{ page_nonce }}" src="{{ 'modules/dashboard/scripts/2fa/otp.min.js' | asset_url }}"></script>
 {%- endif -%}

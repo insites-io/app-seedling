@@ -1,6 +1,6 @@
-name: documentations
+name: documentation
 metadata:
-  label: "Documentations"
+  label: "Documentation"
   groups: [{"id":"fa93191e-5aa3-47ae-8b3c-8218796e8e8b","name":"Documentation Information","weight":0}]
   is_archived: false
 properties:

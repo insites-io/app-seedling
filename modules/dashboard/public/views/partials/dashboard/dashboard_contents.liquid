@@ -1,3 +1,5 @@
+{% include 'modules/dashboard/dashboard/default_images' %}    
+
 {%  graphql documentations = 'modules/dashboard/dashboard/get_documentations' | dig: 'items','results'  %}
     <div class="grid-container">
         <div class="banner-message-container">
@@ -8,9 +10,11 @@
         <div class="spacer xxxx-large"></div>
         <div class="grid-x grid-padding-x grid-padding-y dashboard-main-container">
             {% for document in documentations %}
+                {% assign fallback_image = context.exports.documentations_images | where: "title", document.properties.title | first %}
+
                 <div class="large-3 medium-6 small-12 cell">
                     <div class="dashboard-card-list-container" data-link="{{ document.properties.link }}">
-                        <img src="{{ document.image.url }}" alt="{{ document.properties.title }}">
+                        <img src="{{ document.image.url |  default: fallback_image.image | replace: ' ', '%20' }}" alt="{{ document.properties.title }}">
                         <div class="dashboard-card-desc">
                             <h4>{{ document.properties.title }}</h4>
                             <p>{{ document.properties.description  }}</p>

@@ -6,14 +6,14 @@ query get_documentations(
         page: $page
         per_page: $size
         filter: {
-            table: { value: "modules/dashboard/documentations" }
+            table: { value: "modules/dashboard/documentation" }
             deleted_at: { exists: false }
             properties: [
                 { name: "enabled", value_boolean: true }
             ]
         }
         sort: [
-             { properties: { name: "sort_order", order: DESC } }
+             { properties: { name: "sort_order", order: ASC } }
         ]
     ) {
         total_entries

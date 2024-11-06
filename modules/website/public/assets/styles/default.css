@@ -7,7 +7,7 @@
     /* Buttons & Links */
     --color-main-hover: #436CF2;
     --color-sub1-hover: #D32F19;
-    --color-sub2-hover: #D32F19;
+    --color-sub2-hover: #C7215E;
     --color-main-hover-light: rgba(17, 110, 195, 0.1);
     --color-sub1-hover-light: rgba(126, 22, 208, 0.1);
     --color-sub2-hover-light: rgba(211, 47, 25, 0.1);
@@ -49,7 +49,7 @@
     /* usually on heading */
     --font-family-02: 'Inter', sans-serif;
     /* usually on sub-heading */
-    --font-family-03: 'Cabin', sans-serif;
+    --font-family-03: 'Inter', sans-serif;
     /* usually on paragraph & buttons */
     /* Typography - font size & line height */
     /* previously name as --typography-xxxx-large ... */
@@ -143,10 +143,6 @@ a.color-main:hover,
     color: var(--color-main-hover);
 }
 
-a:visited,
-.body-link:visited {
-    color: var(--color-hover-visited);
-}
 
 a.font-color-head:hover,
 a.font-color-body:hover,
@@ -616,11 +612,11 @@ label,
 }
 
 .ins-form-field-wrap .ins-form-field:hover {
-    border-color: var(--color-ui-05);
+    border: solid 1px #436CF2 !important;
 }
 
 .ins-form-field-wrap .ins-form-field:focus {
-    border-color: var(--color-main);
+    border: solid 1px #436CF2 !important;
 }
 
 .ins-form-field-wrap .ins-form-label.active {
@@ -775,8 +771,8 @@ ins-button button[type=button].primary.outlined,
 ins-button button.blue.outlined,
 ins-button button.primary.outlined {
     background: none;
-    border: 1px solid var(--color-main-hover);
-    color: var(--color-main-hover);
+    border: 1px solid var(--color-main);
+    color: var(--color-main);
 }
 
 
@@ -1494,7 +1490,7 @@ ins-tag span.ins-tag {
 .header-top-bar a,
 .top-bar-right a {
     padding-right: 30px;
-    font-weight: 700;
+    font-weight: 600;
     position: relative;
     font-size: var(--font-x-small);
 }
@@ -1788,7 +1784,7 @@ ul.menu {
 
 #mobile-menu-btn {
     font-size: var(--font-large);
-    color: var(--color-main);
+    color: var(--font-color-inv);
     cursor: pointer;
 }
 
@@ -1893,7 +1889,7 @@ ins-drawer#mobile-menu .user-info ins-accordion-item ins-button {
     ins-drawer#mobile-menu .ins-drawer-wrap .ins-content,
     ins-drawer#mobile-menu .ins-backdrop-wrap {
         top: 105px;
-        padding-bottom: 120px;
+        height: auto !important;
         /* Fix for sidebar scroll overflow */
     }
     .top-bar .top-bar-left,
@@ -2653,7 +2649,7 @@ Notyf
     vertical-align: middle;
     width: 260px;
     min-height: 48px;
-    font-weight: 700;
+    font-weight: 400;
     text-align: left;
     margin-left: 48px;
     padding: 16px;
@@ -2776,8 +2772,14 @@ Notyf
 
 
 #headerRegister button:hover{
-    border: 1px solid var(--color-sub2-hover);
-    background-color:   var(--color-sub2-hover)!important;
+    border: 1px solid #C7215E;
+    background-color:#C7215E!important;
+}
+
+@media screen and (max-width: 480px) { 
+    .notyf__message {
+        width: 100%;
+    }
 }
 
 

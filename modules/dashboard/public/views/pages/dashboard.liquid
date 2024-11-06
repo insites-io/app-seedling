@@ -37,13 +37,22 @@ dynamic_cache:
     {{context.device.device_type}}
 authorization_policies:
   - modules/dashboard/is_user_logged_in
-  - modules/dashboard/is_2fa_verified
 ---
 {%- comment -%} Pagination and Filters {%- endcomment -%}
 {%  liquid            
     assign page_num = context.params.page | default: 1 | plus: 0
     assign per_page = context.params.per_page | default: 6 | plus: 0
 %}
+
+
+{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
+{% assign user = check_2fa_setup.current_user.client | first %}
+{% assign is_currently_logged_in = user.is_currently_logged_in %}
+{% assign otp_configured = user.otp_configured %}
+
+{% if otp_configured == true and is_currently_logged_in == false  %}
+  {% redirect_to '/verify-2fa' %}
+{% endif %}
 
 
 {% include 'modules/dashboard/dashboard/dashboard_contents' %}

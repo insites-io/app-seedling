@@ -10,7 +10,7 @@ redirect_to: >
   {%- if otp_configured == true -%}
     {%- assign go_to = '/verify-2fa' -%}
   {%- else -%}
-    {%- assign go_to = '/setup-2fa' -%}
+    {%- assign go_to = '/dashboard' -%}
   {%- endif -%}
   {{ go_to }}
 fields:
@@ -27,6 +27,10 @@ fields:
   redirect:
     property_options:
         virtual: true
+callback_actions: >
+  {% liquid
+      graphql configure_user_otp = 'modules/dashboard/account/2fa/configure_user_otp', id: context.current_user.id , is_currently_logged_in: true
+  %}
 ---
 
 {%- form 

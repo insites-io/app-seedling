@@ -52,7 +52,7 @@
     /* usually on heading */
     --font-family-02: 'Work Sans', sans-serif;
     /* usually on sub-heading */
-    --font-family-03: 'Cabin', sans-serif;
+    --font-family-03: 'Inter', sans-serif;
     --font-family-04: 'Roboto', condensed;
     --font-family-05: 'Poppins';
     /* Shadow */
@@ -63,6 +63,7 @@
 }
 
 /*********************************************** [Homepage] *************************************************/
+
 
 
 body {
@@ -78,7 +79,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 32px;
-    justify-content: space-around;
+    justify-content: space-between;
     position: relative;
     transition: border-color 0.3s ease, background 0.3s ease;
 }
@@ -138,14 +139,21 @@ body {
     font-family: var(--font-family-01);
 }
 
+.home-card-list-container .icon-container {
+    padding: 10px;
+    border-radius: var(----border-radius, 4px);
+    background:  rgba(67, 108, 242, 0.10);
+    display: flex;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+}
+
 .home-card-list-container i {
     font-size: 24px;
     font-style: normal;
     font-weight: 400;
     line-height: 120%;
-    padding: 10px;
-    border-radius: var(----border-radius, 4px);
-    background:  rgba(67, 108, 242, 0.10);
 }
 
 .home-card-list-container p {
@@ -156,7 +164,8 @@ body {
 .home-card-list-container a,
 .home-card-link i {
     font-size: 12px !important;
-    color: var(--font-color-inv) !important
+    color: var(--font-color-inv) !important;
+    font-weight: bold;
 }
 
 .home-card-list-container a {
@@ -183,11 +192,28 @@ body {
 }
 
 .blurred-bottom {
-    position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: -10%;
+    right: 4%;
 }
 
+.home-card-list-wrapper {
+    padding: 20px  !important;
+}
+
+
+
+@media screen and (min-width: 640px) and (max-width: 1023px) { 
+    .blurred-bottom { 
+        right: -15%;
+    }
+
+    .blurred-top {
+        left: -15%;
+        top: -5%;
+        height: 1000px;
+    }
+
+}
 
 /*********************************************** [Sign In/Register/Forgot password/ Forms] *************************************************/
 
@@ -204,13 +230,14 @@ body {
 
 .seedling-form-container ins-input .ins-input-wrap .input-wrap input {
     background: rgba(0, 0, 0, 0.60);
-    border-color: rgba(0, 0, 0, 0.60) !important
+    border-color: rgba(0, 0, 0) 
 }
 
 .seedling-form-container ins-input .ins-input-wrap .input-wrap input::placeholder { 
     font-family: var(--font-family-02);
     font-size: 14px;
     color: var(--font-color-inv);
+    opacity: 0.6;
 }
 
 #register-btn button div span{
@@ -225,6 +252,15 @@ body {
 .thank-you h1 {
     color: var(--font-color-inv);
 }
+
+#cancel-button button:hover {
+    background: #436CF21A !important;
+}
+
+#cancel-button button:hover .btn__label {
+    color: #3159DB !important;
+}
+
 
 .thank-you p {
     color: #B9C5D6 !important;
@@ -311,12 +347,12 @@ body {
 /*********************************************** [Profile] *************************************************/
 
 .profile-form-left {
-    padding-right: 9;
+    padding-right: 6%;
     border-right: 1px solid #436CF220;
 }
 
 .profile-form-right { 
-    padding-left: 9%;
+    padding-left: 6%;
 }
 
 .profile-buttons {
@@ -333,7 +369,48 @@ body {
         padding-left: 0;
         margin-top: 32px;
     }
+
+    .home-banner {
+        width: 100%;
+        margin: 0 auto;
+    }
 }
+@media screen and (max-width: 639px) { 
+    .home-main-wrapper .blurred-top {
+        right: 0;
+        top: 0;
+        max-width: unset !important;
+    }
+
+    .home-main-wrapper .blurred-bottom {
+        max-width: unset;
+        left: 0;
+        bottom: 0;
+    }
+
+    .home-main-wrapper {
+        overflow: hidden;
+    }
+
+    #submit-personal-details,
+    #save-password-btn {
+        width: 100%;
+    }
+
+    #submit-personal-details button,
+    #save-password-btn button {
+        width: 100%;
+    }
+
+    .seedling-form-container-profile {
+        margin: 0 !important;
+    }
+
+    .profile-form-left { 
+        padding-right: 0;
+    }
+
+} 
 
 /*********************************************** [2FA] *************************************************/
 
@@ -400,7 +477,6 @@ body {
 .manual-code-content  pre,
 .manual-code-content  .copy-btn {
     padding: 16px;
-    background: rgba(0, 0, 0, 0.60);
 }
 
 
@@ -467,6 +543,82 @@ body {
 #turn-off-2fa button:hover {
     background: #DF1F1F20;
 }
+
+
+#submit_button {
+    width: 100%;
+    display: block;
+}
+
+#submit_button button {
+    width: 100%;
+    padding: 10px 16px;
+    height: auto;
+}
+
+#myDetails #submit_button {
+    display: flex;
+}
+
+#myDetails #submit_button,
+#myDetails #submit_button button{
+    width: auto !important;
+}
+
+
+@media screen and (max-width: 639px) { 
+    #myDetails #submit_button {
+        width: 100% !important;
+        display: block;
+    }
+    
+    #myDetails #submit_button button {
+        width: 100% !important;
+        height: auto;
+    }
+
+    .manual-code-content-left {
+        justify-content: center !important;
+        width: 100%;    
+    }
+
+    .manual-code-content-left  .otp_input_fields {
+        width: 100%;
+    }
+
+    .manual-code-content {
+        background: rgba(0, 0, 0, 0.60);
+    }
+
+    #turn-off-2fa button{
+        height: auto;
+        padding: 4px;
+    }
+    
+    .verification { 
+        width: 100%;
+    }
+
+    .otp_input, .otp_input:disabled { 
+        width: 15%;
+    }
+    .otp-input-wrapper {
+        display: block;
+    }
+
+    .otp_input_fields {
+        width: 100%;
+    }
+
+}
+
+@media screen and (min-width: 640px) and (max-width: 1023px) {
+    .verification { 
+        width: 80%;
+    }
+}
+
+
 
 
 /*********************************************** [Foundation Style Customization / Overwrite] *************************************************/
@@ -710,6 +862,9 @@ body {
 
 footer.blocks-footer-05 {
     padding: 0px !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column-reverse;
 }
 
 .blocks-footer-05 .footer-links,
@@ -1261,13 +1416,25 @@ ins-table .ibt-table-wrap .pagination-wrap .ibt-table-wrap__page {
     line-height: 24px; 
 }
 
-.profileNav .ins-dropdown .ins-dropdown_label span:hover {
+.profileNav .ins-dropdown .ins-dropdown_label:hover span,
+.profileNav .ins-dropdown .ins-dropdown_label:hover i {
     color: #436CF2;
 }
 
+
+
 .signOutCustom .ins-button div .btn__label {
-    font-size: 14px!important;
+    font-size: 16px!important;
     color: #000000;
+    font-weight: 600;
+}
+
+.signOutCustom button:hover {
+    background: var(--ins-color-blue-10p) !important;
+}
+
+.signOutCustom button:hover   .btn__label{
+    color: #436CF2;
 }
 
 .servicesMenuSubitems .ins-accordion-link {
@@ -1601,6 +1768,14 @@ ins-card.support .ins-card-wrap:hover {
     font-weight: 700!important;
 }
 
+#mobile-menu .signOutCustom button{
+    text-align: left;
+}
+
+#mobile-menu .signOutCustom button span {
+    font-weight: 500 !important;
+}
+
 .setActive .ins-accordion-link a {
     font-weight: 700;
     text-decoration: none;
@@ -1681,7 +1856,7 @@ ins-card .ins-card-wrap {
 
 .sign-out-wrapper,
 ins-drawer#mobile-menu .ins-accordion-item_content .ins-accordion-link {
-    padding-left: 40px
+    padding-left: 20px
 }
 
 .description ul {
@@ -1848,10 +2023,6 @@ ins-drawer#mobile-menu .ins-accordion-item_content .ins-accordion-link {
     background: var(--color-main-hover-light);
 }
 
-.ins-accordion-item_content .ins-accordion-link {
-    border-bottom: unset
-}
-
 .ins-accordion.menu .ins-accordion-link.active>.ins-accordion-link_link,
 .ins-accordion-link:hover,
 .ins-accordion.menu .ins-accordion-item .inner-head:hover {
@@ -1879,8 +2050,9 @@ ins-drawer#mobile-menu .ins-accordion-item_content .ins-accordion-link {
 .ins-accordion.menu .ins-accordion-item_content .ins-accordion-link_link span {
     font-weight: 400;
     font-size: 16px;
-    font-family: var(--font-family-02);
-    color: var(--font-color-sub);
+    font-family: var(--font-family-01);
+    color: var(--font-color-head);
+    font-weight: 500;
 }
 
 .ins-accordion-link.active>.ins-accordion-link_link,
@@ -1999,6 +2171,10 @@ ins-modal.no-close-icon .ins-modal-head .icon-close-1 {
 
 .insites-form-grid .form-groups-tab {
     margin: initial !important;
+}
+
+.insites-form-grid {
+    margin: 0 !important;
 }
 
 .insites-form.insites-form-code {
@@ -2210,11 +2386,6 @@ ins-step {
 
 .ins-loader-wrap--state {
     margin: 0 auto 24px;
-}
-
-a:visited,
-.body-link:visited {
-    color: var(--color-main);
 }
 
 p,
@@ -2742,6 +2913,17 @@ ins-tag.Completed span.ins-tag {
     line-height: 120%;
 }
 
+.swal2-title {
+    flex-direction: column;
+    margin: 0 0 0.1em !important
+}
+
+.swal2-title .icon-alert-circle {
+    font-size: 100px !important;
+    margin-bottom: 24px;
+    color: #FDB022 !important;
+}
+
 .swal-user-account .swal2-html-container {
     color: var(--font---font-color-body, #383838);
     text-align: center;
@@ -2752,9 +2934,6 @@ ins-tag.Completed span.ins-tag {
     line-height: 24px;
 }
 
-.swal-user-account [class^=icon-] {
-    font-size: 12px!important;
-}
 
 .swal-remove-access .swal2-actions button.swal2-confirm {
     background-color: #DF1F1F!important;
@@ -2793,3 +2972,17 @@ ins-tag.Completed span.ins-tag {
 .account_owner_select .ins-input-select.ins-select-wrap .ins-select-value-wrap .ins-select-value-input:hover {
     cursor: not-allowed !important;
 }
+
+.flex-container {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+}
+
+.spinner {
+    margin: 0 auto;
+}
+  
