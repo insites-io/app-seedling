@@ -44,11 +44,9 @@ metadata: {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 {%- if context.environment == "staging" -%}
-    <script src="{{ 'modules/dashboard/scripts/address-lookup.js' | asset_url }}"></script>
     <script src="{{ 'modules/dashboard/services/apiServices.js' | asset_url }}"></script>
     <script src="{{ 'modules/dashboard/scripts/login-scripts.js' | asset_url }}"></script>
 {%- else -%}
-    <script src="{{ 'modules/dashboard/scripts/address-lookup.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/dashboard/services/apiServices.min.js' | asset_url }}"></script>
     <script src="{{ 'modules/dashboard/scripts/login-scripts.min.js' | asset_url }}"></script>
 {%- endif -%}

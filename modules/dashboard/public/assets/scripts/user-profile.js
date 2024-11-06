@@ -144,15 +144,23 @@ let UserProfileScript = (function () {
                 } else if (formId == 'user-password-form') {
                     // Validation and function for update of password
                     if (await this.validationForm(formElem)) {
-                        let confirm = await App.events.swal('warning',
-                            'Change Password?',
-                            'You will be logged out after changing your password.',
-                            'Submit');
-                        if (confirm) {
-                            this.disableFormButtons(formElem);
-                            customerProfileForm.updatePasswordBtn.loading = true;
-                            formElem.submit();
-                        }
+                        const customIcon = `<i class="icon-alert-circle"></i>`; 
+
+                        let confirm = await Swal.fire({
+                            title: customIcon + `Change Password?`,
+                            html: `You will be logged out after changing your password.`,
+                            confirmButtonText: `Submit`,
+                            showCancelButton: true,
+                            cancelButtonText: `Cancel`,
+                            allowOutsideClick: false,
+                            customClass: "swal-user-account"
+                            }).then( async (result) => {
+                                if (result.isConfirmed) {
+                                    this.disableFormButtons(formElem);
+                                    customerProfileForm.updatePasswordBtn.loading = true;
+                                    formElem.submit();
+                                }
+                            });
                     }
                 } else {
                     //Validation for other (account type) forms
