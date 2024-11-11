@@ -2,6 +2,25 @@
 slug: verify-2fa
 layout: modules/dashboard/system_pages
 searchable: false
+metadata: {
+    "status": "published",
+    "open_graph:url": "{{ context.exports.global.company_url | strip }}",
+    "open_graph:type": "",
+    "open_graph:image": "",
+    "open_graph:title": "Verify 2FA",
+    "open_graph:description": "Verify 2FA",
+    "open_graph:site_name": "{{ context.exports.global.company_name | strip }}",
+    "meta_title": "Verify 2FA",
+    "page_title": "Verify 2FA | Insites",
+    "page_name": "Verify 2FA",
+    "meta_description": "Verify 2FA",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "0", ## secondary order (ASC)
+    "sitemap_changefreq": "never"
+}
 ---
 
 {% assign hashed = 16 | random_string | compute_hmac: "nonce", "MD4" %}
