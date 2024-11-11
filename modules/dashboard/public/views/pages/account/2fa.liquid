@@ -1,5 +1,8 @@
 ---
 method: post
+metadata: {
+    page_name: "API - 2FA config",
+}
 ---
 
 {% assign otp_code = context.params | fetch: "2fa" | fetch: "otp_code" %}
