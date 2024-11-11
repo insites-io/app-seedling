@@ -1,3 +1,10 @@
+---
+metadata: {
+    partial_name: "Website | Api Headers",
+}
+---
+
+
 {%  graphql instance_api_key = 'modules/insites_core/instance_configurations/get_instance_configuration', 
     name: "instance_api_key" | dig: 'items','results' | first | dig: 'key' %}
 

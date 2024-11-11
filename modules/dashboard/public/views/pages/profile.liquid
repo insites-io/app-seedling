@@ -175,9 +175,6 @@ authorization_policies:
   </script>
 {% endif -%}
 
-{% comment %} Search Address Script {% endcomment %}
-{% include 'modules/dashboard/layouts/googlemaps' %}
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 {%- if context.environment == "staging" -%}
   <script src="{{ 'modules/dashboard/scripts/user-profile.js' | asset_url }}"></script>

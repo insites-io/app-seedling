@@ -1,3 +1,10 @@
+---
+metadata: {
+    partial_name: "2FA Functions | Verify Otp | Build",
+}
+---
+
+
 {% parse_json object %}
   {
     "email": {{ email | default: object.email | json }},
