@@ -1,5 +1,10 @@
-  
-    {% assign hashed = 16 | random_string | compute_hmac: "nonce", "MD4" %}
+---
+metadata: {
+    partial_name: "2FA | 2FA Setup",
+}
+---
+
+   {% assign hashed = 16 | random_string | compute_hmac: "nonce", "MD4" %}
     {%- content_for 'page_nonce' -%}{{ context.instance.uuid | base64_encode |  append: hashed }}{%- endcontent_for -%}
     {%- capture page_nonce -%}{%- yield 'page_nonce' -%}{%- endcapture -%}
     {% include "modules/insites_core/sessions/delete_session_variables" %}
