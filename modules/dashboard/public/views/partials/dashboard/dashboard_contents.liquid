@@ -8,6 +8,7 @@ metadata: {
 
 {%  graphql documentations = 'modules/dashboard/dashboard/get_documentations' | dig: 'items','results'  %}
     <div class="grid-container">
+        <div class="spacer section"></div>
         <div class="banner-message-container">
             <h2>Hi {{ context.current_user.first_name }}, welcome to the Insites seedling application!</h2>
             <div class="spacer"></div>
@@ -32,9 +33,10 @@ metadata: {
                     </div>
                 </div>
             {% endfor %}
+            </div>
         </div>
+        <div class="spacer section"></div>
     </div>
-</div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

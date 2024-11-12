@@ -28,13 +28,18 @@ metadata: {
     {%- redirect_to '/dashboard' -%} 
 {%- endif -%} 
 
-<div class="sign-up grid-x grid-padding-x">
-    <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">
-        <h1 class="heading-1 text-center">Sign in</h1>
-        <div class="spacer x-large"></div>
-        {%- include_form 'modules/dashboard/sign_in' -%}
+<div class="sign-up-wrapper">
+    <div class="spacer section"></div>
+    <div class="sign-up grid-x grid-padding-x">
+        <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">
+            <h1 class="heading-1 text-center">Sign in</h1>
+            <div class="spacer x-large"></div>
+            {%- include_form 'modules/dashboard/sign_in' -%}
+        </div>
     </div>
+    <div class="spacer section"></div>
 </div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 {%- if context.environment == "staging" -%}

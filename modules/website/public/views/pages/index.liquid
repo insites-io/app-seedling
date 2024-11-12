@@ -25,8 +25,11 @@ metadata: {
 ---
 {%comment%} get device type {%endcomment%}
 {%- assign device_used = context.device.device_type -%}
-
-{% include 'modules/website/content/index/home_cards' %} 
+<div class="home-wrapper">
+    <div class="spacer section"></div>
+        {% include 'modules/website/content/index/home_cards' %} 
+    <div class="spacer section"></div>
+</div>
 
 {%- if context.environment == "staging" -%}
     <link rel="preload" as="script" href="{{ 'modules/website/scripts/app.js' | asset_url }}" >

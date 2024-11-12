@@ -4,12 +4,10 @@ metadata: {
 }
 ---
 
-<footer class="blocks-footer-05 footer">
+<footer class="blocks-footer-05 footer {%  if stickyFooter  %}  stick-footer  {%- endif -%}">
     <div class="wrapper top-footer footerSubItems">
-
     <div class="wrapper bottom-footer footerSubItems" >
         <div class="grid-container">
-            <div class="spacer section"></div>
             <div class="grid-x">
                 <div class="large-12 medium-12 small-12 cell medium-text-left text-center">
                     <p class="subHeading footer-p text-center">Copyright © <span id="year-container"></span>. Powered by <a class="footer-links"target="_blank" href="https://www.insites.io/">Insites</a>.</p>
