@@ -11,16 +11,6 @@ metadata: {
 <!doctype html>
 <html class="no-js" lang="en">
 <head>
-    {% comment %} 
-        ? Enable Caching for Head after Installation
-        ? Remove the comment once Installed and Menu Database is Populated 
-        {%- capture head_key -%} {{ context.exports.layout_cache_key.cache_key | append: "-head" }} {%- endcapture -%}
-        {%- cache head_key -%}
-            {% include 'modules/website/layout/head' %}
-        {%- endcache -%}
-    {% endcomment %}
-
-    {% comment %} ? Delete line of code below this comment once Installed and Menu Database is Populated {% endcomment %}
     {% include 'modules/website/layout/head' %}
 
     <script type="module" src="https://components.insites.io/v2/latest/insites.esm.js"></script>
@@ -29,35 +19,10 @@ metadata: {
     {%- include 'modules/insites_forms/form_scripts' -%}
 
 </head>
-<body>
+<body class="flex-container flex-dir-column" style="min-height: 100vh;">
     <div class="main-wrap">
-
-        {% comment %} 
-            ? Enable Caching for Header after Installation
-            ? Remove the comment once Installed and Menu Database is Populated 
-                {%- capture header -%} {{ context.current_user.id }}-{{ context.exports.layout_cache_key.cache_key }}-header {%- endcapture -%}
-                {%- cache header -%}
-                    {% include 'modules/website/layout/header' %}
-                {%- endcache -%}
-        {% endcomment %}
-
-        {% comment %} ? Delete line of code below this comment once Installed and Menu Database is Populated {% endcomment %}
         {% include 'modules/website/layout/header_default' %} 
-        
-        {% comment %} 
-            ? Enable Caching for Header after Installation
-            ? Remove the comment once Installed and Menu Database is Populated 
-                {%- capture header-mobile -%} {{ context.current_user.id }}-{{ context.exports.layout_cache_key.cache_key }}-header-mobile {%- endcapture -%}
-                {%- cache header-mobile -%}
-                    {% include 'modules/website/layout/header_mobile' %}
-                {%- endcache -%}
-        {% endcomment %}
-
-        {% comment %} ? Delete line of code below this comment once Installed and Menu Database is Populated {% endcomment %}
         {% include 'modules/website/layout/header_mobile_default' %}
-        
- 
-
         <div class="wrapper client-portal">
             <div class="grid-container">
                 <div class="grid-x gutter-medium grid-padding-x">
@@ -70,18 +35,11 @@ metadata: {
             </div>
         </div>                       
     </div>
+    {% if context.params.slug == 'profile' %}
+        {% assign stickyFooter = true %}
+    {% endif %}
 
-    {% comment %} 
-        ? Enable Caching for Footer after Installation
-        ? Remove the comment once Installed and Menu Database is Populated 
-        {%- capture foot_key -%} {{ context.exports.layout_cache_key.cache_key | append: "-footer_section"}} {%- endcapture -%}
-        {%- cache foot_key -%} 
-            {% include 'modules/website/layout/footer' %}
-        {%- endcache -%}
-    {% endcomment %}
-    
-    {% comment %} ? Delete line of code below this comment once Installed and Menu Database is Populated {% endcomment %}
-    {% include 'modules/website/layout/footer' %}
+    {% include 'modules/website/layout/footer' stickyFooter: stickyFooter%}
 
 </body>
 </html>

@@ -30,13 +30,16 @@ metadata: {
     
 {%- endif -%} 
 
-<div class="sign-up grid-x grid-padding-x">
-    <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">  
-        <h1 class="heading-1 text-center">Create Account</h1>
-        <div class="spacer x-large"></div>
-    {%- include_form 'modules/dashboard/register' -%}
-    
+<div class="register-wrapper">
+    <div class="spacer section"></div>
+    <div class="sign-up grid-x grid-padding-x">
+        <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">  
+            <h1 class="heading-1 text-center">Create Account</h1>
+            <div class="spacer x-large"></div>
+        {%- include_form 'modules/dashboard/register' -%}
+        </div>
     </div>
+    <div class="spacer section"></div>
 </div>
 
 

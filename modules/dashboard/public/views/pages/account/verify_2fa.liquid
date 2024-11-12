@@ -27,7 +27,10 @@ metadata: {
 {%- content_for 'page_nonce' -%}{{ context.instance.uuid | base64_encode |  append: hashed }}{%- endcontent_for -%}
 {%- capture page_nonce -%}{%- yield 'page_nonce' -%}{%- endcapture -%}
 {% include "modules/insites_core/sessions/delete_session_variables" %}
-<div class="spacer xx-large"></div>
+<div class="verify-2fa-wrapper">
+
+
+<div class="spacer section"></div>
 
 <form action="{% if context.flash.alert == "Your 2FA has already been setup." %}/account/2fa{% else %}/account/2fa?return_to={{ context.params.return_to |  url_encode }}{% endif %}" method="post">
     {% render 'modules/insites_core/authenticity_token', context: context %}
@@ -70,8 +73,8 @@ metadata: {
 </form>
 
 
-<div class="spacer xx-large"></div>
-
+<div class="spacer section"></div>
+</div>
 {%- if context.environment == "staging" -%}
     <script nonce="{{ page_nonce }}" src="{{ 'modules/dashboard/scripts/2fa/otp.js' | asset_url }}"></script>
 {% else %}
