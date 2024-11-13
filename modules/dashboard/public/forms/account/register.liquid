@@ -147,10 +147,7 @@ async_callback_actions:
     
     {% comment %} Verification Token {% endcomment %}
     {%  liquid
-        graphql g = 'modules/dashboard/account/generate_user_temporary_token', email: form.email 
-        if g.items.results[0]
-          graphql res = 'modules/dashboard/account/set_email_verification_token', id: g.items.results[0].id, token: g.items.results[0].temporary_token
-        endif
+        graphql temporary_token = 'modules/dashboard/account/generate_user_temporary_token', email: form.email 
     %}
    
     {% comment %} Create Event Stream {% endcomment %}
