@@ -1,3 +1,8 @@
+/**
+ * Default Css
+ * Contains default application styles
+ */
+
 :root {
     font-size: 16px;
     /* Brand colors */
@@ -1417,7 +1422,7 @@ ins-tag span.ins-tag {
 
 .error-message {
     color: var(--error);
-    font-family: var(--font-family-03);
+    font-family: var(--font-family-02);
     font-size: 12px;
     line-height: 16px;
     margin-top: 4px;

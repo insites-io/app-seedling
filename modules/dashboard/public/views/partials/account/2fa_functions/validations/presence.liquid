@@ -14,7 +14,7 @@ metadata: {
 {% liquid
   if object[field_name] == blank
     assign message = "cannot be blank"
-    function c = 'modules/insites_core/lib/register_error', contract: c, field_name: field_name, message: message
+    function c = 'modules/dashboard/account/2fa_functions/register_error', contract: c, field_name: field_name, message: message
   endif
   return c
 %}

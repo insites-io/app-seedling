@@ -24,80 +24,6 @@ fields:
       presence: 
         message: Last name is required
   
-  properties:
-    # Profile - CRM Contact Fields
-    mobile_phone_country_code:
-      property_options:
-        virtual: true
-    mobile_phone_number:
-      property_options:
-        virtual: true
-
-    # CRM Address (Contact) Fields
-    address_1:
-      property_options:
-        virtual: true
-    address_2:
-      property_options:
-        virtual: true
-    suburb:
-      property_options:
-        virtual: true
-    state:
-      property_options:
-        virtual: true
-    postcode:
-      property_options:
-        virtual: true
-    country:
-      property_options:
-        virtual: true
-    latitude:
-      property_options:
-        virtual: true
-    longitude:
-      property_options:
-        virtual: true
-
-    #Contact Address
-    default_address:
-      property_options:
-        virtual: true
-    contact_address_uuid:
-      property_options:
-        virtual: true
-
-callback_actions: |-
-  {% comment %} 
-    - The form itself will update the User: [email, first_name, last_name]
-    - Use API update_contact to add or update profile:crm_contact
-        -- This will only update the [mobile_phone_country_code, mobile_phone_number]
-        -- Note: using add_contact api will create another user
-    - Then update the contact address using another api (update_contact_address or add_contact_address)
-  {% endcomment %}
-
-  {% graphql current_user = 'modules/dashboard/account/get_current_user' | dig: 'current_user' %}
-  
-  {% parse_json update_contact_data %}
-  {
-    "id": "{{form.id}}", 
-    "email": "{{form.email}}", 
-    "mobile_phone_country_code": "{{form.properties.mobile_phone_country_code}}",
-    "mobile_phone_number": "{{form.properties.mobile_phone_number}}"
-  }
-  {% endparse_json %}
-  {% graphql update_contact = 'modules/website/trigger_api_call', name: 'modules/dashboard/update_contact', data: update_contact_data | dig: 'items','response','body' | parse_json %}
-
-  {%  liquid
-      assign data = form | json
-      
-      if form.properties.default_address   
-        graphql contact_address = 'modules/website/trigger_api_call', name: 'modules/dashboard/update_contact_address', data: data | dig: 'items','response','body' | parse_json      
-      else
-        graphql contact_address = 'modules/website/trigger_api_call', name: 'modules/dashboard/add_contact_address', data: data | dig: 'items','response','body' | parse_json
-      endif         
-  %} 
-  
 async_callback_actions:
   delay: 0
   priority: low
@@ -110,17 +36,7 @@ async_callback_actions:
       "log": {
         "first_name": "{{ form.first_name }}",
         "last_name": "{{ form.last_name }}",
-        "email": "{{ form.email }}",
-        "mobile_phone_country_code": "{{ form.properties.mobile_phone_country_code }}",
-        "mobile_phone_number": "{{ form.properties.mobile_phone_number }}",
-        "contact_address":{
-          "address_1": "{{ form.properties.address_1 }}",
-          "address_2": "{{ form.properties.address_2 }}",
-          "suburb": "{{ form.properties.suburb }}",
-          "state": "{{ form.properties.state }}",
-          "postcode": "{{ form.properties.postcode }}",
-          "country": "{{ form.properties.country }}"
-        }      
+        "email": "{{ form.email }}"  
       }
     }
     {% endparse_json %}

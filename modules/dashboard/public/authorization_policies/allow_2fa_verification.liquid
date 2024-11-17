@@ -1,0 +1,18 @@
+---
+name: allow_2fa_verification
+redirect_to: 403
+metadata: {
+    "auth_policy_name": "Allow 2FA Verification",
+    "auth_policy_key": "allow_2fa_verification"
+}
+---
+
+{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
+{% assign user = check_2fa_setup.current_user.client | first %}
+{% assign is_currently_logged_in = user.is_currently_logged_in %}
+
+{% if is_currently_logged_in == true  %}
+    false
+{% else %}
+    true
+{% endif %}

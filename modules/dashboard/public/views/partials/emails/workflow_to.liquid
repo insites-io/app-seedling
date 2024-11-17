@@ -7,7 +7,7 @@ metadata: {
 {%  liquid
     include "modules/insites_cms/globals"
     assign global = context.exports.global
-    assign email = global.company_email_1 | default: "support@insites.io"
+    assign email = global.company_email_1 | default: "notifications@insites.io"
 %}
 
 {{ email }}

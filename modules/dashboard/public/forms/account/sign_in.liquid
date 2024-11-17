@@ -27,10 +27,6 @@ fields:
   redirect:
     property_options:
         virtual: true
-callback_actions: >
-  {% liquid
-      graphql configure_user_otp = 'modules/dashboard/account/2fa/configure_user_otp', id: context.current_user.id , is_currently_logged_in: true
-  %}
 ---
 
 {%- form 
@@ -58,24 +54,22 @@ callback_actions: >
           field="password"
           name="{{ form.fields.password.name }}" 
           value="{{ form.fields.password.value }}" 
+          {% if form.errors['password'] %} has-error {% endif %}
+          error-message="{{ form.fields.password.validation.rules.presence.message }}"
           placeholder="Password">
       </ins-input>
     </div>
 
-    {%- if form.errors -%}
-    <div class="small-12 cell">
-			<p class="warning">{{ form.errors['password'] }}</p>
-		</div>
-  	{%- endif -%}
-
+  
 		<div class="cell grid-x">
 			<div class="cell text-right">
 				<a class="font-color-body" href="/forgot-password">Forgot your password?</a>
 			</div>
 		</div>
 		<div class="small-12 cell spacer x-large">
-    {%- if context.flash.alert and context.flash.alert != 'Sorry-SignIn' -%}
-      <div class="spacer small"></div>
+      <div class="spacer medium"></div>
+    {%- if context.flash.alert == 'Sorry-SignIn' -%}
+      <p class="error-message">Oops! That email / password combination is not valid.</p>
     {%- endif -%}
     </div>
 

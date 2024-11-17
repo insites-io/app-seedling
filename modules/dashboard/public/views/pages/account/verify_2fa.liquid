@@ -21,6 +21,9 @@ metadata: {
     "sitemap_order": "0", ## secondary order (ASC)
     "sitemap_changefreq": "never"
 }
+authorization_policies:
+  - modules/dashboard/is_2FA_activated
+  - modules/dashboard/allow_2fa_verification
 ---
 
 {% assign hashed = 16 | random_string | compute_hmac: "nonce", "MD4" %}
