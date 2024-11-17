@@ -1,0 +1,18 @@
+---
+name: is_2FA_activated
+redirect_to: 403
+metadata: {
+    "auth_policy_name": "2FA Configuration",
+    "auth_policy_key": "is_2FA_activated"
+}
+---
+
+{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
+{% assign user = check_2fa_setup.current_user.client | first %}
+{% assign otp_configured = user.otp_configured %}
+
+{% if otp_configured == false %}
+    false
+{% else %}
+    true
+{% endif %}

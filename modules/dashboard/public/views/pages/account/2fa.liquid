@@ -16,9 +16,6 @@ metadata: {
 
 {% function object = 'modules/dashboard/account/2fa_functions/verify_otp', object: object %}
 
-
-{% log object, type: 'object' %}
-
 {%- assign return_to = context.params.return_to | url_encode -%}
 {%- assign return_to_decoded = context.params.return_to | url_decode -%}
 {% assign now = "now" | date: "%Y-%m-%d %H:%M" %}

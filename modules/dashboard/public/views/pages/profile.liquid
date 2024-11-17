@@ -25,96 +25,12 @@ metadata: {
 }
 authorization_policies:
   - modules/dashboard/is_user_logged_in
+  - modules/dashboard/is_user_allowed
 ---
-
-{%- if context.environment == "staging" -%}
-<!-- start page: my-details  -->
-{%- endif -%}
 
 {%- graphql user = 'modules/dashboard/account/get_current_user' | dig: 'current_user' -%}  
 
-{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
-{% assign user2fa = check_2fa_setup.current_user.client | first %}
-{% assign is_currently_logged_in = user.is_currently_logged_in %}
-{% assign otp_configured = user2fa.otp_configured %}
-
-{% if otp_configured == true and is_currently_logged_in == false  %}
-  {% redirect_to '/verify-2fa' %}
-{% endif %}
-
-{% comment %} Check if CRM Contact was assigned already to CRM Company {% endcomment %}
-{%- if user.crm_contact[0].company_uuid != user.client[0].company_uuid -%}
-  {%- parse_json data -%}
-  {
-    "company_uuid": "{{user.client[0].company_uuid}}",
-    "contact_ids": {{user.id}}
-  }
-  {%- endparse_json -%}
-  {%- graphql assign_company_contact = 'modules/website/trigger_api_call', 
-      name: 'modules/dashboard/assign_company_contact', 
-      data: data | dig: 'items','response','body' | parse_json -%}     
-{%- endif -%}
-
-{% comment %} Check if user verified their account {% endcomment %}
-{%- liquid
-    if user.client
-        assign profile = user.client[0]
-        if profile != blank and profile.is_activated
-            assign verified = true
-        else
-            assign verified = false            
-        endif
-    endif    
--%}
-
-{% comment %} Get CRM -> Contact from v5 API {% endcomment %}
-{% parse_json data %} 
-{
-  "id": "{{user.external_id}}"
-}
-{% endparse_json %}
-{% liquid
-    graphql contact_api = 'modules/website/trigger_api_call', name: 'modules/dashboard/get_contact', data: data 
-    assign contact = contact_api.items.response.body | parse_json | dig: 'items','results' | first
-%}
-
-
-{% comment %} Get CRM -> Contact Address from v5 API {% endcomment %}
-{% parse_json data %} 
-{
-  "contact_uuid": "{{ user.external_id }}"
-}
-{% endparse_json %}
-{% liquid
-    graphql contact_address_api = 'modules/website/trigger_api_call', name: 'modules/dashboard/get_contact_address', data: data 
-    assign contact_address = contact_address_api.items.response.body | parse_json | dig: 'items'
-
-    if contact_address.total_entries == 0
-      assign default_address = '' | parse_json
-    else
-      for item in contact_address.results
-        if forloop.first == true
-          assign default_address = item
-        endif
-        if item.properties.uuid == contact.contact[0].properties.default_address_uuid 
-          assign default_address = item
-        endif
-      endfor
-    endif
-
-    assign contact = contact | add_hash_key: "default_address", default_address
-%}
-
-
 <div id="myDetails" class="my-details">    
-
-    
-     {%- if verified == false -%}
-      <div class="small-12 cell text-center">
-        {% comment %} <div class="spacer x-large"></div> {% endcomment %}
-        {% comment %} {%- include_form "modules/dashboard/resend_verification", id: context.current_user.id -%} {% endcomment %}
-      </div>
-    {%- endif -%} 
     <div class="spacer x-large"></div>
     <div class="grid-container">
       <div class="grid-x">

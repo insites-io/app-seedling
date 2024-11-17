@@ -15,7 +15,7 @@ metadata: {
 {% liquid
   unless object[field_name]
     assign message = message | default: "not true"
-    function c = 'modules/dashboard/lib/register_error', contract: c, field_name: field_name, message: message
+    function c = 'modules/dashboard/account/2fa_functions/register_error', contract: c, field_name: field_name, message: message
   endunless
   return c
 %}

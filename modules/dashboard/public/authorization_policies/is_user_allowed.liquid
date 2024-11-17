@@ -1,0 +1,19 @@
+---
+name: is_user_allowed
+redirect_to: 'verify-2fa'
+metadata: {
+    "auth_policy_name": "User Permission",
+    "auth_policy_key": "is_user_allowed"
+}
+---
+
+{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
+{% assign user = check_2fa_setup.current_user.client | first %}
+{% assign is_currently_logged_in = user.is_currently_logged_in %}
+{% assign otp_configured = user.otp_configured %}
+
+{% if otp_configured == true and is_currently_logged_in == false  %}
+    false
+{% else %}
+    true
+{% endif %}
