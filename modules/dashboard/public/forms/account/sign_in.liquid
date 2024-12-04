@@ -60,17 +60,17 @@ fields:
       </ins-input>
     </div>
 
-  
 		<div class="cell grid-x">
 			<div class="cell text-right">
 				<a class="font-color-body" href="/forgot-password">Forgot your password?</a>
 			</div>
 		</div>
+
 		<div class="small-12 cell spacer x-large">
       <div class="spacer medium"></div>
-    {%- if context.flash.alert == 'Sorry-SignIn' -%}
-      <p class="error-message">Oops! That email / password combination is not valid.</p>
-    {%- endif -%}
+      {%- if context.flash.alert == 'Sorry-SignIn' -%}
+        <p class="error-message">Oops! That email / password combination is not valid.</p>
+      {%- endif -%}
     </div>
 
     <input type="hidden" 
@@ -82,7 +82,5 @@ fields:
       <div class="spacer small"></div>
       <a href="/register"><ins-button id="register-btn" type="button" label="REGISTER" class="full"  color="white" ></ins-button></a>
 		</div>
-
 	</div>
-
 {%- endform -%}
