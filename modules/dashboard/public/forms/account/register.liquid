@@ -37,7 +37,12 @@ async_callback_actions:
     {%  liquid
         graphql temporary_token = 'modules/dashboard/account/generate_user_temporary_token', email: form.email 
     %}
-   
+    {% comment %} Update user client profile for authentication {% endcomment %}
+    {% liquid
+      graphql configure_user_otp = 'modules/dashboard/account/2fa/configure_user_otp', id: form.id , otp_configured: false
+      log configure_user_otp
+    %}
+    
     {% comment %} Create Event Stream {% endcomment %}
     {% parse_json info %}
     {
@@ -60,9 +65,6 @@ async_callback_actions:
     html-onsubmit:"return Session.events.signUpHandler(event, 'personal-details-container');" -%}
 
   <div class="insites-form-grid">
-
-  {% include 'modules/dashboard/account/registration_personal_details' %}
-
+    {% include 'modules/dashboard/account/registration_personal_details' %}
   </div>
-
 {%- endform -%}

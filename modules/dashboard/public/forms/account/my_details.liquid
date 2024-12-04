@@ -51,12 +51,10 @@ async_callback_actions:
     html-onsubmit:"return UserProfileScript.methods.validateForm(event);" -%}
 
     <div class="insites-form-grid seedling-form-container seedling-form-container-profile">
-
       <input type="hidden" name="{{ form.fields.properties.default_address.name }}"  value="{{ data.default_address.id }}" >
       <input type="hidden" name="{{ form.fields.properties.contact_address_uuid.name }}" value="{{ data.default_address.properties.uuid }}" >
       
-      {% include 'modules/dashboard/account/registration_personal_details', data: data %}
-              
+      {% include 'modules/dashboard/account/registration_personal_details', data: data %}          
     </div>
 
 {%- endform -%}
