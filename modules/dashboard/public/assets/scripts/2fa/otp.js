@@ -3,7 +3,6 @@ const input = document.querySelectorAll(".otp_input");
 const inputField = document.querySelector(".otp_input_fields");
 const otpInput = document.querySelector("input[name='2fa[otp_code]']");
 const submitButton = document.getElementById("submit_button");
-console.log(submitButton)
 const setupCode = document.getElementById("setup_code");
 const copyButton = document.querySelector(".copy-btn")
 let inputCount = 0,
