@@ -7,12 +7,28 @@ metadata: {
 }
 ---
 
-{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
-{% assign user = check_2fa_setup.current_user.client | first %}
-{% assign otp_configured = user.otp_configured %}
+{% liquid
+  graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'
+  assign user = check_2fa_setup.current_user.client | first
 
-{% if otp_configured == false %}
-    false
-{% else %}
-    true
-{% endif %}
+  comment
+    Guard 2FA-protected actions by requiring the profile and an activated OTP
+    flag. Missing profile denies by default.
+  endcomment
+  if user == blank
+    echo false
+    return
+  endif
+
+  assign otp_configured = user.otp_configured
+
+  comment
+    Echo false explicitly when OTP is not configured to avoid relying on
+    Liquid truthiness for booleans.
+  endcomment
+  if otp_configured == false
+    echo false
+  else
+    echo true
+  endif
+%}

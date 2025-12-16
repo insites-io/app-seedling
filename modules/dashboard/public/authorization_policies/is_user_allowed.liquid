@@ -7,13 +7,29 @@ metadata: {
 }
 ---
 
-{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'%}
-{% assign user = check_2fa_setup.current_user.client | first %}
-{% assign is_currently_logged_in = user.is_currently_logged_in %}
-{% assign otp_configured = user.otp_configured %}
+{% liquid
+  graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'
+  assign user = check_2fa_setup.current_user.client | first
 
-{% if otp_configured == true and is_currently_logged_in == false  %}
-    false
-{% else %}
-    true
-{% endif %}
+  comment
+    User must exist. If the profile is missing, deny rather than redirecting by
+    default to prevent accidental access on partially-created accounts.
+  endcomment
+  if user == blank
+    echo false
+    return
+  endif
+
+  assign is_currently_logged_in = user.is_currently_logged_in
+  assign otp_configured = user.otp_configured
+
+  comment
+    Block login if 2FA is configured but the session is not marked as current.
+    Otherwise allow the request to continue.
+  endcomment
+  if otp_configured == true and is_currently_logged_in == false
+    echo false
+  else
+    echo true
+  endif
+%}

@@ -5,11 +5,18 @@ metadata: {
     "auth_policy_name": "User Authentication",
     "auth_policy_key": "is_user_logged_in"
 }
----
-{%  liquid
-    graphql data = 'modules/dashboard/account/get_current_user'
+{% liquid
+  graphql data = 'modules/dashboard/account/get_current_user'
 
-    if data.current_user.client != blank
-        echo true
-    endif
+  assign user_profile = data.current_user.client | first
+
+  comment
+    Policy requires an attached client profile. Explicitly echo true/false
+    to avoid implicit behavior that could lead to unexpected access.
+  endcomment
+  if user_profile != blank
+    echo true
+  else
+    echo false
+  endif
 %}
