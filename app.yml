@@ -1,0 +1,36 @@
+name: app-seedling
+version: 1.0.0
+description: "Dashboard and website modules for Seedling, built with Liquid templates, GraphQL, and browser-side JavaScript."
+
+modules:
+  dashboard:
+    path: modules/dashboard/public
+    description: "Authenticated dashboard experience (account, 2FA, profile, documentation)."
+  website:
+    path: modules/website/public
+    description: "Public marketing site and landing pages."
+
+assets:
+  scripts:
+    - modules/dashboard/public/assets/scripts
+    - modules/website/public/assets/scripts
+  styles:
+    - modules/website/public/assets/styles
+
+graphql:
+  dashboard: modules/dashboard/public/graphql
+  website: modules/website/public/graphql
+
+authorization_policies:
+  path: modules/dashboard/public/authorization_policies
+
+migrations:
+  path: modules/dashboard/public/migrations
+
+schema:
+  path: modules/dashboard/public/schema
+
+user_profile_types:
+  path: modules/dashboard/public/user_profile_types
+
+
