@@ -62,7 +62,7 @@ async_callback_actions:
     html-class: 'insites-form insites-form-code' 
     html-novalidate: true
     html-enctype="multipart/form-data"
-    html-onsubmit:"return Session.events.signUpHandler(event, 'personal-details-container');" -%}
+    html-onsubmit:"return FormValidation.validateAndSubmit(event, { containerId: 'personal-details-container', validateTel: true, checkEmail: true });" -%}
 
   <div class="insites-form-grid">
     {% include 'modules/dashboard/account/registration_personal_details' %}

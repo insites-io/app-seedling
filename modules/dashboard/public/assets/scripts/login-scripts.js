@@ -1,4 +1,5 @@
-let emailInputInfo =  {
+// Email uniqueness check state (for registration forms)
+let emailInputInfo = {
     status: 'clean',
     id: null
 }
@@ -17,122 +18,228 @@ const companyMobileFields = {
     country_code: document.getElementById('company_mobile_phone_country_code')
 }
 
+/**
+ * Unified Form Validation Handler
+ * Standardizes form validation across all forms in the application
+ */
+let FormValidation = (function () {
+    return {
+        /**
+         * Validates telephone input fields
+         */
+        validateTelField() {
+            const isTel = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/g;
+            const telFields = document.querySelectorAll("[field='tel']");
+            telFields.forEach(field => {
+                if (field.required) {
+                    if (field.value && isTel.test(field.value) === true) {
+                        field.hasError = false;
+                    } else {
+                        field.hasError = true;
+                    }
+                } else {
+                    if (field.value.trim() === "") {
+                        field.hasError = false;
+                    } else {
+                        field.hasError = !isTel.test(field.value) === true;
+                    }
+                }
+            });
+        },
+
+        /**
+         * Validates password field (minimum 6 characters)
+         */
+        validatePasswordField(field) {
+            if (field.value) {
+                if ((field.value.length >= 6)) {
+                    field.hasError = false;
+                } else {
+                    field.hasError = true;
+                    field.errorMessage = "Minimum of 6 characters";
+                }
+            } else {
+                field.hasError = true;
+                field.errorMessage = "Password is required";
+            }
+        },
+
+        /**
+         * Validates password confirmation matches original password
+         */
+        validatePasswordConfirm(field) {
+            const passFields = document.getElementById('password');
+            if (passFields) {
+                if (passFields.value === field.value) {
+                    field.hasError = false;
+                } else {
+                    field.hasError = true;
+                    field.errorMessage = "Password doesn't match";
+                }
+            }
+        },
+
+        /**
+         * Validates all fields in a container element
+         * @param {HTMLElement} containerEl - Container element with fields to validate
+         * @returns {Promise<boolean>} - True if all fields are valid
+         */
+        async validationForm(containerEl) {
+            const fields = containerEl.querySelectorAll('[validate]');
+            for (let index = 0; index < fields.length; index++) {
+                const field = fields[index];
+                const type = field.tagName.toLowerCase();
+                switch (type) {
+                    case 'div':
+                        App.validation.validateRadio(field);
+                        break;
+                    case 'ins-input-file':
+                        App.validation.validateFile(field);
+                        break;
+                    case 'ins-textarea':
+                        App.validation.validateInput(field.querySelector('textarea'));
+                        break;
+                    case 'ins-input':
+                    default:
+                        if (field.field === 'password') {
+                            if (field.id === 'password_confirmation') {
+                                this.validatePasswordConfirm(field);
+                            } else {
+                                this.validatePasswordField(field);
+                            }
+                        } else if (field.field === 'email') {
+                            App.validation.validateEmail(field);
+                        } else {
+                            App.validation.validateInput(field);
+                        }
+                        break;
+                }
+            }
+            return App.validation.checkInvalidFields(containerEl);
+        },
+
+        /**
+         * Unified form validation and submission handler
+         * @param {Event} event - Form submit event
+         * @param {Object} options - Validation options
+         * @param {string} options.containerId - ID of container element to validate (defaults to form)
+         * @param {boolean} options.validateTel - Whether to validate telephone fields
+         * @param {boolean} options.checkEmail - Whether to check email uniqueness status (for registration)
+         * @returns {boolean} - False to prevent default submission, true if validation passes
+         */
+        async validateAndSubmit(event, options = {}) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            const formId = event.target.id;
+            const formElem = document.getElementById(formId)?.closest('form') || event.target.closest('form');
+            
+            if (!formElem) {
+                console.error('FormValidation: Could not find form element');
+                return false;
+            }
+
+            // Determine container element (form or specified container)
+            const containerEl = options.containerId 
+                ? document.getElementById(options.containerId) 
+                : formElem;
+
+            if (!containerEl) {
+                console.error('FormValidation: Could not find container element');
+                return false;
+            }
+
+            // Validate telephone fields if requested
+            if (options.validateTel) {
+                this.validateTelField();
+            }
+
+            // Perform validation
+            const isValid = await this.validationForm(containerEl);
+
+            if (!isValid) {
+                return false;
+            }
+
+            // Check email uniqueness status for registration forms
+            if (options.checkEmail) {
+                switch (emailInputInfo.status) {
+                    case 'clean':
+                        // Email is new, proceed with submission
+                        formElem.submit();
+                        return false; // Prevent default since we're submitting
+                    case 'update':
+                        // Email exists but no profile, update existing user
+                        LoginScript.methods.changeFormToAppend(formElem, emailInputInfo.id);
+                        formElem.submit();
+                        return false; // Prevent default since we're submitting
+                    case 'error':
+                        // Email is already in use
+                        const emailElem = document.getElementById('email');
+                        if (emailElem) {
+                            emailElem.hasError = true;
+                            emailElem.errorMessage = "Email has already been used.";
+                        }
+                        return false; // Prevent submission
+                    default:
+                        // Unknown status, don't submit
+                        return false;
+                }
+            }
+
+            // Standard validation passed, submit form
+            formElem.submit();
+            return false; // Prevent default since we're submitting
+        }
+    }
+})();
+
+// Expose globally
+window.FormValidation = FormValidation;
+
 let LoginScript = (function () {
     return {
         methods: {
             validateTelField() {
-                //Function to validate telephone input fields
-                let isTel = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/g;
-                let telFields = document.querySelectorAll("[field='tel']");
-                telFields.forEach(field => {
-                    if (field.required) {
-                        if (field.value && isTel.test(field.value) === true) {
-                            field.hasError = false;
-                        } else
-                            field.hasError = true;
-                    } else {
-                        if (field.value.trim() === "") {
-                            field.hasError = false;
-                        } else {
-                            field.hasError = !isTel.test(field.value) === true;
-                        }
-                    }
-                });
+                return FormValidation.validateTelField();
             },
-            validatePasswordField(field){
-                if (field.value) {
-                    if((field.value.length >= 6)){
-                        field.hasError = false;
-                    } else {
-                        field.hasError = true;
-                        field.errorMessage = "Minimum of 6 characters";
-                    }
-                } else {
-                    field.hasError = true;
-                    field.errorMessage = "Password is required";
-                }
+            validatePasswordField(field) {
+                return FormValidation.validatePasswordField(field);
             },
-            validatePasswordConfirm(field){
-                let passFields = document.getElementById('password');
-                if(passFields){
-                    if(passFields.value === field.value){
-                        field.hasError = false;
-                    } else {                        
-                        field.hasError = true;
-                        field.errorMessage = "Password doesn't match";
-                    }
-                } 
+            validatePasswordConfirm(field) {
+                return FormValidation.validatePasswordConfirm(field);
             },
             async validationForm(containerEl) {
-                for (let index = 0; index < containerEl.querySelectorAll('[validate]').length; index++) {
-                    let field = containerEl.querySelectorAll('[validate]')[index];
-                    let type = field.tagName.toLowerCase();
-                    switch (type) {
-                        case 'div':
-                            App.validation.validateRadio(field);
-                            break;
-                        case 'ins-input-file':
-                            App.validation.validateFile(field);
-                            break;
-                        case 'ins-textarea':
-                            App.validation.validateInput(field.querySelector('textarea'));
-                            break
-                        case 'ins-input':
-                        default:
-                            if(field.field === 'password'){
-                                if(field.id === 'password_confirmation'){
-                                    this.validatePasswordConfirm(field);
-                                } else {
-                                    this.validatePasswordField(field);
-                                }
-                            } else if(field.field === 'email'){
-                                App.validation.validateEmail(field);
-                            } else{
-                                App.validation.validateInput(field);
-                            }
-                            break;
-                    }
-                }
-                return App.validation.checkInvalidFields(containerEl);
+                return await FormValidation.validationForm(containerEl);
             },
+            /**
+             * Legacy validateForm method - maintained for backward compatibility
+             * @deprecated Use FormValidation.validateAndSubmit() instead
+             */
             async validateForm(event, groupElem) {
-                event ? event.preventDefault(): '';
-                //Get id and element to identify the kind of form submitted
-                let formId = event.target.id;
-                let formElem = document.getElementById(formId).closest('form'); 
-                // Check what form is being validated...
-                if(formId == 'submit-personal-details' || formId == 'submit-company-details'){
-                    //Validation for Sign Up Form
-                    this.validateTelField();
-                    if(await this.validationForm(groupElem)){
-   
-                        switch(emailInputInfo.status){
-                            case 'clean':{ //email is clean
-                                //formElem.submit();
-                                return true;
-                            }break;
-                            case 'update':{ //email 'update'
-                                this.changeFormToAppend(formElem, emailInputInfo.id);
-                                //formElem.submit();
-                                return true;
-                            }break;
-                            case 'error':{ //email is used
-                                let emailElem = document.getElementById('email');
-                                emailElem.hasError = true;
-                                emailElem.errorMessage = "Email has already been used.";    
-                            }break;
-                        }
-                    }
-                } else if (formId == 'password-reset-form'){
-                    if(await this.validationForm(formElem)){
-                        formElem.submit();
-                    }
-
-                } else {
-                    //Validation for other forms
-                    if(await App.validation.validateForm(formElem)){
-                        formElem.submit();
-                    }
+                // For signup forms with email check
+                const formId = event.target.id;
+                if (formId === 'submit-personal-details' || formId === 'submit-company-details') {
+                    return await FormValidation.validateAndSubmit(event, {
+                        containerId: groupElem?.id || 'personal-details-container',
+                        validateTel: true,
+                        checkEmail: true
+                    });
+                }
+                // For password reset form
+                else if (formId === 'password-reset-form') {
+                    return await FormValidation.validateAndSubmit(event, {
+                        validateTel: false,
+                        checkEmail: false
+                    });
+                }
+                // For other forms (sign in, etc.)
+                else {
+                    return await FormValidation.validateAndSubmit(event, {
+                        validateTel: false,
+                        checkEmail: false
+                    });
                 }
             },
             async checkSignUpUserEmail(event){ 

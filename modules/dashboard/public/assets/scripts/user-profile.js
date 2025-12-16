@@ -121,32 +121,39 @@ let UserProfileScript = (function () {
                 }
                 return App.validation.checkInvalidFields(containerEl);
             },
+            /**
+             * Validates and handles form submission for user profile forms
+             * Uses unified FormValidation for standard forms, custom logic for password change
+             */
             async validateForm(event) {
-                /* Validation and scripts done before submission of forms */
-                /* Attached on the on-submit event of the form */
-                /* Can identify form submitted by using their id */
                 event ? event.preventDefault() : '';
 
-                //Get id and element to identify the kind of form submitted
-                let formId = event.target.id;
-                let formElem = document.getElementById(formId);
+                const formId = event.target.id;
+                const formElem = document.getElementById(formId);
+
+                if (!formElem) {
+                    return false;
+                }
 
                 // Check what form is being validated...
-                if (formId == 'user-profile-form' || formId == 'user-company-form') {
-                    //Validation for User profile/company
+                if (formId === 'user-profile-form' || formId === 'user-company-form') {
+                    // Validation for User profile/company forms
                     this.validateTelField();
 
-                    if (await App.validation.validateForm(formElem)) {                        
+                    if (await App.validation.validateForm(formElem)) {
                         this.disableFormButtons(formElem);
-                        customerProfileForm.updateProfileBtn.loading = true;
+                        if (customerProfileForm.updateProfileBtn && customerProfileForm.updateProfileBtn.length > 0) {
+                            customerProfileForm.updateProfileBtn[0].loading = true;
+                        }
                         formElem.submit();
                     }
-                } else if (formId == 'user-password-form') {
-                    // Validation and function for update of password
+                    return false;
+                } else if (formId === 'user-password-form') {
+                    // Validation and function for update of password (requires confirmation)
                     if (await this.validationForm(formElem)) {
-                        const customIcon = `<i class="icon-alert-circle"></i>`; 
+                        const customIcon = `<i class="icon-alert-circle"></i>`;
 
-                        let confirm = await Swal.fire({
+                        const confirm = await Swal.fire({
                             title: customIcon + `Change Password?`,
                             html: `You will be logged out after changing your password.`,
                             confirmButtonText: `Submit`,
@@ -154,19 +161,23 @@ let UserProfileScript = (function () {
                             cancelButtonText: `Cancel`,
                             allowOutsideClick: false,
                             customClass: "swal-user-account"
-                            }).then( async (result) => {
-                                if (result.isConfirmed) {
-                                    this.disableFormButtons(formElem);
+                        }).then(async (result) => {
+                            if (result.isConfirmed) {
+                                this.disableFormButtons(formElem);
+                                if (customerProfileForm.updatePasswordBtn) {
                                     customerProfileForm.updatePasswordBtn.loading = true;
-                                    formElem.submit();
                                 }
-                            });
+                                formElem.submit();
+                            }
+                        });
                     }
+                    return false;
                 } else {
-                    //Validation for other (account type) forms
-                    if (await App.validation.validateForm(formElem)) {
-                        formElem.submit();
-                    }
+                    // Validation for other (account type) forms - use unified handler
+                    return await FormValidation.validateAndSubmit(event, {
+                        validateTel: false,
+                        checkEmail: false
+                    });
                 }
             },
             checkCardCount() {
