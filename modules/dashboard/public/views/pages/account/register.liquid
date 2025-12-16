@@ -64,45 +64,26 @@ metadata: {
     const step2Container = document.getElementById('company-details-container');
     const step3Container = document.getElementById('confirmation-container');
 
-    let Session = (function () {
-    return {
-        events: {
-
-            async signUpHandler(event) { 
-                if(registerForm){
-                    event ? event.preventDefault(): ''; 
+    // Disable Submit on 'Enter' in Sign up form
+    if(registerForm){
+        window.addEventListener('keydown', function(e) {
+            if (e.keyIdentifier == 'U+000A' || e.keyIdentifier == 'Enter' || e.keyCode == 13) {
+                if (e.target.nodeName == 'INPUT' && e.target.type == 'text') {
+                    e.preventDefault();
+                    return false;
                 }
-            },
-
-            disableSubmitOnEnter() {
-                window.addEventListener('keydown', function(e) {
-                    if (e.keyIdentifier == 'U+000A' || e.keyIdentifier == 'Enter' || e.keyCode == 13) {
-                        if (e.target.nodeName == 'INPUT' && e.target.type == 'text') {
-                            e.preventDefault();
-                            return false;
-                        }
-                    }
-                }, true);
             }
-        }
+        }, true);
     }
-})();
-window.Session = Session;
 
-
-//Disable Submit on 'Enter' in Sign up form
-if(registerForm){
-    Session.events.disableSubmitOnEnter();
-}
-
-    //Stepper
+    // Handle submit button click (form validation is handled by FormValidation.validateAndSubmit)
     if(step1) {
-        step1.addEventListener('insClick', async function(event) {            
-            const isValid = await LoginScript.methods.validateForm(event, step1Container); 
-            if(isValid){
-                registerForm.submit();
-            } else {
-            
+        step1.addEventListener('insClick', async function(event) {
+            // FormValidation.validateAndSubmit will handle validation and submission
+            // This is just a fallback for button clicks
+            const form = document.getElementById('register-form');
+            if (form) {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
             }
         });
     }
