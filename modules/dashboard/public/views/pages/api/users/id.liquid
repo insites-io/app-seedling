@@ -2,6 +2,7 @@
 slug: api/users/:id
 format: json
 method: patch
+authorization_policy: is_user_logged_in
 searchable: false
 metadata: {
     "api_endpoint_name": "update-user",
@@ -26,39 +27,43 @@ metadata: {
 
 {%- liquid
   assign user_id = context.params.id | default: context.params.resource_id | default: null
+  
+  # Verify user can only update their own account
+  graphql current_user_data = 'modules/dashboard/account/get_current_user'
+  assign current_user_id = current_user_data.current_user.id | default: null
+  
+  if current_user_id == blank
+    include 'modules/dashboard/api/error_response', error_type: 'authorization', errors: '{"authorization": ["Authentication required"]}', status_code: 401
+    return
+  endif
+  
+  if user_id != current_user_id
+    include 'modules/dashboard/api/error_response', error_type: 'authorization', errors: '{"authorization": ["You can only update your own account"]}', status_code: 403
+    return
+  endif
 -%}
 
 {%- if user_id -%}
   {%- form 'my_details', resource_id: user_id -%}
     {%- if form.errors.size > 0 -%}
-      {%- parse_json response -%}
-      {
-        "errors": {{ form.errors | json }},
-        "valid": false
-      }
-      {%- endparse_json -%}
+      {%- include 'modules/dashboard/api/error_response', error_type: 'validation', errors: form.errors, status_code: 400 -%}
     {%- else -%}
       {%- parse_json response -%}
       {
-        "id": {{ form.id | json }},
-        "email": {{ form.email | json }},
-        "first_name": {{ form.first_name | json }},
-        "last_name": {{ form.last_name | json }},
+        "success": true,
+        "data": {
+          "id": {{ form.id | json }},
+          "email": {{ form.email | json }},
+          "first_name": {{ form.first_name | json }},
+          "last_name": {{ form.last_name | json }}
+        },
         "valid": true
       }
       {%- endparse_json -%}
+      {{ response }}
     {%- endif -%}
-    {{ response }}
   {%- endform -%}
 {%- else -%}
-  {%- parse_json error_response -%}
-  {
-    "errors": {
-      "id": ["User ID is required"]
-    },
-    "valid": false
-  }
-  {%- endparse_json -%}
-  {{ error_response }}
+  {%- include 'modules/dashboard/api/error_response', error_type: 'validation', errors: '{"id": ["User ID is required"]}', status_code: 400 -%}
 {%- endif -%}
 

@@ -5,9 +5,10 @@ import { RequestLogger, Selector } from 'testcafe';
 const BASE_URL = process.env.MPKIT_URL || 'http://localhost:3000';
 
 // Simple helper to log requests in the test output
+// Note: Using TestCafe's built-in logging instead of console.log
 function logRequest(label, url) {
-    // eslint-disable-next-line no-console
-    console.log(`[Email API E2E] ${label}: ${url}`);
+    // Request logging is handled by TestCafe's RequestLogger
+    // No console output needed
 }
 
 function getJsonBody(response) {
