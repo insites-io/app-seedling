@@ -34,7 +34,9 @@ metadata: {
   endif
   
   # Basic email format validation
-  if email contains '@' == false or email contains '.' == false
+  assign has_at = email contains '@'
+  assign has_dot = email contains '.'
+  if has_at == false or has_dot == false
     include 'modules/dashboard/api/error_response', error_type: 'validation', errors: '{"email": ["Please provide a valid email address"]}', status_code: 400
     return
   endif
