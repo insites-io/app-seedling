@@ -3,7 +3,7 @@ slug: api/users/:id
 format: json
 method: patch
 authorization_policies:
-  - is_user_logged_in
+  - modules/dashboard/is_user_logged_in
 searchable: false
 metadata: {
     "api_endpoint_name": "update-user",
