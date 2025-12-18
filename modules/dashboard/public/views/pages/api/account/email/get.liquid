@@ -27,17 +27,9 @@ metadata: {
 {%- liquid
   assign email = context.params.email | default: null
   
-  # Validate email format
-  if email == blank
+  # Validate email parameter is provided
+  if email == blank or email == null
     include 'modules/dashboard/api/error_response', error_type: 'validation', errors: '{"email": ["Email parameter is required"]}', status_code: 400
-    return
-  endif
-  
-  # Basic email format validation
-  assign has_at = email contains '@'
-  assign has_dot = email contains '.'
-  if has_at == false or has_dot == false
-    include 'modules/dashboard/api/error_response', error_type: 'validation', errors: '{"email": ["Please provide a valid email address"]}', status_code: 400
     return
   endif
   
