@@ -2,6 +2,10 @@
 
 Seedling contains the public assets that power the dashboard and marketing site. The codebase is organized as Liquid templates, GraphQL documents, and small JavaScript helpers that run in the browser (no server runtime inside this repo). The `modules/dashboard` folder owns authenticated experiences such as account, 2FA, profile management, and documentation pages; `modules/website` serves the public-facing marketing site.
 
+## Documentation
+
+For detailed documentation, see the [Insites Application - Seedling Documentation v1.0.0](https://uploads.prod01.sydney.platformos.com/instances/572/property_uploads/modules/ins_console/marketplace_listings/documentation_file/bd2fd432-9819-4e48-b924-fb453a0ab338/Insites%20Application%20-%20Seedling%20Documentation%20v1.0.0.pdf) PDF.
+
 ## Installation instructions
 
 1) Clone the repository: `git clone <repo-url> && cd app-seedling`  
