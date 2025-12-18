@@ -24,34 +24,56 @@ metadata: {
 }
 ---
 
-{%- assign email = context.params.email | default: null -%}
-{%- graphql results = "modules/dashboard/account/check_user_email_signup", email: email | dig: "items" -%}
-
-{%- assign email_check = '{}' | parse_json -%}
-{%- 
-    liquid
-    if results.total_entries > 0
-        assign item = results | dig: "results" | first
-        comment
-        Check if email has CRM contact profile: if found, email is already registered and cannot be reused.
-        array_find_index returns array of matches; size > 0 means profile exists.
-        endcomment
-        assign find_profile = item.profiles | array_find_index: profile_type: "modules/insites_core/crm_contact"
-        if find_profile.size > 0
-            assign email_check = email_check | add_hash_key: "email_status", "invalid"
-            assign email_check = email_check | add_hash_key: "message", "Email has already been used."
-        else
-            comment
-            Email exists but no CRM profile - user can update existing account
-            endcomment
-            assign email_check = email_check | add_hash_key: "email_id", item.id 
-            assign email_check = email_check | add_hash_key: "email_status", "no-profile"
-            assign email_check = email_check | add_hash_key: "message", "Email needs update."
-        endif      
+{%- liquid
+  assign email = context.params.email | default: null
+  
+  # Validate email format
+  if email == blank
+    include 'modules/dashboard/api/error_response', error_type: 'validation', errors: '{"email": ["Email parameter is required"]}', status_code: 400
+    return
+  endif
+  
+  # Basic email format validation
+  if email contains '@' == false or email contains '.' == false
+    include 'modules/dashboard/api/error_response', error_type: 'validation', errors: '{"email": ["Please provide a valid email address"]}', status_code: 400
+    return
+  endif
+  
+  # Execute GraphQL query with error handling
+  graphql results = "modules/dashboard/account/check_user_email_signup", email: email
+  
+  # Check for GraphQL errors (PlatformOS returns errors in results.errors array)
+  if results.errors and results.errors.size > 0
+    assign error_msg = '{"server": ["An error occurred while checking email"]}'
+    include 'modules/dashboard/api/error_response', error_type: 'server', errors: error_msg, status_code: 500
+    return
+  endif
+  
+  assign items = results.items | default: results | dig: "items"
+  
+  assign email_check = '{}' | parse_json
+  if items.total_entries > 0
+    assign item = items | dig: "results" | first
+    comment
+    Check if email has CRM contact profile: if found, email is already registered and cannot be reused.
+    array_find_index returns array of matches; size > 0 means profile exists.
+    endcomment
+    assign find_profile = item.profiles | array_find_index: profile_type: "modules/insites_core/crm_contact"
+    if find_profile.size > 0
+      assign email_check = email_check | add_hash_key: "email_status", "invalid"
+      assign email_check = email_check | add_hash_key: "message", "Email has already been used."
     else
-        assign email_check = email_check | add_hash_key: "email_status", "valid"
-        assign email_check = email_check | add_hash_key: "message", "Email is valid"
-    endif
+      comment
+      Email exists but no CRM profile - user can update existing account
+      endcomment
+      assign email_check = email_check | add_hash_key: "email_id", item.id 
+      assign email_check = email_check | add_hash_key: "email_status", "no-profile"
+      assign email_check = email_check | add_hash_key: "message", "Email needs update."
+    endif      
+  else
+    assign email_check = email_check | add_hash_key: "email_status", "valid"
+    assign email_check = email_check | add_hash_key: "message", "Email is valid"
+  endif
 -%}
 
 {{ email_check }}

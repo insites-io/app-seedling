@@ -293,7 +293,15 @@ let LoginScript = (function () {
                 let elem = document.getElementById('register-form');
                 if(elem){
                     let emailInput = document.getElementById('email');
-                    emailInput.addEventListener('insBlur', LoginScript.methods.checkSignUpUserEmail);
+                    let emailCheckTimeout;
+                    
+                    // Add debouncing to email validation (500ms delay)
+                    emailInput.addEventListener('insBlur', (event) => {
+                        clearTimeout(emailCheckTimeout);
+                        emailCheckTimeout = setTimeout(() => {
+                            LoginScript.methods.checkSignUpUserEmail(event);
+                        }, 500);
+                    });
                 } 
             }
         }

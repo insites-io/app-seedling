@@ -11,7 +11,7 @@ var apiServices = (function () {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('[name="csrf-token"]').content
+            'X-CSRF-TOKEN': (document.querySelector('[name="csrf-token"]')?.content || '')
         }
     };
 
