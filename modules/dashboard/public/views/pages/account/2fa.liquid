@@ -33,6 +33,10 @@ metadata: {
             assign goto = '/dashboard'
         endif
 
+        comment
+        Redirect logic: If return_to is provided and not the verify-2fa page itself,
+        redirect to original destination. Exclude JSON endpoints to prevent redirect loops.
+        endcomment
         if return_to != blank and return_to_decoded != '/verify-2fa'
             unless return_to contains ".json"
                 assign goto = return_to | url_decode

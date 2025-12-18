@@ -1,0 +1,18 @@
+{
+  "name": "app-seedling",
+  "version": "1.0.0",
+  "description": "E2E tests for Seedling dashboard and website modules",
+  "scripts": {
+    "test": "MPKIT_URL=https://insites-app-seedling-uat.staging.oregon.platform-os.com testcafe chrome:headless modules/*/test/**/*.js",
+    "test:dashboard": "MPKIT_URL=https://insites-app-seedling-uat.staging.oregon.platform-os.com testcafe chrome:headless modules/dashboard/test/**/*.js",
+    "test:website": "MPKIT_URL=https://insites-app-seedling-uat.staging.oregon.platform-os.com testcafe chrome:headless modules/website/test/**/*.js",
+    "test:ui": "MPKIT_URL=https://insites-app-seedling-uat.staging.oregon.platform-os.com testcafe chrome modules/*/test/**/*.js"
+  },
+  "devDependencies": {
+    "testcafe": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

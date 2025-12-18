@@ -22,7 +22,10 @@ because the page will be cached base on the cache key
 {%- graphql site_last_updated = "modules/website/page_cache/check_site_update_date" -%}
 
 
-{% comment %} Set an array for the update dates {% endcomment %}
+{% comment %} 
+Initialize empty array using split trick (Liquid doesn't have array literal syntax).
+This collects all update timestamps to find the most recent change.
+{% endcomment %}
 {%- assign date_array = ',' | split: "," -%}
 
 {% comment %} Add values on the array for the update dates {% endcomment %}
@@ -55,7 +58,11 @@ because the page will be cached base on the cache key
     endif
 %}
 
-{% comment %} Sort the array so the latest date would be used {% endcomment %}
+{% comment %} 
+Sort array ascending, then use .last to get most recent timestamp.
+Convert to Unix timestamp (%s) and prepend URL to create unique cache key per page/params.
+This ensures cache invalidates when any tracked content or the page URL changes.
+{% endcomment %}
 {%- assign date_array = date_array | sort -%}
 
 {% comment %} Prepend context.location.url to be added in key as it contains all of the params (which allows for paginated caching) {% endcomment %}

@@ -1,3 +1,8 @@
+---
+metadata: {
+    graphql_name: "trigger_api_call"
+}
+---
 mutation trigger_api_call($name: String!, $data:HashObject) {
   items: api_call_send(
       template: {

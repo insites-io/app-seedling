@@ -1,9 +1,18 @@
+---
+metadata: {
+    graphql_name: "check_user_email_signup"
+}
+---
+# Purpose: Checks if email exists and whether it's associated with a CRM contact profile
+# Used by: modules/dashboard/public/views/pages/api/account/email/get.liquid (registration validation)
+# Parameters:
+#   - $email: Email address to check
+# Returns: User with profiles array to determine if email is already registered
 query check_user_email_signup($email:String){
   items: users(
     page: 1,
     per_page: 100,
     filter: {
-      deleted_at: { exists:false }
       email: { value: $email }
     }
   ){

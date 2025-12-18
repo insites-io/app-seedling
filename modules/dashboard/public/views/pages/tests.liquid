@@ -1,0 +1,58 @@
+---
+slug: tests
+searchable: false
+metadata: {
+    "status": "published",
+    "api_endpoint_name": "tests",
+    "open_graph:url": "",
+    "open_graph:type": "",
+    "open_graph:image": "",
+    "open_graph:title": "Unit Tests",
+    "open_graph:description": "Unit Tests Runner",
+    "open_graph:site_name": "",
+    "meta_title": "Unit Tests",
+    "page_title": "Unit Tests",
+    "meta_description": "Unit Tests Runner",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "sitemap_enabled": false,
+    "sitemap_priority": "1.0",
+    "sitemap_order": "9999",
+    "sitemap_changefreq": "never"
+}
+---
+
+{%- assign test_name = context.params.name | default: null -%}
+
+{%- if test_name -%}
+  {%- comment -%} Run a specific test {% endcomment -%}
+  {%- liquid
+    assign test_path = 'modules/dashboard/test/commands/' | append: test_name
+    include test_path
+  -%}
+{%- else -%}
+  {%- comment -%} Run all tests {% endcomment -%}
+  {%- parse_json all_results -%}[]{%- endparse_json -%}
+  
+  {%- comment -%} Run check_user_email_signup_test {% endcomment -%}
+  {%- liquid
+    include 'modules/dashboard/test/commands/account/check_user_email_signup_test'
+    if contract
+      assign test_result = contract
+    else
+      assign test_result = '{"valid": false, "errors": {}}' | parse_json
+    endif
+    assign test_result = test_result | add_hash_key: 'test_name', 'commands/account/check_user_email_signup_test'
+    assign all_results = all_results | add_to_array: test_result
+  -%}
+  
+  {%- parse_json final_results -%}
+  {
+    "total_tests": {{ all_results.size }},
+    "results": {{ all_results | json }}
+  }
+  {%- endparse_json -%}
+  
+  {{ final_results }}
+{%- endif -%}
+

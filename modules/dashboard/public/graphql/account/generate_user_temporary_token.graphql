@@ -1,3 +1,14 @@
+---
+metadata: {
+    graphql_name: "generate_user_temporary_token"
+}
+---
+# Purpose: Generates a temporary token for password reset flow
+# Used by: modules/dashboard/public/views/pages/api/account/generate_password_token.liquid
+# Parameters:
+#   - $email: User email address
+# Returns: User ID and temporary_token valid for 24 hours
+# Note: Token expires after 24 hours (valid_for: 24)
 query generate_user_temporary_token($email: String) {
   items: users(
     per_page: 1
