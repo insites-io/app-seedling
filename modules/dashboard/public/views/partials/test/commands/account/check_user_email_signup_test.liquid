@@ -1,0 +1,140 @@
+---
+metadata: {
+    partial_name: "Test | Check User Email Signup",
+}
+---
+{% comment %}
+  Unit test for the check_user_email_signup API endpoint
+  Tests the GraphQL query and email validation logic
+{% endcomment %}
+
+{% liquid
+  assign contract = '{"errors": {}, "valid": true}' | parse_json
+%}
+
+{% comment %} Test 1: Valid email (new email that doesn't exist) {% endcomment %}
+{% parse_json test_email_valid %}
+{
+  "email": "test-new-{{ 'now' | date: '%s' }}-{{ 'now' | date: '%N' }}@example.com"
+}
+{% endparse_json %}
+
+{% liquid
+  graphql results = 'modules/dashboard/account/check_user_email_signup', email: test_email_valid.email
+  assign items = results | dig: 'items'
+  
+  unless items.total_entries == 0
+    include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'valid_email_test', message: 'Expected email to not exist in database'
+  endunless
+%}
+
+{% comment %} Test 2: Invalid email (email with CRM profile) {% endcomment %}
+{% comment %} 
+  Note: This test requires a user with CRM profile to exist.
+  You may need to create test data or adjust the email accordingly.
+{% endcomment %}
+{% parse_json test_email_invalid %}
+{
+  "email": "existing-crm@example.com"
+}
+{% endparse_json %}
+
+{% liquid
+  graphql results_invalid = 'modules/dashboard/account/check_user_email_signup', email: test_email_invalid.email
+  assign items_invalid = results_invalid | dig: 'items'
+  
+  if items_invalid.total_entries > 0
+    assign item = items_invalid | dig: 'results' | first
+    assign find_profile = item.profiles | array_find_index: profile_type: 'modules/dashboard/client'
+
+    unless find_profile.size > 0
+      include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'invalid_email_test', message: 'Expected email to have Client profile but none found'
+    endunless
+  else
+    comment
+      If test email doesn't exist, skip this test (requires test data setup)
+    endcomment
+  endif
+%}
+
+{% comment %} Test 3: No-profile email (email exists but no CRM profile) {% endcomment %}
+{% comment %} 
+  Note: This test requires a user without CRM profile to exist.
+  You may need to create test data or adjust the email accordingly.
+{% endcomment %}
+{% parse_json test_email_no_profile %}
+{
+  "email": "existing-no-profile@example.com"
+}
+{% endparse_json %}
+
+{% liquid
+  graphql results_no_profile = 'modules/dashboard/account/check_user_email_signup', email: test_email_no_profile.email
+  assign items_no_profile = results_no_profile | dig: 'items'
+  
+  if items_no_profile.total_entries > 0
+    assign item_no_profile = items_no_profile | dig: 'results' | first
+    assign find_profile_no_profile = item_no_profile.profiles | array_find_index: profile_type: 'modules/insites_core/crm_contact'
+    
+    if find_profile_no_profile.size > 0
+      include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'no_profile_email_test', message: 'Expected email to not have CRM profile but profile found'
+    endif
+    
+    unless item_no_profile.id
+      include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'no_profile_email_test', message: 'Expected user ID to exist for no-profile email'
+    endunless
+  else
+    comment
+      If test email doesn't exist, skip this test (requires test data setup)
+    endcomment
+  endif
+%}
+
+{% comment %} Test 4: Missing email parameter {% endcomment %}
+{% liquid
+  graphql results_missing = 'modules/dashboard/account/check_user_email_signup', email: null
+  assign items_missing = results_missing | dig: 'items'
+  
+  comment
+    GraphQL should handle null email gracefully - should return empty results or handle appropriately
+  endcomment
+  unless items_missing
+    include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'missing_email_test', message: 'Expected GraphQL to handle null email parameter'
+  endunless
+%}
+
+{% comment %} Test 5: Invalid email format {% endcomment %}
+{% parse_json test_email_invalid_format %}
+{
+  "email": "not-an-email"
+}
+{% endparse_json %}
+
+{% liquid
+  graphql results_invalid_format = 'modules/dashboard/account/check_user_email_signup', email: test_email_invalid_format.email
+  assign items_invalid_format = results_invalid_format | dig: 'items'
+  
+  comment
+    GraphQL should handle invalid email format - should return empty results
+  endcomment
+  unless items_invalid_format
+    include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'invalid_format_email_test', message: 'Expected GraphQL to handle invalid email format'
+  endunless
+%}
+
+{% comment %} Test 6: Verify GraphQL query structure {% endcomment %}
+{% liquid
+  graphql results_structure = 'modules/dashboard/account/check_user_email_signup', email: test_email_invalid.email
+  assign items_structure = results_structure | dig: 'items'
+  
+  unless items_structure.total_entries != blank
+    include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'graphql_structure_test', message: 'Expected GraphQL to return total_entries field'
+  endunless
+  
+  unless items_structure.results != blank
+    include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'graphql_structure_test', message: 'Expected GraphQL to return results array'
+  endunless
+%}
+
+{% comment %} Return test results {% endcomment %}
+{{ contract }}

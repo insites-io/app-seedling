@@ -29,3 +29,8 @@ tmp/
 app.zip
 .insites
 .DS_Store
+
+# Test artifacts
+test/screenshots/
+test/videos/
+test/reports/

@@ -1,3 +1,8 @@
+---
+metadata: {
+    graphql_name: "log_last_login_date"
+}
+---
 mutation log_last_login_date(
   $id: ID!
   $date: String!

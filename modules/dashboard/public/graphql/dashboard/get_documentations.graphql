@@ -1,3 +1,14 @@
+---
+metadata: {
+    graphql_name: "get_documentations"
+}
+---
+# Purpose: Fetches paginated documentation records for display in dashboard
+# Used by: modules/dashboard/public/views/pages/dashboard.liquid
+# Parameters:
+#   - $page: Page number (default: 1)
+#   - $size: Records per page (default: 10)
+# Returns: Paginated list of enabled documentation records with images, sorted by sort_order
 query get_documentations(
     $page: Int = 1, 
     $size: Int = 10,
@@ -7,7 +18,6 @@ query get_documentations(
         per_page: $size
         filter: {
             table: { value: "modules/dashboard/documentation" }
-            deleted_at: { exists: false }
             properties: [
                 { name: "enabled", value_boolean: true }
             ]

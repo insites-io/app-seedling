@@ -2,9 +2,10 @@
 name: is_user_logged_in
 redirect_to: 401
 metadata: {
-    "auth_policy_name": "User Authentication",
-    "auth_policy_key": "is_user_logged_in"
+    "auth_policy_name": "User Authentication"
 }
+---
+  
 {% liquid
   graphql data = 'modules/dashboard/account/get_current_user'
 

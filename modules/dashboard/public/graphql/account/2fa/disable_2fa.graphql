@@ -1,3 +1,14 @@
+---
+metadata: {
+    graphql_name: "disable_two_fa"
+}
+---
+# Purpose: Disables 2FA for a user by setting otp_configured to false
+# Used by: modules/dashboard/public/views/pages/profile.liquid (2FA deactivation)
+# Parameters:
+#   - $id: User ID
+# Returns: Updated user with otp_configured status
+# Note: deleted_at: null ensures profile exists even if previously soft-deleted
 mutation disable_two_fa (
     $id: ID!,
 ) {

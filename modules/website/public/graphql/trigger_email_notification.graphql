@@ -1,3 +1,8 @@
+---
+metadata: {
+    graphql_name: "trigger_email_notification"
+}
+---
 mutation trigger_email_notification (
   $data:HashObject, 
   $name: String!

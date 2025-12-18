@@ -1,3 +1,13 @@
+---
+metadata: {
+    graphql_name: "check_records_update_date"
+}
+---
+# Purpose: Finds the most recently updated record across specified model tables for cache invalidation
+# Used by: modules/website/public/views/partials/cache/generate_cache_key.liquid
+# Parameters:
+#   - $tables: Array of model table names to check
+# Returns: Most recent updated_at timestamp from the specified tables (per_page: 3, sorted DESC, takes first)
 query check_records_update_date( $tables:[String!] ) {
   items: records(
     per_page: 3

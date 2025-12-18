@@ -1,3 +1,16 @@
+---
+metadata: {
+    graphql_name: "configure_user_otp"
+}
+---
+# Purpose: Updates user's 2FA configuration and session status
+# Used by: modules/dashboard/public/views/pages/account/2fa.liquid (enable/disable 2FA)
+# Parameters:
+#   - $id: User ID
+#   - $otp_configured: Boolean to enable/disable 2FA
+#   - $is_currently_logged_in: Boolean to mark session as 2FA-verified
+# Returns: Updated user with otp_configured status
+# Note: deleted_at: null ensures profile exists even if previously soft-deleted
 mutation configure_user_otp (
     $id: ID!,
     $otp_configured: Boolean,

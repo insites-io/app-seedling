@@ -4,6 +4,7 @@ format: json
 method: get
 searchable: false
 metadata: {
+    "api_endpoint_name": "check-user-email-signup",
     "status": "published",
     "open_graph:url": "",
     "open_graph:type": "",
@@ -31,11 +32,18 @@ metadata: {
     liquid
     if results.total_entries > 0
         assign item = results | dig: "results" | first
+        comment
+        Check if email has CRM contact profile: if found, email is already registered and cannot be reused.
+        array_find_index returns array of matches; size > 0 means profile exists.
+        endcomment
         assign find_profile = item.profiles | array_find_index: profile_type: "modules/insites_core/crm_contact"
         if find_profile.size > 0
             assign email_check = email_check | add_hash_key: "email_status", "invalid"
             assign email_check = email_check | add_hash_key: "message", "Email has already been used."
         else
+            comment
+            Email exists but no CRM profile - user can update existing account
+            endcomment
             assign email_check = email_check | add_hash_key: "email_id", item.id 
             assign email_check = email_check | add_hash_key: "email_status", "no-profile"
             assign email_check = email_check | add_hash_key: "message", "Email needs update."

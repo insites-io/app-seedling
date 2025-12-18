@@ -1,0 +1,64 @@
+---
+slug: api/users/:id
+format: json
+method: patch
+searchable: false
+metadata: {
+    "api_endpoint_name": "update-user",
+    "status": "published",
+    "open_graph:url": "",
+    "open_graph:type": "",
+    "open_graph:image": "",
+    "open_graph:title": "Update User API",
+    "open_graph:description": "Update User API",
+    "open_graph:site_name": "",
+    "meta_title": "Update User API",
+    "page_title": "Update User API",
+    "meta_description": "Update User API",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "sitemap_enabled": false,
+    "sitemap_priority": "1.0",
+    "sitemap_order": "9999",
+    "sitemap_changefreq": "never"
+}
+---
+
+{%- liquid
+  assign user_id = context.params.id | default: context.params.resource_id | default: null
+-%}
+
+{%- if user_id -%}
+  {%- form 'my_details', resource_id: user_id -%}
+    {%- if form.errors.size > 0 -%}
+      {%- parse_json response -%}
+      {
+        "errors": {{ form.errors | json }},
+        "valid": false
+      }
+      {%- endparse_json -%}
+    {%- else -%}
+      {%- parse_json response -%}
+      {
+        "id": {{ form.id | json }},
+        "email": {{ form.email | json }},
+        "first_name": {{ form.first_name | json }},
+        "last_name": {{ form.last_name | json }},
+        "valid": true
+      }
+      {%- endparse_json -%}
+    {%- endif -%}
+    {{ response }}
+  {%- endform -%}
+{%- else -%}
+  {%- parse_json error_response -%}
+  {
+    "errors": {
+      "id": ["User ID is required"]
+    },
+    "valid": false
+  }
+  {%- endparse_json -%}
+  {{ error_response }}
+{%- endif -%}
+
