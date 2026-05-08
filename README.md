@@ -1,59 +1,71 @@
-## Project overview
+# app-seedling
 
-Seedling contains the public assets that power the dashboard and marketing site. The codebase is organized as Liquid templates, GraphQL documents, and small JavaScript helpers that run in the browser (no server runtime inside this repo). The `modules/dashboard` folder owns authenticated experiences such as account, 2FA, profile management, and documentation pages; `modules/website` serves the public-facing marketing site.
+A starter Insites application that provides a reference implementation for an authenticated dashboard and a public marketing site. The codebase is organised as Liquid templates, GraphQL documents, and small vanilla JavaScript helpers (built around axios) that run in the browser. There is no server runtime in this repo. Fork it as a starting point for your own Insites application.
 
-## Documentation
+## Stack
 
-For detailed documentation, see the [Insites Application - Seedling Documentation v1.0.0](https://uploads.prod01.sydney.platformos.com/instances/572/property_uploads/modules/ins_console/marketplace_listings/documentation_file/bd2fd432-9819-4e48-b924-fb453a0ab338/Insites%20Application%20-%20Seedling%20Documentation%20v1.0.0.pdf) PDF.
+- Liquid templates for layouts, pages, and partials
+- GraphQL documents for data access
+- Vanilla JavaScript with axios for browser-side helpers
+- TestCafe for end-to-end tests
+- Runs on the Insites platform
 
-## Installation instructions
+The repo is split into two modules:
 
-1) Clone the repository: `git clone <repo-url> && cd app-seedling`  
-2) There is no build step required to view or edit the Liquid/GraphQL files. Open the `modules/` tree in your editor and work directly against the source files.  
-3) If you use optional tooling (formatters, linters, or bundlers), install a recent Node.js LTS (18+) and add your toolchain locally; compiled assets should be checked in alongside the readable sources.  
-4) Deploy/sync the `modules/` directory to your target platform as needed (for example via your platform’s CLI or file sync).
+- `modules/dashboard` — authenticated experiences (account, 2FA, profile management, documentation pages)
+- `modules/website` — public-facing marketing site
 
-## Architecture overview
+## Getting started
 
-- `modules/dashboard/public/authorization_policies`: Liquid auth policies that gate protected routes (2FA, session checks).
-- `modules/dashboard/public/graphql`: GraphQL documents used by account and dashboard flows.
-- `modules/dashboard/public/assets`: Unminified JS helpers plus minified counterparts for dashboard flows (sign in, 2FA, profile, API helpers).
-- `modules/dashboard/public/views`: Layouts, pages, and partials for authenticated experiences.
-- `modules/website/public`: Static marketing site layouts, styles, scripts, and GraphQL documents that support caching and notifications.
-- Schema, migrations, and user profile type definitions live beside the modules to keep runtime configuration close to the templates.
+This application is designed to run on a deployed Insites instance. You will need:
 
-## Development guidelines
+1. An Insites instance (provisioned via CloudShell). See [docs.insites.io](https://docs.insites.io) for setup.
+2. Node.js 18 or newer (only required if you want to run the test suite).
 
-- Edit the readable sources (`*.js`, `*.liquid`, `*.graphql`) first; keep minified assets in sync when they are the deployed artifacts.
-- Auth policies must explicitly echo `true` or `false` and handle missing user data defensively.
-- GraphQL documents should be shared and de-duplicated; prefer updating a single query and reusing it instead of copying.
-- Keep console logging behind a feature flag (e.g., `window.APP_DEBUG === true`) or remove it entirely before shipping.
-- Favor small, composable partials and keep forms/scripts close to their associated view for discoverability.
+To work with the source:
 
-## Common patterns and examples
+```bash
+git clone https://github.com/insites-io/app-seedling.git
+cd app-seedling
+```
 
-- **Authorization**: Policies query `modules/dashboard/account/check_2fa_setup` and echo booleans based on 2FA and session state (`authorization_policies/*.liquid`).
-- **GraphQL usage**: Templates request data with `{% graphql variable = 'modules/dashboard/account/check_2fa_setup' %}` then consume it with Liquid assignments.
-- **Form validation**: All forms use the unified `FormValidation.validateAndSubmit(event, options)` handler. Client-side validation provides immediate feedback; server-side validation (defined in form YAML) is the source of truth. See `docs/FORM_VALIDATION.md` for the complete strategy.
-- **API helpers**: `modules/dashboard/public/assets/services/apiServices.js` wraps Axios; error logging is gated by `window.APP_DEBUG` to avoid noisy consoles in production. A similar helper exists for marketing forms at `modules/website/public/assets/services/formServices.js`.
+There is no build step. Edit the Liquid, GraphQL, and JavaScript files directly under `modules/`, then deploy them to your Insites instance using the Insites CLI or CloudShell.
 
-More examples live in `docs/EXAMPLES.md`.
+## Architecture
 
-## Caching strategy
+- `modules/dashboard/public/authorization_policies` — Liquid auth policies that gate protected routes
+- `modules/dashboard/public/graphql` — GraphQL documents for account and dashboard flows
+- `modules/dashboard/public/assets` — JavaScript helpers (sign in, 2FA, profile, API services)
+- `modules/dashboard/public/views` — Layouts, pages, and partials for authenticated experiences
+- `modules/website/public` — Static marketing site layouts, styles, scripts, and GraphQL documents
+- Schema, migrations, and user profile type definitions live beside the modules
 
-- Cache static marketing pages by default; see `modules/website/public/graphql/page_cache` for update timestamps to drive cache invalidation.
-- Avoid caching routes that reference `current_user` or private profile data.
-- Use short TTLs (5–15 minutes) on public GraphQL page-cache endpoints; bypass caching for dashboard API responses.
-- Details in `docs/CACHING.md`.
+## Patterns
 
-## Environment configuration examples
+- **Authorization** — Policies query `modules/dashboard/account/check_2fa_setup` and echo booleans based on 2FA and session state.
+- **GraphQL usage** — Templates load data with `{% graphql variable = 'modules/dashboard/account/check_2fa_setup' %}` and consume it with Liquid assignments.
+- **Form validation** — Forms use the unified `FormValidation.validateAndSubmit(event, options)` handler. Client-side validation provides immediate feedback; server-side validation (defined in form YAML) is the source of truth.
+- **API helpers** — `modules/dashboard/public/assets/services/apiServices.js` wraps axios; error logging is gated by `window.APP_DEBUG`.
 
-- Front-end flags such as `APP_DEBUG`, `API_BASE_URL`, and `FORMS_API_BASE_URL` can be injected via inline script tags or your platform’s environment settings.
-- Keep CSRF token selectors consistent with `CSRF_TOKEN_NAME` (default `csrf-token`).
-- See `docs/ENVIRONMENT.md` for example snippets and guidance.
+## Testing
 
-## Migrations cleanup guide
+End-to-end tests use TestCafe and run against a live Insites instance. The instance URL is read from the `MPKIT_URL` environment variable.
 
-- Migrations live in `modules/dashboard/public/migrations/`; clean obsolete seeds and duplicates carefully.
-- Follow the safety checklist in `docs/MIGRATIONS_CLEANUP.md` before removing or consolidating files.
+```bash
+npm install
+export MPKIT_URL=https://your-instance.insites.io
+npm test                 # all modules, headless Chrome
+npm run test:dashboard   # dashboard tests only
+npm run test:website     # website tests only
+npm run test:ui          # full Chrome UI (not headless)
+```
 
+If `MPKIT_URL` is not set, the scripts fall back to a placeholder which will not resolve. Set the variable to match the instance you want to test against.
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, including the Developer Certificate of Origin (DCO) sign-off requirement. Please also read the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Licence
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
