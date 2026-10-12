@@ -7,10 +7,10 @@ metadata: {
    {% assign hashed = 16 | random_string | compute_hmac: "nonce", "MD4" %}
     {%- content_for 'page_nonce' -%}{{ context.instance.uuid | base64_encode |  append: hashed }}{%- endcontent_for -%}
     {%- capture page_nonce -%}{%- yield 'page_nonce' -%}{%- endcapture -%}
-    {% include "modules/insites_core/sessions/delete_session_variables" %}
+    {% include "modules/insites_crm/sessions/delete_session_variables" %}
     
     <form action="/account/2fa" method="post" html-enctype="multipart/form-data" accept-charset="utf-8" >
-        {% render 'modules/insites_core/authenticity_token', context: context %}
+        {% render 'modules/insites_crm/authenticity_token', context: context %}
         <div class="setup-2fa-container">
             <div class="grid-x">
                 <div class="large-12 cell text-center {%-  if context.params.slug == 'profile' -%}text-left{%- endif -%}">
@@ -30,7 +30,7 @@ metadata: {
                 </div>
                 <div class="large-12 cell text-center">
                     {% assign issuer = 'Insites Instance ' |  append: context.instance.name %}
-                    {% graphql generate_secret_key = 'modules/insites_core/two_factor_auth/generate_secret_key', email: context.current_user.email, issuer: issuer %}
+                    {% graphql generate_secret_key = 'modules/dashboard/account/2fa/generate_secret_key', email: context.current_user.email, issuer: issuer %}
                     {% assign otp = generate_secret_key.items.results.first | fetch: "otp" %}
                     
                     <div class="qr-code-details-wrapper">

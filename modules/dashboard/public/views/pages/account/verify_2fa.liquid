@@ -29,14 +29,14 @@ authorization_policies:
 {% assign hashed = 16 | random_string | compute_hmac: "nonce", "MD4" %}
 {%- content_for 'page_nonce' -%}{{ context.instance.uuid | base64_encode |  append: hashed }}{%- endcontent_for -%}
 {%- capture page_nonce -%}{%- yield 'page_nonce' -%}{%- endcapture -%}
-{% include "modules/insites_core/sessions/delete_session_variables" %}
+{% include "modules/insites_crm/sessions/delete_session_variables" %}
 <div class="verify-2fa-wrapper">
 
 
 <div class="spacer section"></div>
 
 <form action="{% if context.flash.alert == "Your 2FA has already been setup." %}/account/2fa{% else %}/account/2fa?return_to={{ context.params.return_to |  url_encode }}{% endif %}" method="post">
-    {% render 'modules/insites_core/authenticity_token', context: context %}
+    {% render 'modules/insites_crm/authenticity_token', context: context %}
     <div class="setup-2fa-container verification">
         <div class="grid-x">
             <div class="large-12 cell text-center">

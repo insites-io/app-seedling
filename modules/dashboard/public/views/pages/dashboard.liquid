@@ -28,7 +28,7 @@ dynamic_cache:
     {%- parse_json models -%}
     [
       "modules/insites_site_manager/insites_global_content",
-      "modules/insites_core/insites_system_fields",
+      "modules/insites_crm/crm_system_field",
     ]
     {%- endparse_json -%}
     {%- include "modules/website/cache/generate_cache_key", models: models -%}

@@ -13,7 +13,7 @@ query get_current_user {
     external_id
 
     crm_contact: profiles(
-      profile_type: "modules/insites_core/crm_contact"
+      profile_type: "modules/insites_crm/crm_contact"
     ) {
       id
       company_uuid: property(name: "company_uuid")

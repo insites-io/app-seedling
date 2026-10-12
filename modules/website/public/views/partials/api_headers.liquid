@@ -7,7 +7,7 @@ metadata: {
     API Header for website, you can put additional header fields here
 {%- endcomment -%}
 
-{%  graphql instance_api_key = 'modules/insites_core/instance_configurations/get_instance_configuration', 
+{%  graphql instance_api_key = 'modules/insites_crm/instance_configurations/get_instance_configuration', 
     name: "instance_api_key" | dig: 'items','results' | first | dig: 'key' %}
 
 {
