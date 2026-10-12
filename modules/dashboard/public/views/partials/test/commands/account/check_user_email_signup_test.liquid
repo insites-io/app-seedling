@@ -74,7 +74,7 @@ metadata: {
   
   if items_no_profile.total_entries > 0
     assign item_no_profile = items_no_profile | dig: 'results' | first
-    assign find_profile_no_profile = item_no_profile.profiles | array_find_index: profile_type: 'modules/insites_core/crm_contact'
+    assign find_profile_no_profile = item_no_profile.profiles | array_find_index: profile_type: 'modules/insites_crm/crm_contact'
     
     if find_profile_no_profile.size > 0
       include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'no_profile_email_test', message: 'Expected email to not have CRM profile but profile found'
