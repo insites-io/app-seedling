@@ -4,11 +4,36 @@ layout: application
 format: json
 method: post
 searchable: false
+authorization_policies:
+  - modules/dashboard/has_passed_2fa
 metadata: {
     api_endpoint_name: "disable-2fa"
 }
---- 
+---
 
-{% liquid
-    graphql configure_user_otp = 'modules/dashboard/account/2fa/configure_user_otp', id: context.current_user.id, otp_configured: false, is_currently_logged_in: true
-%}
+{%- liquid
+  comment
+    Turning 2FA off needs a current code from the authenticator app, checked
+    against the signed-in user. This never marks the session as having passed 2FA.
+  endcomment
+  assign object = {}
+  assign object['id'] = context.current_user.id
+  assign object['otp_code'] = context.params.otp_code
+
+  function allowed = 'modules/dashboard/account/rate_limit/allow', action: 'otp', key: context.current_user.id, max_per_key: 5, max_per_ip: 50
+  unless allowed
+    response_status 429
+    include 'modules/dashboard/api/error_response', error_type: 'rate_limit', errors: '{"otp_code": ["Too many attempts. Try again later."]}', status_code: 429
+    break
+  endunless
+
+  function object = 'modules/dashboard/account/2fa_functions/verify_otp', object: object
+  unless object.valid
+    response_status 422
+    include 'modules/dashboard/api/error_response', error_type: 'validation', errors: '{"otp_code": ["The code is not valid."]}', status_code: 422
+    break
+  endunless
+
+  graphql configure_user_otp = 'modules/dashboard/account/2fa/configure_user_otp', id: context.current_user.id, otp_configured: false
+-%}
+{"success": true, "valid": true}

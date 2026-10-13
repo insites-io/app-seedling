@@ -1,0 +1,31 @@
+---
+metadata: {
+    partial_name: "Account | Safe Return To",
+}
+---
+{%- comment -%}
+  Returns path when it is a path on this site, otherwise blank. Called with:
+    function return_to = 'modules/dashboard/account/safe_return_to', path: context.params.return_to
+  Allowed: starts with a single / (not // and not /\), contains no backslash.
+  The 2FA pages themselves and .json endpoints are excluded to prevent redirect loops.
+{%- endcomment -%}
+{%- liquid
+  assign path = path | default: '' | append: '' | strip
+  assign first_char = path | slice: 0, 1
+  assign second_char = path | slice: 1, 1
+  comment
+    Liquid strings cannot hold a backslash, so look for its encoded form (%5C).
+  endcomment
+  assign encoded_path = path | url_encode
+
+  if first_char != '/' or second_char == '/' or encoded_path contains '%5C'
+    return ''
+  endif
+
+  assign bare_path = path | split: '?' | first
+  if bare_path == '/verify-2fa' or bare_path == '/account/2fa' or path contains '.json'
+    return ''
+  endif
+
+  return path
+-%}

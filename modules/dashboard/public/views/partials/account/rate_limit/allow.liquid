@@ -1,0 +1,37 @@
+---
+metadata: {
+    partial_name: "Rate Limit | Allow",
+}
+---
+{%- comment -%}
+  Counts recent attempts at an action and records this one if it is allowed. Called with:
+    function allowed = 'modules/dashboard/account/rate_limit/allow', action: 'sign_in', key: email, max_per_key: 10, max_per_ip: 50
+  @params
+    action      - sign_in, otp, forgot_password, email_check
+    key         - what the attempt is about (email or user id); blank limits by IP only
+    max_per_key - attempts allowed per key in the window
+    max_per_ip  - attempts allowed per IP address in the window
+    window      - seconds, default 900 (15 minutes)
+  Returns true when the attempt may go ahead, false when a limit is reached.
+  A refused attempt is not recorded, so a blocked caller cannot extend its own lockout.
+{%- endcomment -%}
+{%- liquid
+  assign window = window | default: 900
+  assign key = key | default: '' | append: '' | downcase | strip
+  function ip = 'modules/dashboard/account/rate_limit/client_ip'
+
+  assign now_unix = 'now' | date: '%s' | plus: 0
+  assign since_iso = now_unix | minus: window | date: '%Y-%m-%dT%H:%M:%SZ'
+
+  graphql counts = 'modules/dashboard/account/rate_limit/count_attempts', action: action, key: key, ip: ip, since: since_iso
+
+  if counts.for_ip.total_entries >= max_per_ip
+    return false
+  endif
+  if key != blank and counts.for_key.total_entries >= max_per_key
+    return false
+  endif
+
+  graphql recorded = 'modules/dashboard/account/rate_limit/record_attempt', action: action, key: key, ip: ip
+  return true
+-%}

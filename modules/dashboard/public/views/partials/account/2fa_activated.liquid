@@ -26,7 +26,10 @@ metadata: {
     twoFactorButton.addEventListener('insClick', async ()=> {
         let confirm = await Swal.fire({
                     title: customIcon + `Turn Off Two-Factor Authentication`,
-                    html: `Turning off two-factor authentication will remove the extra security on your account.`,
+                    html: `Turning off two-factor authentication will remove the extra security on your account. Enter the current code from your authentication app to confirm.`,
+                    input: 'text',
+                    inputAttributes: { inputmode: 'numeric', maxlength: 6, autocomplete: 'one-time-code' },
+                    inputValidator: (value) => /^[0-9]{6}$/.test(value) ? null : 'Enter the 6-digit code.',
                     confirmButtonText: `TURN OFF`,
                     showCancelButton: true,
                     cancelButtonText: `Cancel`,
@@ -35,9 +38,18 @@ metadata: {
                     }).then( async (result) => {
                         if (result.isConfirmed) {
                             let url = '/disable-2fa'
-                            let response = await apiServices.processRequest('post', url); 
-                            window.location.href = "/profile";            
-
+                            // The page has no csrf-token meta tag, so send this session's token explicitly
+                            let headers = {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-Token': {{ context.authenticity_token | json }}
+                            };
+                            let response = await apiServices.processRequest('post', url, { otp_code: result.value }, headers);
+                            if (response.state) {
+                                window.location.href = "/profile";
+                            } else {
+                                App.events.notyf('error', 'The code is not valid. Please try again.');
+                            }
                         }
                     });
     })

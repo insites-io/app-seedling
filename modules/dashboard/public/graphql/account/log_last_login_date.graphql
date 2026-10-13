@@ -12,7 +12,7 @@ mutation log_last_login_date(
     user: {
       profiles: [
         {
-          name: "modules/insites_crm/administrator",
+          name: "modules/dashboard/client",
           values: { properties: [ { name: "last_login_date", value: $date } ] }
         }
       ]

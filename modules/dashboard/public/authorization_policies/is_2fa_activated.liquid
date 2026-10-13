@@ -1,5 +1,5 @@
 ---
-name: is_2FA_activated
+name: is_2fa_activated
 redirect_to: 403
 metadata: {
     "auth_policy_name": "2FA Configuration"
@@ -19,15 +19,12 @@ metadata: {
     return
   endif
 
-  assign otp_configured = user.otp_configured
-
   comment
-    Echo false explicitly when OTP is not configured to avoid relying on
-    Liquid truthiness for booleans.
+    Allow only when OTP is explicitly true. An empty or missing flag denies.
   endcomment
-  if otp_configured == false
-    echo false
-  else
+  if user.otp_configured == true
     echo true
+  else
+    echo false
   endif
 %}

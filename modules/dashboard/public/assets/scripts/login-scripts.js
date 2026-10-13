@@ -169,11 +169,6 @@ let FormValidation = (function () {
                         // Email is new, proceed with submission
                         formElem.submit();
                         return false; // Prevent default since we're submitting
-                    case 'update':
-                        // Email exists but no profile, update existing user
-                        LoginScript.methods.changeFormToAppend(formElem, emailInputInfo.id);
-                        formElem.submit();
-                        return false; // Prevent default since we're submitting
                     case 'error':
                         // Email is already in use
                         const emailElem = document.getElementById('email');
@@ -262,25 +257,11 @@ let LoginScript = (function () {
                     emailElem.errorMessage = data.message;
                     this.updateEmailInputInfo('error');
                 } 
-                else if(data.email_status == "no-profile") {
-                    //Profile has no profile
-                    emailElem.hasError = false;
-                    this.updateEmailInputInfo('update', data.email_id);
-                } else {
+                else {
                     // New email
                     emailElem.hasError = false;
                     this.updateEmailInputInfo('clean');
                 }
-            },
-            changeFormToAppend(formElement, id){
-                let tmpInput = document.createElement("input");
-                tmpInput.name = "_method";
-                tmpInput.type = "hidden";
-                tmpInput.value = "patch"
-                formElement.appendChild(tmpInput);
-                let tmpSrc = formElement.querySelector('input[name="resource_id"]');
-                tmpSrc.value = id;
-                formElement.action = '/api/users/' + id;
             },
             updateEmailInputInfo(status, id = null){
                 emailInputInfo.status = status;

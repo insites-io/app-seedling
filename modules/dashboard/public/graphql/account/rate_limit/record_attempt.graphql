@@ -1,0 +1,26 @@
+---
+metadata: {
+    graphql_name: "record_attempt"
+}
+---
+# Purpose: Records one attempt at a rate-limited action
+# Used by: modules/dashboard/public/views/partials/account/rate_limit/allow.liquid
+# Parameters:
+#   - $action: Action name (sign_in, otp, forgot_password, email_check)
+#   - $key: What the attempt is about (email or user id)
+#   - $ip: Visitor IP address
+# Returns: The new record id
+mutation record_attempt($action: String!, $key: String, $ip: String!) {
+  record_create(
+    record: {
+      table: "modules/dashboard/auth_attempt"
+      properties: [
+        { name: "action", value: $action }
+        { name: "attempt_key", value: $key }
+        { name: "ip", value: $ip }
+      ]
+    }
+  ) {
+    id
+  }
+}

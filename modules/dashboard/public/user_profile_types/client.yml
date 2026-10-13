@@ -22,5 +22,5 @@ properties:
   type: string  
 - name: otp_configured
   type: boolean  
-- name: is_currently_logged_in
-  type: boolean    
+- name: last_login_date
+  type: string

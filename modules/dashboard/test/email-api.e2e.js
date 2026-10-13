@@ -82,38 +82,13 @@ test('Should return invalid status for email with CRM profile', async t => {
         .expect('email_status' in body).ok('email_status should exist in body')
         .expect('message' in body).ok('message should exist in body');
     
-    // The status could be 'invalid' or 'no-profile' depending on the email's state
+    // Any existing user is reported as taken, and the user id is never returned
     if (body.email_status === 'invalid') {
         await t.expect(body.message).eql('Email has already been used.');
     }
-});
-
-test('Should return no-profile status for email without CRM profile', async t => {
-    // Note: This test assumes you have a test email without a CRM profile
-    // Update the email or set up test data accordingly
-    const emailWithoutProfile = 'no-profile@example.com';
-    const url = `${BASE_URL}${EMAIL_API_PATH}?email=${encodeURIComponent(emailWithoutProfile)}`;
-
-    logRequest('No-profile email request', url);
-    const response = await t.request(url);
-
-    const body = getJsonBody(response);
-
     await t
-        .expect(response.status).eql(200)
-        .expect(response.headers['content-type']).ok()
-        .expect(response.headers['content-type']).contains('application/json');
-
-    await t
-        .expect(body).ok('Response body should be present')
-        .expect('email_status' in body).ok('email_status should exist in body')
-        .expect('message' in body).ok('message should exist in body');
-
-    if (body.email_status === 'no-profile') {
-        await t
-            .expect('email_id' in body).ok('email_id should exist in body when status is no-profile')
-            .expect(body.message).eql('Email needs update.');
-    }
+        .expect(body.email_status).notEql('no-profile')
+        .expect('email_id' in body).notOk('email_id must never be returned');
 });
 
 test('Should handle missing email parameter gracefully', async t => {

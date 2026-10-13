@@ -1,0 +1,36 @@
+---
+name: has_passed_2fa
+metadata: {
+    "auth_policy_name": "Passed 2FA In This Session"
+}
+---
+
+{% liquid
+  graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'
+  assign current_user = check_2fa_setup.current_user
+  assign user = current_user.client | first
+
+  comment
+    Requires a signed-in user with 2FA turned on who has passed 2FA in this
+    session. Used to guard changes to the 2FA setting itself. No redirect_to,
+    so a JSON caller gets a 403.
+  endcomment
+  if current_user.id == blank or user == blank
+    echo false
+    return
+  endif
+
+  if user.otp_configured != true
+    echo false
+    return
+  endif
+
+  assign current_user_id = current_user.id | append: ''
+  assign passed_user_id = context.session.two_factor_user_id | append: ''
+
+  if passed_user_id == current_user_id
+    echo true
+  else
+    echo false
+  endif
+%}

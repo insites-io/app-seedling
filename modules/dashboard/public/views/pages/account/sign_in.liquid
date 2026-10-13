@@ -34,7 +34,7 @@ metadata: {
         <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">
             <h1 class="heading-1 text-center">Sign in</h1>
             <div class="spacer x-large"></div>
-            {%- include_form 'modules/dashboard/sign_in' -%}
+            {%- render 'modules/dashboard/account/sign_in_form', context: context -%}
         </div>
     </div>
     <div class="spacer section"></div>

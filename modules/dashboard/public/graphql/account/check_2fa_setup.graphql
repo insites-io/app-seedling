@@ -3,11 +3,11 @@ metadata: {
     graphql_name: "check_2fa_setup"
 }
 ---
-# Purpose: Checks if current user has 2FA configured and active session status
-# Used by: Authorization policies (is_user_allowed, allow_2fa_verification, is_2FA_activated)
+# Purpose: Checks if current user has 2FA configured
+# Used by: Authorization policies (is_user_allowed, allow_2fa_verification, is_2fa_activated, has_passed_2fa)
 # Returns:
 #   - otp_configured: Boolean indicating if 2FA is set up
-#   - is_currently_logged_in: Boolean indicating if session is verified via 2FA
+#   - id: compared with context.session.two_factor_user_id to tell whether this session passed 2FA
 {
     current_user {
         id
@@ -15,7 +15,6 @@ metadata: {
         email
         client: profiles(profile_type: "modules/dashboard/client") {
             otp_configured: property_boolean(name: "otp_configured")
-            is_currently_logged_in: property_boolean(name: "is_currently_logged_in")
         }
     }
 }

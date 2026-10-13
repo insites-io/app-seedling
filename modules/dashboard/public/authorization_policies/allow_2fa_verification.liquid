@@ -8,23 +8,25 @@ metadata: {
 
 {% liquid
   graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'
-  assign user = check_2fa_setup.current_user.client | first
+  assign current_user = check_2fa_setup.current_user
+  assign user = current_user.client | first
 
   comment
-    Only users without an active session should be allowed to perform the
-    2FA verification flow. If the profile is missing, deny.
+    Only sessions that have not passed 2FA yet should see the verification
+    flow. If the profile is missing, deny.
   endcomment
   if user == blank
     echo false
     return
   endif
 
-  assign is_currently_logged_in = user.is_currently_logged_in
+  assign current_user_id = current_user.id | append: ''
+  assign passed_user_id = context.session.two_factor_user_id | append: ''
 
   comment
-    If the session is already active, block verification to prevent replays.
+    If this session already passed 2FA, block verification to prevent replays.
   endcomment
-  if is_currently_logged_in == true
+  if passed_user_id == current_user_id
     echo false
   else
     echo true

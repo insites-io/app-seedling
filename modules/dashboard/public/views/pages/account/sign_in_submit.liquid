@@ -1,0 +1,50 @@
+---
+slug: sign-in
+method: post
+layout: ''
+searchable: false
+metadata: {
+    page_name: "Sign In - Submit",
+}
+---
+
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
+
+  assign email = context.params.email | default: '' | strip | downcase
+  assign password = context.params.password | default: ''
+  if email == blank or password == blank
+    redirect_to '/sign-in?error=invalid'
+    break
+  endif
+
+  function allowed = 'modules/dashboard/account/rate_limit/allow', action: 'sign_in', key: email, max_per_key: 10, max_per_ip: 50
+  unless allowed
+    redirect_to '/sign-in?error=too_many'
+    break
+  endunless
+
+  graphql auth = 'modules/dashboard/account/authenticate_password', email: email, password: password
+  assign user = auth.users.results | first
+  if user == blank or user.authenticate.password != true
+    redirect_to '/sign-in?error=invalid'
+    break
+  endif
+
+  comment
+    2FA is passed per session. Clear any earlier value before signing in, so a
+    new sign-in always has to pass 2FA again.
+  endcomment
+  graphql cleared = 'modules/dashboard/account/delete_session', name: 'two_factor_user_id'
+  sign_in user_id: user.id
+
+  assign profile = user.client | first
+  if profile.otp_configured == true
+    redirect_to '/verify-2fa'
+  else
+    redirect_to '/dashboard'
+  endif
+-%}

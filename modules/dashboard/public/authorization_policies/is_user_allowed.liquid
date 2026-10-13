@@ -8,7 +8,8 @@ metadata: {
 
 {% liquid
   graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup'
-  assign user = check_2fa_setup.current_user.client | first
+  assign current_user = check_2fa_setup.current_user
+  assign user = current_user.client | first
 
   comment
     User must exist. If the profile is missing, deny rather than redirecting by
@@ -19,14 +20,15 @@ metadata: {
     return
   endif
 
-  assign is_currently_logged_in = user.is_currently_logged_in
-  assign otp_configured = user.otp_configured
-
   comment
-    Block login if 2FA is configured but the session is not marked as current.
-    Otherwise allow the request to continue.
+    2FA is passed per session, not per user: the 2FA page stores the user id in
+    this session only after a valid code. Another browser signed in with the
+    password alone has no such value and is sent to verify-2fa.
   endcomment
-  if otp_configured == true and is_currently_logged_in == false
+  assign current_user_id = current_user.id | append: ''
+  assign passed_user_id = context.session.two_factor_user_id | append: ''
+
+  if user.otp_configured == true and passed_user_id != current_user_id
     echo false
   else
     echo true

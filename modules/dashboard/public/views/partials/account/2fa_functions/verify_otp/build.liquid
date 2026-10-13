@@ -7,9 +7,8 @@ metadata: {
 
 {% parse_json object %}
   {
-    "email": {{ email | default: object.email | json }},
-    "password": {{ object.password | json }},
-    "otp_code": {{ object.otp_code | json }}
+    "id": {{ object.id | json }},
+    "otp_code": {{ object.otp_code | append: '' | strip | json }}
   }
 {% endparse_json %}
 

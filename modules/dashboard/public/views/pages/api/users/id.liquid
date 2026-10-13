@@ -4,6 +4,7 @@ format: json
 method: patch
 authorization_policies:
   - modules/dashboard/is_user_logged_in
+  - modules/dashboard/is_user_allowed
 searchable: false
 metadata: {
     "api_endpoint_name": "update-user",

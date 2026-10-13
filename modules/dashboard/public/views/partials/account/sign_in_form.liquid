@@ -1,0 +1,52 @@
+---
+metadata: {
+    partial_name: "Account | Sign In Form",
+}
+---
+
+<form id="sign-in-form" action="/sign-in" method="post" novalidate enctype="multipart/form-data" onsubmit="return FormValidation.validateAndSubmit(event);">
+	{% render 'modules/insites_crm/authenticity_token', context: context %}
+
+	<div class="grid-x grid-padding-x">
+		<div class="small-12 cell">
+			<ins-input validate
+				id="email"
+				label="Email"
+				field="email"
+				name="email"
+				error-message="Please use a valid email address"
+				placeholder="Email">
+			</ins-input>
+
+			<ins-input validate
+				id="password"
+				label="Password"
+				field="password"
+				name="password"
+				error-message="Password is required"
+				placeholder="Password">
+			</ins-input>
+		</div>
+
+		<div class="cell grid-x">
+			<div class="cell text-right">
+				<a class="font-color-body" href="/forgot-password">Forgot your password?</a>
+			</div>
+		</div>
+
+		<div class="small-12 cell spacer x-large">
+			<div class="spacer medium"></div>
+			{%- if context.params.error == 'invalid' -%}
+				<p class="error-message">Oops! That email / password combination is not valid.</p>
+			{%- elsif context.params.error == 'too_many' -%}
+				<p class="error-message">Too many sign-in attempts. Please wait 15 minutes and try again.</p>
+			{%- endif -%}
+		</div>
+
+		<div class="small-12 cell text-center">
+			<ins-button id="submit-btn" label="SIGN IN" class="full" solid color="blue" type="submit" ></ins-button>
+			<div class="spacer small"></div>
+			<a href="/register"><ins-button id="register-btn" type="button" label="REGISTER" class="full"  color="white" ></ins-button></a>
+		</div>
+	</div>
+</form>
