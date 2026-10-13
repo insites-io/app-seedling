@@ -20,8 +20,16 @@ metadata: {
   assign object['id'] = context.current_user.id
   assign object['otp_code'] = context.params.otp_code
 
+  function reset_required = 'modules/dashboard/account/two_factor_reset_required', user_id: context.current_user.id
+  if reset_required
+    response_status 429
+    include 'modules/dashboard/api/error_response', error_type: 'rate_limit', errors: '{"otp_code": ["Too many attempts. Try again later."]}', status_code: 429
+    break
+  endif
+
   function allowed = 'modules/dashboard/account/rate_limit/allow', action: 'otp', key: context.current_user.id, max_per_key: 5, max_per_ip: 50
   unless allowed
+    function locked = 'modules/dashboard/account/two_factor_lockout', user_id: context.current_user.id, email: context.current_user.email, max_per_key: 5
     response_status 429
     include 'modules/dashboard/api/error_response', error_type: 'rate_limit', errors: '{"otp_code": ["Too many attempts. Try again later."]}', status_code: 429
     break

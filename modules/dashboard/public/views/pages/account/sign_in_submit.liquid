@@ -35,6 +35,17 @@ metadata: {
   endif
 
   comment
+    After 3 2FA lockouts in 24 hours the account needs a password reset. Show the same
+    message as a wrong password, so nobody signed out can tell the account exists.
+    The alert email has already told the user to reset.
+  endcomment
+  function reset_required = 'modules/dashboard/account/two_factor_reset_required', user_id: user.id
+  if reset_required
+    redirect_to '/sign-in?error=invalid'
+    break
+  endif
+
+  comment
     2FA is passed per session. Clear any earlier value before signing in, so a
     new sign-in always has to pass 2FA again.
   endcomment

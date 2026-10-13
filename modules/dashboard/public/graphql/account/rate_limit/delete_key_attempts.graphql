@@ -1,0 +1,26 @@
+---
+metadata: {
+    graphql_name: "delete_key_attempts"
+}
+---
+# Purpose: Deletes every attempt at one action for one key (e.g. a user's 2FA lockouts after a password reset)
+# Used by: modules/dashboard/public/views/pages/account/password_reset_submit.liquid
+# Parameters:
+#   - $action: Action name (otp, otp_lockout)
+#   - $key: The key the attempts were recorded under (user id)
+# Returns: Number of records deleted
+# Note: sync: true so the next sign-in sees the cleared state straight away
+mutation delete_key_attempts($action: String!, $key: String!) {
+  records_delete_all(
+    table: "modules/dashboard/auth_attempt"
+    sync: true
+    filter: {
+      properties: [
+        { name: "action", value: $action }
+        { name: "attempt_key", value: $key }
+      ]
+    }
+  ) {
+    count
+  }
+}
