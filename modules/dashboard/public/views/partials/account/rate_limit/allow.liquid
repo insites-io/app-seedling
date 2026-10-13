@@ -33,5 +33,11 @@ metadata: {
   endif
 
   graphql recorded = 'modules/dashboard/account/rate_limit/record_attempt', action: action, key: key, ip: ip
+
+  comment
+    Only attempts inside the window are ever counted, so delete older ones for this action.
+    This keeps the table to the last window instead of growing forever.
+  endcomment
+  graphql cleared = 'modules/dashboard/account/rate_limit/delete_old_attempts', action: action, before: since_iso
   return true
 -%}
