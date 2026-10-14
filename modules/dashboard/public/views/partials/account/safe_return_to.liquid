@@ -6,7 +6,7 @@ metadata: {
 {%- comment -%}
   Returns path when it is a path on this site, otherwise blank. Called with:
     function return_to = 'modules/dashboard/account/safe_return_to', path: context.params.return_to
-  Allowed: starts with a single / (not // and not /\), contains no backslash.
+  Allowed: starts with a single / (not // and not /\), contains no backslash or control character.
   The 2FA pages themselves and .json endpoints are excluded to prevent redirect loops.
 {%- endcomment -%}
 {%- liquid
@@ -19,6 +19,14 @@ metadata: {
   assign encoded_path = path | url_encode
 
   if first_char != '/' or second_char == '/' or encoded_path contains '%5C'
+    return ''
+  endif
+
+  comment
+    No control characters (tab, newline and the like): the redirect tag errors on them.
+    Encoded, they are %00 to %1F and %7F. A literal % is encoded as %25, so it cannot match.
+  endcomment
+  if encoded_path contains '%0' or encoded_path contains '%1' or encoded_path contains '%7F'
     return ''
   endif
 

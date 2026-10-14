@@ -12,11 +12,13 @@ metadata: {
     max_per_key - attempts allowed per key in the window
     max_per_ip  - attempts allowed per IP address in the window
     window      - seconds, default 900 (15 minutes)
+    count_only  - true to check without recording this attempt (the caller records failures itself)
   Returns true when the attempt may go ahead, false when a limit is reached.
   A refused attempt is not recorded, so a blocked caller cannot extend its own lockout.
 {%- endcomment -%}
 {%- liquid
   assign window = window | default: 900
+  assign count_only = count_only | default: false
   assign key = key | default: '' | append: '' | downcase | strip
   function ip = 'modules/dashboard/account/rate_limit/client_ip'
 
@@ -32,12 +34,12 @@ metadata: {
     return false
   endif
 
-  graphql recorded = 'modules/dashboard/account/rate_limit/record_attempt', action: action, key: key, ip: ip
-
   comment
-    Only attempts inside the window are ever counted, so delete older ones for this action.
-    This keeps the table to the last window instead of growing forever.
+    count_only: true checks the limit without recording, for callers that record only
+    failures (sign-in records a wrong password, not a correct one).
   endcomment
-  graphql cleared = 'modules/dashboard/account/rate_limit/delete_old_attempts', action: action, before: since_iso
+  if count_only != true
+    function recorded = 'modules/dashboard/account/rate_limit/record', action: action, key: key, window: window
+  endif
   return true
 -%}

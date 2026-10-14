@@ -21,7 +21,11 @@ metadata: {
     break
   endif
 
-  function allowed = 'modules/dashboard/account/rate_limit/allow', action: 'sign_in', key: email, max_per_key: 10, max_per_ip: 50
+  comment
+    Only failed sign-ins count toward the limit: check it here without recording,
+    and record an attempt below only when the password is wrong.
+  endcomment
+  function allowed = 'modules/dashboard/account/rate_limit/allow', action: 'sign_in', key: email, max_per_key: 10, max_per_ip: 50, count_only: true
   unless allowed
     redirect_to '/sign-in?error=too_many'
     break
@@ -30,6 +34,7 @@ metadata: {
   graphql auth = 'modules/dashboard/account/authenticate_password', email: email, password: password
   assign user = auth.users.results | first
   if user == blank or user.authenticate.password != true
+    function recorded = 'modules/dashboard/account/rate_limit/record', action: 'sign_in', key: email
     redirect_to '/sign-in?error=invalid'
     break
   endif

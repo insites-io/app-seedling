@@ -4,7 +4,7 @@ metadata: {
 }
 ---
 # Purpose: Records one attempt at a rate-limited action
-# Used by: modules/dashboard/public/views/partials/account/rate_limit/allow.liquid
+# Used by: partials account/rate_limit/record.liquid, account/two_factor_lockout.liquid
 # Parameters:
 #   - $action: Action name (sign_in, otp, forgot_password, email_check)
 #   - $key: What the attempt is about (email or user id)

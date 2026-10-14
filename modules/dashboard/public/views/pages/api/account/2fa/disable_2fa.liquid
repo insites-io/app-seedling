@@ -36,6 +36,12 @@ metadata: {
   endunless
 
   function object = 'modules/dashboard/account/2fa_functions/verify_otp', object: object
+  if object.valid
+    function claimed = 'modules/dashboard/account/two_factor_claim_code', user_id: context.current_user.id, code: object.otp_code
+    unless claimed
+      assign object['valid'] = false
+    endunless
+  endif
   unless object.valid
     response_status 422
     include 'modules/dashboard/api/error_response', error_type: 'validation', errors: '{"otp_code": ["The code is not valid."]}', status_code: 422
@@ -43,5 +49,11 @@ metadata: {
   endunless
 
   graphql configure_user_otp = 'modules/dashboard/account/2fa/configure_user_otp', id: context.current_user.id, otp_configured: false
+
+  comment
+    Replace the secret, so the old authenticator entry stops working and turning 2FA
+    back on shows a new QR code.
+  endcomment
+  graphql refreshed = 'modules/dashboard/account/2fa/refresh_secret', user_id: context.current_user.id
 -%}
 {"success": true, "valid": true}

@@ -1,0 +1,32 @@
+---
+metadata: {
+    partial_name: "Account | Two Factor Claim Code",
+}
+---
+{%- comment -%}
+  Makes a correct 2FA code work once. Called after the code has been verified:
+    function claimed = 'modules/dashboard/account/two_factor_claim_code', user_id: context.current_user.id, code: object.otp_code
+  Returns true the first time a user's code is claimed, false if it was already used.
+  The claim is a record with a unique external id (otp_used-<user>-<code>), so even two
+  requests at the same moment cannot both claim it. Claims older than 3 minutes are deleted
+  first: a code is valid for about 90 seconds (30-second steps with 30 seconds of drift),
+  so by then it can no longer be used, and the same digits may legitimately come round again.
+{%- endcomment -%}
+{%- liquid
+  assign key = user_id | append: ''
+  assign code = code | append: '' | strip
+  if key == blank or code == blank
+    return false
+  endif
+
+  assign now_unix = 'now' | date: '%s' | plus: 0
+  assign expired_before = now_unix | minus: 180 | date: '%Y-%m-%dT%H:%M:%SZ'
+  graphql cleared = 'modules/dashboard/account/rate_limit/delete_old_attempts', action: 'otp_used', before: expired_before, sync: true
+
+  assign external_id = 'otp_used-' | append: key | append: '-' | append: code
+  graphql claim = 'modules/dashboard/account/rate_limit/claim_code', external_id: external_id, key: key
+  if claim.record_create.id != blank
+    return true
+  endif
+  return false
+-%}
