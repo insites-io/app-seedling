@@ -63,7 +63,12 @@ metadata: {
         <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">
             <h1 class="heading-1 text-center">Sign in</h1>
             <div class="spacer x-small"></div>
-            <p class="text-center">You are signing in as <strong>{{ link_email | escape }}</strong>.</p>
+            {%- comment -%}
+              Cloudflare in front of the instance rewrites email addresses in a page into
+              "[email protected]" and needs JavaScript to show them again. The two markers
+              tell it to leave this address alone.
+            {%- endcomment -%}
+            <p class="text-center">You are signing in as <!--email_off--><strong>{{ link_email | escape }}</strong><!--email_on-->.</p>
             <div class="spacer x-large"></div>
 
             <form id="sign-in-link-confirm-form" action="/sign-in/link" method="post" novalidate onsubmit="return FormValidation.validateAndSubmit(event);">
