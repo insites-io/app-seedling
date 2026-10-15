@@ -1,0 +1,22 @@
+---
+metadata: {
+    partial_name: "Layout | Project assets",
+}
+---
+
+{%- comment -%}
+Project Assets - Holds app css and js
+{%- endcomment -%}
+
+{%- if context.environment == "staging" -%}
+    <link rel="preload" as="style" href="{{ 'styles/default.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'styles/default.css' | asset_url }}" > 
+    <link rel="preload" as="style" href="{{ 'styles/custom.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'styles/custom.css' | asset_url }}" >
+{%- else -%}
+    {%- comment -%} Minified version will be used in the production environment {%- endcomment -%}
+    <link rel="preload" as="style" href="{{ 'styles/default.min.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'styles/default.min.css' | asset_url }}" >
+    <link rel="preload" as="style" href="{{ 'styles/custom.min.css' | asset_url }}" >
+    <link rel="stylesheet" href="{{ 'styles/custom.min.css' | asset_url }}" >
+{%- endif -%}

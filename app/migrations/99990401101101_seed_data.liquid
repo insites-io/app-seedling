@@ -1,0 +1,68 @@
+{%- comment -%} 
+    Please delete migration file after installation/deployment
+{%- endcomment -%}
+
+{%- comment -%} Documentation {%- endcomment -%}
+{% parse_json 'import_models' %}
+[
+    {
+        "properties": {
+            "link": "https://docs.insites.io/",
+            "image": {},
+            "title": "Documentation",
+            "enabled": true,
+            "link_label": "Explore the documentation",
+            "sort_order": 1,
+            "description": "Insites simplifies web app development for every skill level, making it accessible to all."
+        },
+        "type_name": "documentation"
+    },
+    {
+        "properties": {
+            "link": "https://docs.insites.io/developers-guide/developer-guide-overview",
+            "image": {},
+            "title": "Developer Guide",
+            "enabled": true,
+            "link_label": "Explore the Developer Guide",
+            "sort_order": 2,
+            "description": "This developer guide has tutorials, references, and examples for Insites features."
+        },
+        "type_name": "documentation"
+    },
+    {
+        "properties": {
+            "link": "https://docs.insites.io/developers-app/overview-apps",
+            "image": {},
+            "title": "Apps",
+            "enabled": true,
+            "link_label": "Explore the Apps",
+            "sort_order": 3,
+            "description": "Enhancing convenience and productivity by meeting user needs."
+        },
+        "type_name": "documentation"
+    },
+    {
+          "properties": {
+            "link": "https://docs.insites.io/developers-liquid/liquid-developers-overview",
+            "image": {},
+            "title": "Liquid",
+            "enabled": true,
+            "link_label": "Explore the Liquid Overview",
+            "sort_order": 4,
+            "description": "Liquid is a template language for Insites, used to build dynamic pages."
+        },
+        "type_name": "documentation"
+    }
+]
+{% endparse_json %}
+
+{%- graphql results, models: import_models -%}
+    mutation ($models: [CustomizationImport!]!) {
+    import_models(
+            models: $models
+        ) {
+            ids
+        }
+    }{%- endgraphql -%}
+{% log results, type: "SEED DATA: Documentation" %}
+

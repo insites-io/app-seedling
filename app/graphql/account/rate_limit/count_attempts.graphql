@@ -1,0 +1,41 @@
+---
+metadata: {
+    graphql_name: "count_attempts"
+}
+---
+# Purpose: Counts recent attempts at one action, by key and by IP address
+# Used by: app/views/partials/account/rate_limit/allow.liquid
+# Parameters:
+#   - $action: Action name (sign_in, otp, forgot_password, email_check)
+#   - $key: What the attempt is about (email or user id); blank counts by IP only
+#   - $ip: Visitor IP address
+#   - $since: ISO date-time; only attempts created after it are counted
+# Returns: total_entries for the key and for the IP address
+query count_attempts($action: String!, $key: String, $ip: String!, $since: String!) {
+  for_key: records(
+    per_page: 1
+    filter: {
+      table: { value: "auth_attempt" }
+      created_at: { gte: $since }
+      properties: [
+        { name: "action", value: $action }
+        { name: "attempt_key", value: $key }
+      ]
+    }
+  ) {
+    total_entries
+  }
+  for_ip: records(
+    per_page: 1
+    filter: {
+      table: { value: "auth_attempt" }
+      created_at: { gte: $since }
+      properties: [
+        { name: "action", value: $action }
+        { name: "ip", value: $ip }
+      ]
+    }
+  ) {
+    total_entries
+  }
+}

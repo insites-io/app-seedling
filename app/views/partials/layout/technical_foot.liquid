@@ -1,0 +1,19 @@
+---
+metadata: {
+    partial_name: "Layout | Technical foot",
+}
+---
+
+{%- comment -%}
+Technical footer:
+Contains all the scripts imported right before the </body> tag
+{%- endcomment -%}
+
+{%- if context.environment == "staging" -%}
+    <link rel="preload" as="script" href="{{ 'scripts/app.js' | asset_url }}" >
+    <script src="{{ 'scripts/app.js' | asset_url }}"></script>
+{% else %}
+    <!-- minified --> 
+    <link rel="preload" as="script" href="{{ 'scripts/app.min.js' | asset_url }}" >
+    <script src="{{ 'scripts/app.min.js' | asset_url }}"></script>
+{%- endif -%}

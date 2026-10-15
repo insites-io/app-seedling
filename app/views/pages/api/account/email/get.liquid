@@ -1,0 +1,70 @@
+---
+slug: api/check-user-email-signup
+format: json
+method: get
+searchable: false
+metadata: {
+    "api_endpoint_name": "check-user-email-signup",
+    "status": "published",
+    "open_graph:url": "",
+    "open_graph:type": "",
+    "open_graph:image": "",
+    "open_graph:title": "Check User Email API",
+    "open_graph:description": "Check User Email API",
+    "open_graph:site_name": "",
+    "meta_title": "Check User Email API",
+    "page_title": "Check User Email API",
+    "meta_description": "Check User Email API",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "9999", ## secondary order (ASC)
+    "sitemap_changefreq": "never"
+}
+---
+
+{%- liquid
+  assign email = context.params.email | default: null
+  
+  # Validate email parameter is provided
+  if email == blank or email == null
+    include 'api/error_response', error_type: 'validation', errors: '{"email": ["Email parameter is required"]}', status_code: 400
+    return
+  endif
+  
+  # Limit how fast one visitor can probe for registered emails
+  function allowed = 'account/rate_limit/allow', action: 'email_check', key: '', max_per_key: 0, max_per_ip: 30
+  unless allowed
+    response_status 429
+    include 'api/error_response', error_type: 'rate_limit', errors: '{"email": ["Too many requests. Try again later."]}', status_code: 429
+    return
+  endunless
+
+  # Execute GraphQL query with error handling
+  graphql results = "account/check_user_email_signup", email: email
+  
+  # Check for GraphQL errors (Insites returns errors in the results.errors array)
+  if results.errors and results.errors.size > 0
+    assign error_msg = '{"server": ["An error occurred while checking email"]}'
+    include 'api/error_response', error_type: 'server', errors: error_msg, status_code: 500
+    return
+  endif
+  
+  assign items = results.items
+  
+  assign email_check = '{}' | parse_json
+  comment
+    Any existing user means the email is taken. The response never includes a user id,
+    and registration never updates an existing account.
+  endcomment
+  if items.total_entries > 0
+    assign email_check = email_check | add_hash_key: "email_status", "invalid"
+    assign email_check = email_check | add_hash_key: "message", "Email has already been used."
+  else
+    assign email_check = email_check | add_hash_key: "email_status", "valid"
+    assign email_check = email_check | add_hash_key: "message", "Email is valid"
+  endif
+-%}
+
+{{ email_check }}

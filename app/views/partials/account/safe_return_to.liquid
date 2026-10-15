@@ -1,0 +1,45 @@
+---
+metadata: {
+    partial_name: "Account | Safe Return To",
+}
+---
+{%- comment -%}
+  Returns path when it is a path on this site, otherwise blank. Called with:
+    function return_to = 'account/safe_return_to', path: context.params.return_to
+  Allowed: starts with a single / (not // and not /\), contains no backslash, no control character and no character outside ASCII.
+  The 2FA pages themselves and .json endpoints are excluded to prevent redirect loops.
+{%- endcomment -%}
+{%- liquid
+  assign path = path | default: '' | append: '' | strip
+  assign first_char = path | slice: 0, 1
+  assign second_char = path | slice: 1, 1
+  comment
+    Liquid strings cannot hold a backslash, so look for its encoded form (%5C).
+  endcomment
+  assign encoded_path = path | url_encode
+
+  if first_char != '/' or second_char == '/' or encoded_path contains '%5C'
+    return ''
+  endif
+
+  comment
+    No control characters (tab, newline and the like): the redirect tag errors on them.
+    Encoded, they are %00 to %1F and %7F. A literal % is encoded as %25, so it cannot match.
+    No character outside ASCII either: some are control or line-break characters too
+    (U+0085, U+2028), and the redirect tag errors on those. Any non-ASCII character
+    encodes to bytes %80 to %FF, which no ASCII character produces.
+  endcomment
+  if encoded_path contains '%0' or encoded_path contains '%1' or encoded_path contains '%7F'
+    return ''
+  endif
+  if encoded_path contains '%8' or encoded_path contains '%9' or encoded_path contains '%A' or encoded_path contains '%B' or encoded_path contains '%C' or encoded_path contains '%D' or encoded_path contains '%E' or encoded_path contains '%F'
+    return ''
+  endif
+
+  assign bare_path = path | split: '?' | first
+  if bare_path == '/verify-2fa' or bare_path == '/account/2fa' or path contains '.json'
+    return ''
+  endif
+
+  return path
+-%}

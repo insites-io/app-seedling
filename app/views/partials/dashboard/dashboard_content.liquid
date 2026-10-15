@@ -1,0 +1,60 @@
+---
+metadata: {
+    partial_name: "Dashboard | Content",
+}
+---
+{%- comment -%} 
+    Remove this line of code only after all documentation items image have been successfully uploaded
+{%- endcomment -%}    
+{% include 'dashboard/default_images' %}    
+
+{% graphql documentations = 'dashboard/get_documentations' | dig: 'items','results' %}
+    <div class="grid-container">
+        <div class="spacer section"></div>
+        
+        <div class="banner-message-container">
+            <h2>Hi {{ context.current_user.first_name }}, welcome to the Insites seedling application!</h2>
+            <div class="spacer"></div>
+            <p>Thanks for joining us! We're thrilled to welcome you to the Insites seedling application. Your dashboard is all set to assist you in exploring our powerful platform, packed with tools to simplify your business operations. Dive into the dashboard to find detailed documentation and guidelines that will get you up and running in no time, allowing you to make the most out of Insites.</p>
+        </div>
+        <div class="spacer xxxx-large"></div>
+
+        <div class="grid-x grid-padding-x grid-padding-y dashboard-main-container">
+            {% for document in documentations %}
+                {%- comment -%} 
+                    Remove fallback_image variable after all documentation items image have been successfully uploaded
+                {%- endcomment -%}   
+                {% assign fallback_image = context.exports.documentations_images | where: "title", document.properties.title | first %}
+                <div class="large-3 medium-6 small-12 cell">
+                    <div class="dashboard-card-list-container" data-link="{{ document.properties.link }}">
+                        {%- comment -%} 
+                            Remove 'default: fallback_image.image' filter after all documentation items image have been successfully uploaded
+                        {%- endcomment -%}                         
+                        <img src="{{ document.image.url |  default: fallback_image.image | replace: ' ', '%20' }}" alt="{{ document.properties.title }}">
+                        <div class="dashboard-card-desc">
+                            <h4>{{ document.properties.title }}</h4>
+                            <p>{{ document.properties.description  }}</p>
+                        </div>
+                        <div class="dashboard-card-link">
+                            <a>{{ document.properties.link_label  }}</a>
+                            <i class="icon-arrow-forward"></i>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="spacer section"></div>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.dashboard-card-list-container').forEach(card => {
+            card.addEventListener('click', function() {
+                const link = card.getAttribute('data-link');
+                if (link) {
+                    window.open(link, '_blank');
+                }
+            });
+        });
+    });
+</script>

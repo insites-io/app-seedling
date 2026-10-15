@@ -1,0 +1,31 @@
+---
+metadata: {
+    partial_name: "Dashboard | Default images",
+}
+---
+{%- comment -%} 
+    Delete this file only after all documentation items image have been successfully uploaded
+{%- endcomment -%}   
+
+{% parse_json 'documentations_images' %}
+[
+    {
+        "image": "{{ 'images/home/apps-img.svg' | asset_url }}",
+        "title": "Apps"
+    },
+    {
+        "image": "{{ 'images/home/documentation-img.svg' | asset_url }}",
+        "title": "Documentation"
+    },
+    {
+        "image": "{{ 'images/home/guide-img.svg' | asset_url }}",
+        "title": "Developer Guide"
+    },
+    {
+        "image": "{{ 'images/home/liquid-img.svg' | asset_url }}",
+        "title": "Liquid"
+    }
+]
+{% endparse_json %}
+
+{%- export documentations_images -%}

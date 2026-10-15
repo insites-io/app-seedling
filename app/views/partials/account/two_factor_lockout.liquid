@@ -1,0 +1,53 @@
+---
+metadata: {
+    partial_name: "Account | Two Factor Lockout",
+}
+---
+{%- comment -%}
+  Called when a 2FA code is refused by the rate limit. Records a lockout and emails the user,
+  once per lockout. Called with:
+    function locked = 'account/two_factor_lockout', user_id: context.current_user.id, email: context.current_user.email, max_per_key: 5
+  @params
+    user_id     - the signed-in user
+    email       - where the alert goes
+    max_per_key - the per-user code limit the caller uses
+  Returns true when a new lockout was recorded, false when it was the IP limit or this
+  lockout was already recorded.
+  A lockout row (action otp_lockout) is kept for 24 hours; 3 in 24 hours require a password reset.
+{%- endcomment -%}
+{%- liquid
+  assign key = user_id | append: ''
+  function ip = 'account/rate_limit/client_ip'
+
+  assign now_unix = 'now' | date: '%s' | plus: 0
+  assign window_start = now_unix | minus: 900 | date: '%Y-%m-%dT%H:%M:%SZ'
+  assign day_start = now_unix | minus: 86400 | date: '%Y-%m-%dT%H:%M:%SZ'
+
+  comment
+    Only the per-user limit is a lockout. Refusals from the shared per-IP limit are not.
+  endcomment
+  graphql codes = 'account/rate_limit/count_attempts', action: 'otp', key: key, ip: ip, since: window_start
+  if codes.for_key.total_entries < max_per_key
+    return false
+  endif
+
+  comment
+    One lockout, and one email, per window.
+  endcomment
+  graphql recent = 'account/rate_limit/count_attempts', action: 'otp_lockout', key: key, ip: ip, since: window_start
+  if recent.for_key.total_entries > 0
+    return false
+  endif
+
+  graphql recorded = 'account/rate_limit/record_attempt', action: 'otp_lockout', key: key, ip: ip
+  graphql cleared = 'account/rate_limit/delete_old_attempts', action: 'otp_lockout', before: day_start
+
+  function reset_required = 'account/two_factor_reset_required', user_id: key
+
+  assign mail = {}
+  assign mail['to'] = email
+  assign mail['reset_required'] = reset_required
+  graphql sent = 'account/2fa/send_two_factor_alert', data: mail
+
+  return true
+-%}

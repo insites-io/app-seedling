@@ -1,0 +1,27 @@
+---
+metadata: {
+    partial_name: "Account | Two Factor Reset Required",
+}
+---
+{%- comment -%}
+  True when the user has had 3 or more 2FA lockouts in the last 24 hours. Until they reset
+  their password, sign-in and the 2FA check are refused. A password reset deletes the lockouts.
+  Called with:
+    function reset_required = 'account/two_factor_reset_required', user_id: user.id
+{%- endcomment -%}
+{%- liquid
+  assign key = user_id | append: ''
+  if key == blank
+    return false
+  endif
+
+  function ip = 'account/rate_limit/client_ip'
+  assign now_unix = 'now' | date: '%s' | plus: 0
+  assign day_start = now_unix | minus: 86400 | date: '%Y-%m-%dT%H:%M:%SZ'
+
+  graphql lockouts = 'account/rate_limit/count_attempts', action: 'otp_lockout', key: key, ip: ip, since: day_start
+  if lockouts.for_key.total_entries >= 3
+    return true
+  endif
+  return false
+-%}

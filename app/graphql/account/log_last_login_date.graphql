@@ -1,0 +1,24 @@
+---
+metadata: {
+    graphql_name: "log_last_login_date"
+}
+---
+mutation log_last_login_date(
+  $id: ID!
+  $date: String!
+){
+  user_update(
+    id: $id
+    user: {
+      profiles: [
+        {
+          name: "client",
+          values: { properties: [ { name: "last_login_date", value: $date } ] }
+        }
+      ]
+    }
+  ){
+    id
+    email
+  }
+}

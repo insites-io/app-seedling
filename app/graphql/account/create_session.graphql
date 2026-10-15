@@ -1,0 +1,14 @@
+---
+metadata: {
+    graphql_name: "create_session"
+}
+---
+# Purpose: Creates a session variable to track 2FA verification state
+# Used by: app/views/pages/account/2fa.liquid
+# Parameters:
+#   - $name: Session variable name (e.g., "two_factor_user_id")
+#   - $value: Session variable value (Any type)
+# Returns: Success status
+mutation create_session($name: String!, $value: Any!) {
+    session_create_field(name: $name, value: $value)
+}

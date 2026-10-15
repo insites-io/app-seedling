@@ -1,0 +1,23 @@
+---
+metadata: {
+    layout_name: Website - Message
+}
+---
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        {% include 'layout/technical_head' %}
+    </head>
+    <body class="system-page flex-container flex-dir-column">
+        <div>
+            {% include 'layout/header' %} 
+            {% include 'layout/header_mobile' %}
+            <div class="system-content">      
+                {{ content_for_layout }}
+            </div>
+        </div>
+        {% include 'layout/footer' %}
+        {% include 'layout/technical_foot' %}
+    </body>
+</html>
+

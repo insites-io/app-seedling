@@ -1,0 +1,51 @@
+---
+metadata: {
+    partial_name: "Layout | Header mobile default",
+}
+---
+<div class="navigation-05b drawer-holder mobile-menu-container hide-for-large">
+<ins-drawer no-padding id="mobile-menu" show-header="false" class="mobileNav hide-for-large hide-for-small" >
+    <div>
+        <ul class="vertical menu">
+          <!-- /normal list -->     
+          {% if context.current_user == nil %}
+          <li class="no-submenu mobile-menu-style sign-in-button">
+              <a href="/sign-in">     
+            <i class="icon-user"></i>  Sign In
+            </a>
+          </li>
+          <li class="no-submenu mobile-menu-style">
+              <a href="/register" class="colorBlack">
+              <ins-button class="register-mobile-button" label="REGISTER" type="submit" size="normal" solid></ins-button>
+            </a>
+          </li>
+          {% else %}
+              <li class="no-submenu mobile-menu-style">
+                <a class="colorBlack" href="/dashboard">
+                  Dashboard
+                </a>
+              </li>
+              <li class="mobile-menu-style">
+                  <ins-accordion menu>
+                      <ins-accordion-item heading="{{ context.current_user.first_name }} {{ context.cdurrent_user.last_name }}" link="#" open-icon="icon-plus" close-icon="icon-minus"
+                        class="has-subitems">
+                        {%- graphql user_with_token = 'account/get_user_with_password_token', email: context.current_user.email | dig: 'users','results' | first -%}
+                        {%- assign user_data_default = user_with_token.default | first -%}
+
+                              <ins-accordion-link label="Profile" link="/profile" link-target="_self">
+                              </ins-accordion-link>
+
+                              <div class="sign-out-wrapper">
+                                {% include_form 'sign_out' %}
+                              </div>
+                        
+                      </ins-accordion-item>
+                    </ins-accordion>
+              </li>
+          {% endif %}
+  
+        </ul>
+      </div>
+</ins-drawer>
+</div>
+

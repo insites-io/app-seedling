@@ -1,0 +1,60 @@
+---
+name: my_details
+resource: User
+resource_owner: anyone
+flash_alert: Error-My-Details
+flash_notice: Success-My-Details
+redirect_to: profile
+fields:
+  # User Fields
+  email:
+    validation: 
+      unique:
+        message: Email already exist
+      presence:
+        message: Please use a valid email address
+      email: 
+        message: Please use a valid email address      
+  first_name:
+    validation: 
+      presence: 
+        message: First name is required
+  last_name:
+    validation: 
+      presence: 
+        message: Last name is required
+  
+async_callback_actions:
+  delay: 0
+  priority: low
+  max_attempts: 2
+  content: |-
+    {% comment %} Create Event Stream {% endcomment %}
+    {% parse_json info %}
+    {
+      "description": "My Details Updated",
+      "log": {
+        "first_name": "{{ form.first_name }}",
+        "last_name": "{{ form.last_name }}",
+        "email": "{{ form.email }}"  
+      }
+    }
+    {% endparse_json %}
+    {% include 'events/log_event', info %}
+---
+
+{%- form 
+    html-id: "user-profile-form"
+    html-class: 'insites-form insites-form-code' 
+    html-novalidate: true
+    html-enctype="multipart/form-data"
+    html-onsubmit:"return UserProfileScript.methods.validateForm(event);" -%}
+
+    <div class="insites-form-grid seedling-form-container seedling-form-container-profile">
+      <input type="hidden" name="{{ form.fields.properties.default_address.name }}"  value="{{ data.default_address.id }}" >
+      <input type="hidden" name="{{ form.fields.properties.contact_address_uuid.name }}" value="{{ data.default_address.properties.uuid }}" >
+      
+      {% include 'account/registration_personal_details', data: data %}          
+    </div>
+
+{%- endform -%}

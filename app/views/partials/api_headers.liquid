@@ -1,0 +1,16 @@
+---
+metadata: {
+    partial_name: "API headers",
+}
+---
+{%- comment -%} 
+    API headers for outbound API calls. You can put additional header fields here
+{%- endcomment -%}
+
+{%  graphql instance_api_key = 'modules/insites_crm/instance_configurations/get_instance_configuration', 
+    name: "instance_api_key" | dig: 'items','results' | first | dig: 'key' %}
+
+{
+    "Content-Type": "application/json",
+    "Authorization": "{{ instance_api_key }}"
+}

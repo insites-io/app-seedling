@@ -1,0 +1,23 @@
+---
+name: is_user_logged_in
+redirect_to: 401
+metadata: {
+    "auth_policy_name": "User Authentication"
+}
+---
+  
+{% liquid
+  graphql data = 'account/get_current_user'
+
+  assign user_profile = data.current_user.client | first
+
+  comment
+    Policy requires an attached client profile. Explicitly echo true/false
+    to avoid implicit behavior that could lead to unexpected access.
+  endcomment
+  if user_profile != blank
+    echo true
+  else
+    echo false
+  endif
+%}
