@@ -1,14 +1,16 @@
 ---
 metadata: {
-    partial_name: "Emails | Autoresponder form",
+    partial_name: "Emails | Autoresponder from",
 }
 ---
-
-{%  liquid
-    include "modules/insites_cms/globals"
-    assign global = context.exports.global
-    assign name = global.company_name | default: ""
-    assign email = global.company_email_1 | default: "notifications@insites.io"
-%}
-
-{{ name }} < {{ email }} >
+{%- comment -%}
+  The From line of every email: "Business Name <verified sender>". See emails/sender.
+{%- endcomment -%}
+{%- liquid
+  function sender = 'emails/sender'
+  assign from = ''
+  if sender.ok
+    assign from = sender.name | append: ' < ' | append: sender.email | append: ' >' | strip
+  endif
+-%}
+{{ from }}

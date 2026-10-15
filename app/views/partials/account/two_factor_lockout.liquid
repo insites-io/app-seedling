@@ -44,10 +44,17 @@ metadata: {
 
   function reset_required = 'account/two_factor_reset_required', user_id: key
 
-  assign mail = {}
-  assign mail['to'] = email
-  assign mail['reset_required'] = reset_required
-  graphql sent = 'account/2fa/send_two_factor_alert', data: mail
+  comment
+    The alert needs a sendable sender. Without one, emails/sender writes the reason to the
+    instance log and the lockout still counts.
+  endcomment
+  function sender = 'emails/sender'
+  if sender.ok
+    assign mail = {}
+    assign mail['to'] = email
+    assign mail['reset_required'] = reset_required
+    graphql sent = 'account/2fa/send_two_factor_alert', data: mail
+  endif
 
   return true
 -%}

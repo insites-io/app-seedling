@@ -1,0 +1,41 @@
+---
+metadata: {
+    partial_name: "Emails | Sender",
+}
+---
+{%- comment -%}
+  Who this app's emails come from. Called with:
+    function sender = 'emails/sender'
+  Returns { "name": ..., "email": ..., "reply_to": ..., "ok": true|false }.
+
+  The address is the instance's verified sender, from the CRM module: the customer's own
+  domain once it is verified in Insites Console, otherwise no-reply@insites.site. Mail is
+  never sent from an address the instance cannot authenticate, because a customer domain
+  that is not verified fails delivery checks (SPF, DKIM, DMARC) and the mail is dropped.
+  The display name is company_name from CMS Globals, and replies go to company_email_1
+  from CMS Globals. Without company_email_1 the mail still goes, with no Reply-To.
+  ok is false only when the instance has no sendable sender at all (for example a
+  suspended instance). Pages that send email check it and say email is not available.
+  The partials named here come from the installed CRM and CMS modules, which the linter
+  cannot see.
+{%- endcomment -%}
+{%- comment -%}insites-check-disable-next-line MissingPartial{%- endcomment -%}
+{%- include 'modules/insites_cms/globals' -%}
+{%- comment -%}insites-check-disable-next-line MissingPartial{%- endcomment -%}
+{%- function resolved = 'modules/insites_crm/functions/email_sender/resolve' -%}
+{%- comment -%}insites-check-disable-next-line MissingPartial{%- endcomment -%}
+{%- function customer = 'modules/insites_crm/functions/email_sender/customer_sender', sender: resolved -%}
+{%- liquid
+  assign global = context.exports.global
+  assign sender = {}
+  assign sender['name'] = global.company_name | default: customer.name | default: '' | strip
+  assign sender['email'] = customer.address | default: '' | strip
+  assign sender['reply_to'] = global.company_email_1 | default: '' | strip
+  assign sender['ok'] = false
+  if customer.is_sendable == true and sender.email != blank
+    assign sender['ok'] = true
+  else
+    log 'Seedling cannot send email: this instance has no sendable sender. Check its email sender in Insites Console.', type: 'error'
+  endif
+  return sender
+-%}

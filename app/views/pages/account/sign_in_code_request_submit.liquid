@@ -46,6 +46,15 @@ metadata: {
   endif
 
   comment
+    An instance with no sendable sender (see emails/sender) cannot send, so none is promised.
+  endcomment
+  function sender = 'emails/sender'
+  unless sender.ok
+    redirect_to '/sign-in/email-code?error=unavailable'
+    break
+  endunless
+
+  comment
     5 requests per address and 20 per IP address in 15 minutes. Every request counts the
     same whether or not the address has an account, so the limit tells nobody which do.
   endcomment
