@@ -1,0 +1,106 @@
+---
+slug: sign-in/email-link
+method: post
+layout: ''
+searchable: false
+metadata: {
+    page_name: "Email Me a Sign-In Link - Submit",
+}
+---
+
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
+
+  comment
+    A post without a valid authenticity token is not refused: it arrives with an empty
+    session. The form page sets this flag, so its absence means the token was missing or wrong.
+  endcomment
+  if context.session.sign_in_form != 'on'
+    redirect_to '/sign-in/email-link?error=session'
+    break
+  endif
+
+  assign email = context.params.email | default: '' | strip | downcase
+  assign valid = true
+  if email.size < 6 or email.size > 254 or email contains ' '
+    assign valid = false
+  endif
+  unless email contains '@'
+    assign valid = false
+  endunless
+  unless valid
+    redirect_to '/sign-in/email-link?error=invalid'
+    break
+  endunless
+
+  comment
+    The link is built from the SITE_ORIGIN constant, never from the request, so nobody can
+    make the email point at another site by changing a header. Without it, no link is sent.
+  endcomment
+  assign origin = context.constants.SITE_ORIGIN | default: '' | strip
+  assign last_char = origin | slice: -1, 1
+  if last_char == '/'
+    assign origin_size = origin.size | minus: 1
+    assign origin = origin | slice: 0, origin_size
+  endif
+  if origin == blank
+    redirect_to '/sign-in/email-link?error=unavailable'
+    break
+  endif
+
+  comment
+    5 requests per address and 20 per IP address in 15 minutes. Every request counts the
+    same whether or not the address has an account, so the limit tells nobody which do.
+  endcomment
+  function allowed = 'account/rate_limit/allow', action: 'sign_in_link', key: email, max_per_key: 5, max_per_ip: 20
+  unless allowed
+    redirect_to '/sign-in/email-link?error=too_many'
+    break
+  endunless
+
+  function return_to = 'account/safe_return_to', path: context.params.return_to
+  function ip = 'account/rate_limit/client_ip'
+  function account = 'account/sign_in/allowed_user', email: email
+
+  assign now_unix = 'now' | date: '%s' | plus: 0
+  assign expires_at = now_unix | plus: 900 | date: '%Y-%m-%dT%H:%M:%SZ'
+  assign nonce = 40 | random_string
+  assign status = 'miss'
+  if account.id != blank
+    assign status = 'pending'
+  endif
+
+  comment
+    One row and the same answer for every address. Only an address with an account gets
+    an email. The platform token is sent in the link and never stored; the row keeps the
+    nonce, which is what makes the link work once.
+  endcomment
+  graphql saved = 'account/sign_in/create_link_request', email: email, nonce: nonce, expires_at: expires_at, status: status, ip: ip, return_to: return_to
+
+  if status == 'pending' and saved.record_create.id != blank
+    graphql minted = 'account/sign_in/mint_link_token', email: email, hours: 0.25
+    if minted.user.temporary_token != blank
+      assign encoded_email = email | url_encode
+      assign encoded_token = minted.user.temporary_token | url_encode
+      assign encoded_nonce = nonce | url_encode
+      assign link = origin | append: '/sign-in/link?e=' | append: encoded_email | append: '&t=' | append: encoded_token | append: '&n=' | append: encoded_nonce
+
+      assign mail = {}
+      assign mail['to'] = email
+      assign mail['link'] = link
+      assign mail['minutes'] = 15
+      graphql sent = 'account/sign_in/send_sign_in_link', data: mail
+    endif
+  endif
+
+  comment
+    Keep the table small: requests live 15 minutes, so anything older than a day can go.
+  endcomment
+  assign day_ago = now_unix | minus: 86400 | date: '%Y-%m-%dT%H:%M:%SZ'
+  graphql cleared = 'account/sign_in/delete_old_requests', table: 'sign_in_link', before: day_ago
+
+  redirect_to '/sign-in/email-link?sent=1'
+-%}
