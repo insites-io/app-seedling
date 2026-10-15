@@ -1,6 +1,6 @@
 ---
 slug: api/disable-2fa
-layout: application
+layout: ''
 format: json
 method: post
 searchable: false
@@ -23,7 +23,8 @@ metadata: {
   function reset_required = 'account/two_factor_reset_required', user_id: context.current_user.id
   if reset_required
     response_status 429
-    include 'api/error_response', error_type: 'rate_limit', errors: '{"otp_code": ["Too many attempts. Try again later."]}', status_code: 429
+    assign errors = { "otp_code": ["Too many attempts. Try again later."] }
+    render 'api/error_response', error_type: 'rate_limit', errors: errors, status_code: 429
     break
   endif
 
@@ -31,7 +32,8 @@ metadata: {
   unless allowed
     function locked = 'account/two_factor_lockout', user_id: context.current_user.id, email: context.current_user.email, max_per_key: 5
     response_status 429
-    include 'api/error_response', error_type: 'rate_limit', errors: '{"otp_code": ["Too many attempts. Try again later."]}', status_code: 429
+    assign errors = { "otp_code": ["Too many attempts. Try again later."] }
+    render 'api/error_response', error_type: 'rate_limit', errors: errors, status_code: 429
     break
   endunless
 
@@ -44,7 +46,8 @@ metadata: {
   endif
   unless object.valid
     response_status 422
-    include 'api/error_response', error_type: 'validation', errors: '{"otp_code": ["The code is not valid."]}', status_code: 422
+    assign errors = { "otp_code": ["The code is not valid."] }
+    render 'api/error_response', error_type: 'validation', errors: errors, status_code: 422
     break
   endunless
 
@@ -55,5 +58,7 @@ metadata: {
     back on shows a new QR code.
   endcomment
   graphql refreshed = 'account/2fa/refresh_secret', user_id: context.current_user.id
+
+  assign response = { "success": true, "valid": true }
 -%}
-{"success": true, "valid": true}
+{{ response }}
