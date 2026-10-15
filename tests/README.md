@@ -1,6 +1,6 @@
 # Seedling tests
 
-This folder holds the end-to-end tests for Seedling, written with TestCafe. They run against a real instance, so you tell them which one with the `INSITES_URL` environment variable.
+This folder holds the end-to-end tests for Seedling, written with TestCafe, and the QA suite in [`qa/`](qa/README.md). They run against a real instance, so you tell them which one with the `INSITES_URL` environment variable.
 
 The test tooling lives here rather than at the repository root on purpose: the Insites GitHub App treats a `package.json` at the root as a project to build, and would then deploy only its `dist/` folder.
 
@@ -28,6 +28,8 @@ INSITES_URL=https://your-instance.example.com npx testcafe remote 'e2e/**/*.e2e.
 - `.testcaferc.json` in this folder holds the TestCafe settings. Screenshots of failures go to `screenshots/` and the JSON report to `reports/report.json`, both ignored by git.
 
 ## Test files
+
+- `qa/`: the QA suite for sign-in, 2FA, password reset, passwordless sign-in and the v2.1.0 clean-up work. It deploys to a test instance, runs 132 cases, verifies the build, and removes everything it added. See [qa/README.md](qa/README.md) before running it: it changes the instance.
 
 - `e2e/email-api.e2e.js`: tests the email check endpoint used by registration (`/api/check-user-email-signup`): a new email, a missing email (400), a malformed email (422), and that no user id is ever returned. Set `EXISTING_EMAIL` to an address registered on the instance to also check the "already used" answer.
 

@@ -1,0 +1,190 @@
+---
+slug: qa-fixture/admin
+format: json
+layout: ''
+---
+{%- comment -%}
+  TEST ONLY. Deployed by tests/qa/run.py for one run and removed by its clean-up. Never part of app/.
+  Creates test users, reads test state, moves test rows in time, inserts rate-limit rows and mints
+  sign-in codes and links without sending an email. Answers 404 unless the request carries the
+  X-Inspect-Key header with the value of the SEEDLING_QA_FIXTURE_KEY constant, which the runner sets
+  to a random value at the start of a run and unsets at the end.
+{%- endcomment -%}
+{%- liquid
+  assign key = context.constants.SEEDLING_QA_FIXTURE_KEY
+  assign given = context.headers.HTTP_X_INSPECT_KEY
+  if key == blank or given != key
+    response_status 404
+    echo "{}"
+    break
+  endif
+  assign op = context.params.op
+  assign email = context.params.email | default: '' | strip | downcase
+  assign out = {}
+  assign out['op'] = op
+  assign out['now'] = 'now' | date: '%Y-%m-%dT%H:%M:%SZ'
+-%}
+{%- if op == 'create' -%}
+  {%- if context.params.client == '0' -%}
+    {%- graphql r, em: email, pw: context.params.pw -%}
+    mutation ($em: String!, $pw: String!) { user_create(user: { email: $em, password: $pw, first_name: "Seedling", last_name: "QA" }) { id email } }
+    {%- endgraphql -%}
+  {%- else -%}
+    {%- graphql r, em: email, pw: context.params.pw -%}
+    mutation ($em: String!, $pw: String!) {
+      user_create(user: { email: $em, password: $pw, first_name: "Seedling", last_name: "QA", profiles: [{ name: "client", values: { properties: [{ name: "otp_configured", value_boolean: false }] } }] }) { id email }
+    }
+    {%- endgraphql -%}
+  {%- endif -%}
+  {%- assign out['res'] = r -%}
+{%- elsif op == 'state' -%}
+  {%- graphql u, em: email -%}
+  query ($em: String) {
+    users(per_page: 1, filter: { email: { value: $em } }) {
+      results {
+        id email updated_at
+        profiles { id profile_type }
+        token: profiles(profile_type: "modules/insites_crm/token") { password_token: property(name: "password_token") }
+        client: profiles(profile_type: "client") { otp_configured: property_boolean(name: "otp_configured") last_login_date: property(name: "last_login_date") }
+        otp { secret }
+      }
+    }
+  }
+  {%- endgraphql -%}
+  {%- assign user = u.users.results | first -%}
+  {%- assign uid = user.id | append: '' -%}
+  {%- graphql a, k1: uid, k2: email -%}
+  query ($k1: String, $k2: String) {
+    by_id: records(per_page: 100, sort: [{ created_at: { order: ASC } }], filter: { table: { value: "auth_attempt" }, properties: [{ name: "attempt_key", value: $k1 }] }) { total_entries results { id created_at action: property(name: "action") ip: property(name: "ip") } }
+    by_email: records(per_page: 100, sort: [{ created_at: { order: ASC } }], filter: { table: { value: "auth_attempt" }, properties: [{ name: "attempt_key", value: $k2 }] }) { total_entries results { id created_at action: property(name: "action") ip: property(name: "ip") } }
+    codes: records(per_page: 100, sort: [{ created_at: { order: ASC } }], filter: { table: { value: "sign_in_code" }, properties: [{ name: "email", value: $k2 }] }) { total_entries results { id created_at status: property(name: "status") expires_at: property(name: "expires_at") ip: property(name: "ip") return_to: property(name: "return_to") code_hash: property(name: "code_hash") } }
+    claims: records(per_page: 100, sort: [{ created_at: { order: ASC } }], filter: { table: { value: "auth_attempt" }, properties: [{ name: "action", value: "otp_used" }] }) { total_entries results { id external_id created_at key: property(name: "attempt_key") } }
+    links: records(per_page: 100, sort: [{ created_at: { order: ASC } }], filter: { table: { value: "sign_in_link" }, properties: [{ name: "email", value: $k2 }] }) { total_entries results { id created_at status: property(name: "status") expires_at: property(name: "expires_at") ip: property(name: "ip") return_to: property(name: "return_to") nonce: property(name: "nonce") } }
+  }
+  {%- endgraphql -%}
+  {%- assign out['user'] = user -%}
+  {%- assign out['attempts'] = a -%}
+{%- elsif op == 'slots' -%}
+  {%- assign prefix = context.params.rid | append: '-' -%}
+  {%- graphql s, t: context.params.table, p: prefix -%}
+  query ($t: String, $p: String) { records(per_page: 100, sort: [{ created_at: { order: ASC } }], filter: { table: { value: $t }, external_id: { starts_with: $p } }) { total_entries results { id external_id created_at status: property(name: "status") } } }
+  {%- endgraphql -%}
+  {%- assign out['slots'] = s.records -%}
+{%- elsif op == 'backdate' -%}
+  {%- comment -%} Moves auth_attempt rows for one action (and optionally one key) back in time, out of the rate-limit window. Same effect as waiting. {%- endcomment -%}
+  {%- assign secs = context.params.secs | plus: 0 -%}
+  {%- if context.params.k != blank -%}
+    {%- graphql a, k: context.params.k, act: context.params.act -%}
+    query ($k: String, $act: String) { records(per_page: 100, filter: { table: { value: "auth_attempt" }, properties: [{ name: "attempt_key", value: $k }, { name: "action", value: $act }] }) { results { id created_at } } }
+    {%- endgraphql -%}
+  {%- else -%}
+    {%- graphql a, act: context.params.act -%}
+    query ($act: String) { records(per_page: 100, filter: { table: { value: "auth_attempt" }, properties: [{ name: "action", value: $act }] }) { results { id created_at } } }
+    {%- endgraphql -%}
+  {%- endif -%}
+  {%- assign done = [] -%}
+  {%- for rec in a.records.results -%}
+    {%- assign t0 = rec.created_at | date: '%s' | plus: 0 | minus: secs | date: '%Y-%m-%dT%H:%M:%SZ' -%}
+    {%- graphql up, id: rec.id, ts: t0 -%}
+    mutation ($id: ID!, $ts: JSONDate) { record_update(id: $id, record: { table: "auth_attempt", created_at: $ts }) { id created_at } }
+    {%- endgraphql -%}
+    {%- assign done = done | add_to_array: up -%}
+  {%- endfor -%}
+  {%- assign out['updated'] = done -%}
+{%- elsif op == 'ip' -%}
+  {%- function ip = 'account/rate_limit/client_ip' -%}
+  {%- assign out['ip'] = ip -%}
+{%- elsif op == 'seed' -%}
+  {%- comment -%}
+    Inserts n auth_attempt rows for one action, the rows the app writes itself through the same named
+    query, so a limit can be reached without the requests (and emails) that would normally get there.
+    ip=mine uses the caller's address as the app sees it; anything else is stored as given. back moves
+    the new rows that many seconds into the past.
+  {%- endcomment -%}
+  {%- assign n = context.params.n | default: 1 | plus: 0 -%}
+  {%- if n > 60 -%}{%- assign n = 60 -%}{%- endif -%}
+  {%- assign back = context.params.back | default: 0 | plus: 0 -%}
+  {%- assign seed_key = context.params.k | default: '' | append: '' | downcase | strip -%}
+  {%- if context.params.ip == 'mine' -%}
+    {%- function seed_ip = 'account/rate_limit/client_ip' -%}
+  {%- else -%}
+    {%- assign seed_ip = context.params.ip | default: '192.0.2.77' -%}
+  {%- endif -%}
+  {%- assign made = [] -%}
+  {%- for i in (1..n) -%}
+    {%- graphql rec = 'account/rate_limit/record_attempt', action: context.params.act, key: seed_key, ip: seed_ip -%}
+    {%- assign rid = rec.record_create.id -%}
+    {%- if back > 0 and rid != blank -%}
+      {%- assign t0 = 'now' | date: '%s' | plus: 0 | minus: back | date: '%Y-%m-%dT%H:%M:%SZ' -%}
+      {%- graphql up, id: rid, ts: t0 -%}
+      mutation ($id: ID!, $ts: JSONDate) { record_update(id: $id, record: { table: "auth_attempt", created_at: $ts }) { id } }
+      {%- endgraphql -%}
+    {%- endif -%}
+    {%- assign made = made | add_to_array: rid -%}
+  {%- endfor -%}
+  {%- assign out['seeded'] = made -%}
+  {%- assign out['ip'] = seed_ip -%}
+{%- elsif op == 'mint_code' -%}
+  {%- comment -%}
+    Saves a sign-in code request exactly as /sign-in/email-code does (same hash partial, same return_to
+    cleaning, same named query) for a code the caller chose, and sends no email. expires is seconds from
+    now and may be negative.
+  {%- endcomment -%}
+  {%- assign code = context.params.code | append: '' -%}
+  {%- function code_hash = 'account/sign_in/code_hash', email: email, code: code -%}
+  {%- function rt = 'account/safe_return_to', path: context.params.return_to -%}
+  {%- function ip = 'account/rate_limit/client_ip' -%}
+  {%- assign expires_in = context.params.expires | default: 900 | plus: 0 -%}
+  {%- assign expires_at = 'now' | date: '%s' | plus: 0 | plus: expires_in | date: '%Y-%m-%dT%H:%M:%SZ' -%}
+  {%- assign status = context.params.status | default: 'pending' -%}
+  {%- graphql saved = 'account/sign_in/create_code_request', email: email, code_hash: code_hash, expires_at: expires_at, status: status, ip: ip, return_to: rt -%}
+  {%- assign out['id'] = saved.record_create.id -%}
+  {%- assign out['hash_set'] = false -%}
+  {%- if code_hash != blank -%}{%- assign out['hash_set'] = true -%}{%- endif -%}
+{%- elsif op == 'mint_link' -%}
+  {%- comment -%}
+    Saves a sign-in link request and builds its link exactly as /sign-in/email-link does (SITE_ORIGIN,
+    a 40-character nonce, a 15-minute platform token, the same named queries), and sends no email.
+  {%- endcomment -%}
+  {%- assign origin = context.constants.SITE_ORIGIN | default: '' | strip -%}
+  {%- assign last_char = origin | slice: -1, 1 -%}
+  {%- if last_char == '/' -%}{%- assign origin_size = origin.size | minus: 1 -%}{%- assign origin = origin | slice: 0, origin_size -%}{%- endif -%}
+  {%- function rt = 'account/safe_return_to', path: context.params.return_to -%}
+  {%- function ip = 'account/rate_limit/client_ip' -%}
+  {%- assign expires_in = context.params.expires | default: 900 | plus: 0 -%}
+  {%- assign expires_at = 'now' | date: '%s' | plus: 0 | plus: expires_in | date: '%Y-%m-%dT%H:%M:%SZ' -%}
+  {%- assign nonce = 40 | random_string -%}
+  {%- assign status = context.params.status | default: 'pending' -%}
+  {%- graphql saved = 'account/sign_in/create_link_request', email: email, nonce: nonce, expires_at: expires_at, status: status, ip: ip, return_to: rt -%}
+  {%- graphql minted = 'account/sign_in/mint_link_token', email: email, hours: 0.25 -%}
+  {%- assign encoded_email = email | url_encode -%}
+  {%- assign encoded_token = minted.user.temporary_token | url_encode -%}
+  {%- assign encoded_nonce = nonce | url_encode -%}
+  {%- assign out['id'] = saved.record_create.id -%}
+  {%- assign out['link'] = origin | append: '/sign-in/link?e=' | append: encoded_email | append: '&t=' | append: encoded_token | append: '&n=' | append: encoded_nonce -%}
+{%- elsif op == 'mail' -%}
+  {%- assign n = context.params.n | default: 20 | plus: 0 -%}
+  {%- assign pg = context.params.page | default: 1 | plus: 0 -%}
+  {%- graphql m, n: n, pg: pg -%}
+  query ($n: Int, $pg: Int) { admin_sent_notifications(per_page: $n, page: $pg, sort: [{ created_at: { order: DESC } }]) { total_entries results { id created_at notification_id options content } } }
+  {%- endgraphql -%}
+  {%- assign out['mail'] = m.admin_sent_notifications -%}
+{%- elsif op == 'sent_total' -%}
+  {%- graphql m -%}
+  query { admin_sent_notifications(per_page: 1) { total_entries } }
+  {%- endgraphql -%}
+  {%- assign out['total'] = m.admin_sent_notifications.total_entries -%}
+{%- elsif op == 'mint' -%}
+  {%- comment -%} A password reset token stored on the user exactly where forgot-password stores it, without the email. hours may be a fraction. {%- endcomment -%}
+  {%- assign hours = context.params.hours | plus: 0.0 -%}
+  {%- graphql t, em: email, h: hours -%}
+  query ($em: String, $h: Float) { users(per_page: 1, filter: { email: { value: $em } }) { results { id temporary_token(expires_in: $h) } } }
+  {%- endgraphql -%}
+  {%- assign tu = t.users.results | first -%}
+  {%- graphql s, id: tu.id, tok: tu.temporary_token -%}
+  mutation ($id: ID!, $tok: String!) { user_update(id: $id, user: { profiles: [{ name: "modules/insites_crm/token", values: { properties: [{ name: "password_token", value: $tok }] } }] }) { id } }
+  {%- endgraphql -%}
+  {%- assign out['token'] = tu.temporary_token -%}
+  {%- assign out['stored'] = s -%}
+{%- endif -%}
+{{ out | json }}

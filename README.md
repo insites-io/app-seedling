@@ -102,6 +102,11 @@ address. A customer domain that is not verified fails the receiving server's del
 instance has no sendable sender at all, the pages that send email say it is not available
 and the reason is written to the instance log.
 
+## Testing
+
+- `tests/e2e/`: TestCafe end-to-end tests for the email check endpoint. See [tests/README.md](tests/README.md).
+- `tests/qa/`: the QA suite. It deploys Seedling to a test instance, runs 132 cases across sign-in, 2FA, password reset, passwordless sign-in and the v2.1.0 clean-up work, verifies the build, then removes everything it added and compares before and after snapshots. See [tests/qa/README.md](tests/qa/README.md).
+
 ## Development guidelines
 
 - Edit the readable sources (`*.js`, `*.css`, `*.liquid`, `*.graphql`). There are no minified copies to keep in step.
