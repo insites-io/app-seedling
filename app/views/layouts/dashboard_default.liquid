@@ -1,0 +1,29 @@
+---
+metadata: {
+    layout_name: Dashboard - Default
+}
+---
+{%- comment -%} Signed-in pages without a form, such as the dashboard. {%- endcomment -%}
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+  {%- render 'layout/technical_head' -%}
+</head>
+<body class="flex-container flex-dir-column body-height-100">
+  <div class="main-wrap">
+    {%- render 'layout/header' -%}
+    {%- render 'layout/header_mobile' -%}
+    <div class="wrapper client-portal">
+      <div class="grid-container">
+        <div class="grid-x gutter-medium grid-padding-x">
+          <div class="large-12 medium-12 small-12 cell bg-color-ui-01 main-content">
+            {{ content_for_layout }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- render 'layout/footer', sticky_footer: true -%}
+</body>
+</html>

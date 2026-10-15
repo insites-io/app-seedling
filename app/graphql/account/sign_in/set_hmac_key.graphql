@@ -1,0 +1,10 @@
+# Purpose: Stores the secret that sign-in codes are hashed with
+# Used by: app/migrations/20261015000000_sign_in_code_hmac_key.liquid
+# Parameters:
+#   - $value: A long random string, made by the migration and never shown
+# Returns: The constant name
+mutation set_hmac_key($value: String!) {
+  constant_set(name: "SIGN_IN_HMAC_KEY", value: $value) {
+    name
+  }
+}

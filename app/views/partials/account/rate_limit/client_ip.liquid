@@ -1,0 +1,21 @@
+---
+metadata: {
+    partial_name: "Rate Limit | Client IP",
+}
+---
+{%- comment -%}
+  The visitor IP address, for rate limits. Called with:
+    function ip = 'account/rate_limit/client_ip'
+  X-Real-IP and the FIRST X-Forwarded-For entry hold the address the edge saw, and the
+  edge replaces whatever the client sent in either header. The LAST X-Forwarded-For
+  entry is an internal address, so never limit on it.
+{%- endcomment -%}
+{%- liquid
+  assign ip = context.headers.HTTP_X_REAL_IP
+  if ip == blank
+    assign xff = context.headers.HTTP_X_FORWARDED_FOR | default: 'unknown'
+    assign ip = xff | split: ',' | first | strip
+  endif
+  assign ip = ip | truncate: 60, ''
+  return ip
+-%}

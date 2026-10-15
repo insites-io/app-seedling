@@ -31,6 +31,9 @@ app.zip
 .DS_Store
 
 # Test artifacts
-test/screenshots/
-test/videos/
-test/reports/
+tests/screenshots/
+tests/videos/
+tests/reports/
+# Seedling QA suite (tests/qa)
+tests/qa/logs/
+__pycache__/

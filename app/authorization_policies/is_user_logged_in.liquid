@@ -1,0 +1,33 @@
+---
+name: is_user_logged_in
+redirect_to: '{% if context.current_user %}/401{% else %}/sign-in{% endif %}'
+metadata: {
+    "auth_policy_name": "User Authentication"
+}
+---
+
+{% liquid
+  graphql data = 'account/get_current_user'
+
+  assign user_profile = data.current_user.client | first
+
+  comment
+    Policy requires an attached client profile. Explicitly echo true/false
+    to avoid implicit behavior that could lead to unexpected access.
+
+    A signed-out visitor is sent to /sign-in. A signed-in user with no client
+    profile (for example a contact created by the CRM) is not sent to sign in,
+    because the sign-in page would send them straight back. This policy's
+    redirect names /401, but such a user also fails is_user_allowed, and when
+    several policies fail the one created first decides the redirect. That is
+    is_user_allowed, so in practice they go to /verify-2fa and end on /403.
+    The platform adds
+    return_to=<the page asked for> to the redirect; the sign-in page passes it
+    through account/safe_return_to.
+  endcomment
+  if user_profile != blank
+    echo true
+  else
+    echo false
+  endif
+%}

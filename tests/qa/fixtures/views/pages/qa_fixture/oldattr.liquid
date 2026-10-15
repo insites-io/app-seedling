@@ -1,0 +1,11 @@
+---
+slug: qa-fixture/oldattr
+method: get
+layout: ''
+---
+{%- comment -%} TEST ONLY (tests/qa): the attribute patterns before the v2.1.0 fix, kept as controls for case W4. {%- endcomment -%}
+<html><body>
+<form id="f1"><input type="hidden" id="rt" name="return_to" value="{{ context.params.return_to | escape }}"></form>
+<img id="im" src="data:," width="1" height="1" alt="{{ context.params.t | escape }}">
+<form id="f2"><input name="token" id="tok" value="{{ context.params.token }}" type="hidden"></form>
+</body></html>

@@ -1,0 +1,11 @@
+---
+metadata: {
+    partial_name: "Layout | Project assets",
+}
+---
+{%- comment -%}
+  This app's own stylesheets. There is one readable copy of each, loaded in every
+  environment, so what you test on staging is what production runs.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'styles/default.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'styles/custom.css' | asset_url }}">

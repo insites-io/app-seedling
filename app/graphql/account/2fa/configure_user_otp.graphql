@@ -1,0 +1,40 @@
+---
+metadata: {
+    graphql_name: "configure_user_otp"
+}
+---
+# Purpose: Turns 2FA on or off for a user
+# Used by: app/views/pages/account/2fa.liquid (enable), views/pages/api/account/2fa/disable_2fa.liquid (disable)
+# Parameters:
+#   - $id: User ID
+#   - $otp_configured: Boolean to enable/disable 2FA
+# Returns: Updated user with otp_configured status
+# Note: deleted_at: null ensures profile exists even if previously soft-deleted
+mutation configure_user_otp (
+    $id: ID!,
+    $otp_configured: Boolean
+) {
+    items: user_update (
+    id: $id,
+    user: {
+        profiles: [
+            {
+                name: "client",
+                values: {
+                    deleted_at: null,
+                    properties: [
+                        { name: "otp_configured", value_boolean: $otp_configured }
+                    ]
+                }
+            }
+        ]
+    }
+    ) {
+        id
+        name
+        email
+        user_details: profiles(profile_type: "client") {
+            otp_configured: property(name: "otp_configured")
+        }
+    }
+}

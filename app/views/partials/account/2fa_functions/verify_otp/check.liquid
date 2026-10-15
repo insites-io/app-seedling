@@ -1,0 +1,34 @@
+---
+metadata: {
+    partial_name: "2FA Functions | Verify OTP | Check",
+}
+---
+
+{% liquid
+  assign c = { "errors": {}, "valid": true }
+
+  function c = 'account/2fa_functions/validations/presence', c: c, object: object, field_name: 'id'
+  function c = 'account/2fa_functions/validations/presence', c: c, object: object, field_name: 'otp_code'
+
+  comment
+    An authenticator code is exactly 6 digits. Reject anything else before it reaches GraphQL.
+  endcomment
+  assign otp_code = object.otp_code | append: ''
+  assign non_digits = otp_code | replace_regex: '[0-9]', ''
+  if otp_code.size != 6 or non_digits != blank
+    function c = 'account/2fa_functions/register_error', contract: c, field_name: 'otp_code', message: 'must be 6 digits', key: nil
+  endif
+
+  if c.valid
+    function r = 'account/2fa_functions/commands/execute', mutation_name: 'account/verify_otp', object: object, selection: 'users'
+    assign user = r.results.first
+
+    function c = 'account/2fa_functions/validations/truthy', c: c, field_name: 'otp_code', object: user.authenticate, message: 'The code you’ve entered is not valid. Please retry or try again if the code has expired.'
+    assign object['id'] = user.id
+  endif
+
+  assign object['valid'] = c.valid
+  assign object['errors'] = c.errors
+
+  return object
+%}

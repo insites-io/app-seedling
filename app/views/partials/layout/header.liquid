@@ -1,0 +1,56 @@
+---
+metadata: {
+    partial_name: "Layout | Header default",
+}
+---
+{%- comment -%}
+  The site header. Called with:
+    render 'layout/header'
+  The logo comes from CMS Globals (company_logo) when one has been uploaded.
+{%- endcomment -%}
+{%- liquid
+  assign logo = context.exports.global.company_logo
+  if logo == blank or logo contains 'client-logo.png'
+    assign logo = 'images/default-images/logo/insites-logo.png' | asset_url
+  endif
+  assign full_name = context.current_user.first_name | append: ' ' | append: context.current_user.last_name | strip
+  comment
+    An output tag on this platform turns an escaped double quote back into a quote, so a
+    value that goes into an attribute is escaped here and written with print.
+  endcomment
+  assign full_name_attr = full_name | escape
+  assign logo_attr = logo | escape
+-%}
+<header class="navigation-04 header" data-test="main-header" id="main-header">
+  <div class="wrapper">
+    <div class="header-top-bar grid-container grid-x align-middle">
+      <div class="large-2 medium-3 small-9 cell">
+        <a href="/">
+          <img class="logo" src="{% print logo_attr %}" alt="Logo">
+        </a>
+      </div>
+      <div class="large-1 medium-3 small-0"></div>
+      <div class="hide-for-large mobile-menu-toggle large-0 medium-6 small-3 cell vertical-align-middle align-right">
+        <div id="mobile-menu-btn" class="icon-menu-1"></div>
+      </div>
+      <div class="show-for-large large-9 medium-6 small-12 cell text-right">
+        {%- if context.current_user == blank -%}
+          <a href="/sign-in">
+            <ins-button label="SIGN IN"></ins-button>
+          </a>
+          <a href="/register">
+            <ins-button id="headerRegister" class="btnMain" solid label="Register"></ins-button>
+          </a>
+        {%- elsif context.location.pathname != '/verify-2fa' -%}
+          <a class="nav-link-dashboard" href="/dashboard">Dashboard</a>
+          <ins-dropdown label="{% print full_name_attr %}" class="profileNav">
+            <ins-dropdown-item link="/profile" label="Profile"></ins-dropdown-item>
+            <ins-dropdown-item link="" label="">
+              {%- render 'account/sign_out_form' -%}
+            </ins-dropdown-item>
+          </ins-dropdown>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</header>

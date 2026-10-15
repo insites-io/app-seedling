@@ -1,0 +1,90 @@
+---
+slug: sign-in/link
+method: get
+layout: dashboard_account
+searchable: false
+metadata: {
+    "status": "published",
+    "open_graph_url": "{{ context.exports.global.company_url | strip }}",
+    "open_graph_type": "",
+    "open_graph_image": "",
+    "open_graph_title": "Sign In",
+    "open_graph_description": "Sign In",
+    "open_graph_site_name": "{{ context.exports.global.company_name | strip }}",
+    "meta_title": "Sign In",
+    "page_title": "Sign In | Seedling",
+    "page_name": "Sign In",
+    "meta_description": "Sign In",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "is_sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "0", ## secondary order (ASC)
+    "sitemap_change_frequency": "never"
+}
+---
+
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
+
+  graphql flagged = 'account/create_session', name: 'sign_in_form', value: 'on'
+
+  comment
+    The emailed link carries e (email), t (token) and n (nonce). Move them into the session
+    and come back here without them, so the token leaves the address bar and the history
+    and is never sent as the Referer of anything this page loads.
+    Opening the link changes nothing else. Email scanners open links before people do, so
+    only the Continue button below uses the link.
+  endcomment
+  if context.params.e != blank or context.params.t != blank or context.params.n != blank
+    assign link_email = context.params.e | default: '' | strip | downcase
+    assign link_token = context.params.t | default: '' | strip
+    assign link_nonce = context.params.n | default: '' | strip
+    graphql saved_email = 'account/create_session', name: 'sign_in_link_e', value: link_email
+    graphql saved_token = 'account/create_session', name: 'sign_in_link_t', value: link_token
+    graphql saved_nonce = 'account/create_session', name: 'sign_in_link_n', value: link_nonce
+    redirect_to '/sign-in/link'
+    break
+  endif
+
+  assign link_email = context.session.sign_in_link_e | default: ''
+  function link = 'account/sign_in/check_link', email: link_email, token: context.session.sign_in_link_t, nonce: context.session.sign_in_link_n
+  unless link.ok
+    redirect_to '/sign-in/email-link?error=stale'
+    break
+  endunless
+-%}
+
+<div class="sign-up-wrapper">
+    <div class="spacer section"></div>
+    <div class="sign-up grid-x grid-padding-x">
+        <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">
+            <h1 class="heading-1 text-center">Sign in</h1>
+            <div class="spacer x-small"></div>
+            {%- comment -%}
+              Cloudflare in front of the instance rewrites email addresses in a page into
+              "[email protected]" and needs JavaScript to show them again. The two markers
+              tell it to leave this address alone.
+            {%- endcomment -%}
+            <p class="text-center">You are signing in as <!--email_off--><strong>{{ link_email | escape }}</strong><!--email_on-->.</p>
+            <div class="spacer x-large"></div>
+
+            <form id="sign-in-link-confirm-form" action="/sign-in/link" method="post" novalidate onsubmit="return FormValidation.validateAndSubmit(event);">
+                <input type="hidden" name="authenticity_token" value="{{ context.authenticity_token }}">
+                <div class="grid-x grid-padding-x">
+                    <div class="small-12 cell text-center">
+                        <ins-button id="submit-btn" label="CONTINUE" class="full" solid color="blue" type="submit"></ins-button>
+                        <div class="spacer x-large"></div>
+                        <p class="seedling-form-container-link">Not you? <a href="/sign-in">Back to sign in</a></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="spacer section"></div>
+</div>
+
+<script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>

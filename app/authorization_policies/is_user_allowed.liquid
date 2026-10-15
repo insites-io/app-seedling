@@ -1,0 +1,42 @@
+---
+name: is_user_allowed
+redirect_to: '{% if context.current_user %}/verify-2fa{% else %}/sign-in{% endif %}'
+metadata: {
+    "auth_policy_name": "User Permission"
+}
+---
+
+{% liquid
+  graphql check_2fa_setup = 'account/check_2fa_setup'
+  assign current_user = check_2fa_setup.current_user
+  assign user = current_user.client | first
+
+  comment
+    User must exist. If the profile is missing, deny rather than redirecting by
+    default to prevent accidental access on partially-created accounts.
+
+    When several policies on a page fail, the platform uses the redirect of the
+    policy that was created first, not the first one listed in the page. So this
+    redirect does not rely on is_user_logged_in winning: a signed-out visitor is
+    sent to /sign-in from here too, and only a signed-in user who still has to
+    pass 2FA goes to /verify-2fa.
+  endcomment
+  if user == blank
+    echo false
+    return
+  endif
+
+  comment
+    2FA is passed per session, not per user: the 2FA page stores the user id in
+    this session only after a valid code. Another browser signed in with the
+    password alone has no such value and is sent to verify-2fa.
+  endcomment
+  assign current_user_id = current_user.id | append: ''
+  assign passed_user_id = context.session.two_factor_user_id | append: ''
+
+  if user.otp_configured == true and passed_user_id != current_user_id
+    echo false
+  else
+    echo true
+  endif
+%}

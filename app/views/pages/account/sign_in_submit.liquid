@@ -1,0 +1,78 @@
+---
+slug: sign-in
+method: post
+layout: ''
+searchable: false
+metadata: {
+    page_name: "Sign In - Submit",
+}
+---
+
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
+
+  assign email = context.params.email | default: '' | strip | downcase
+  assign password = context.params.password | default: ''
+
+  comment
+    return_to is where the visitor was going when a signed-in page sent them here.
+    It is checked here and again in account/sign_in/destination, and kept on the
+    error answers so a second try still lands there.
+  endcomment
+  function return_to = 'account/safe_return_to', path: context.params.return_to
+  assign again = ''
+  if return_to != blank
+    assign encoded_return_to = return_to | url_encode
+    assign again = '&return_to=' | append: encoded_return_to
+  endif
+  assign invalid = '/sign-in?error=invalid' | append: again
+  assign too_many = '/sign-in?error=too_many' | append: again
+
+  if email == blank or password == blank
+    redirect_to invalid
+    break
+  endif
+
+  comment
+    Only failed sign-ins count toward the limit: check it here without recording,
+    and record an attempt below only when the password is wrong.
+  endcomment
+  function allowed = 'account/rate_limit/allow', action: 'sign_in', key: email, max_per_key: 10, max_per_ip: 50, count_only: true
+  unless allowed
+    redirect_to too_many
+    break
+  endunless
+
+  graphql auth = 'account/authenticate_password', email: email, password: password
+  assign user = auth.users.results | first
+  if user == blank or user.authenticate.password != true
+    function recorded = 'account/rate_limit/record', action: 'sign_in', key: email
+    redirect_to invalid
+    break
+  endif
+
+  comment
+    After 3 2FA lockouts in 24 hours the account needs a password reset. Show the same
+    message as a wrong password, so nobody signed out can tell the account exists.
+    The alert email has already told the user to reset.
+  endcomment
+  function reset_required = 'account/two_factor_reset_required', user_id: user.id
+  if reset_required
+    redirect_to invalid
+    break
+  endif
+
+  comment
+    2FA is passed per session. Clear any earlier value before signing in, so a
+    new sign-in always has to pass 2FA again.
+  endcomment
+  graphql cleared = 'account/delete_session', name: 'two_factor_user_id'
+  sign_in user_id: user.id
+
+  assign profile = user.client | first
+  function goto = 'account/sign_in/destination', otp_configured: profile.otp_configured, return_to: return_to
+  redirect_to goto
+-%}

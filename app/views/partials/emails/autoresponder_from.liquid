@@ -1,0 +1,16 @@
+---
+metadata: {
+    partial_name: "Emails | Autoresponder from",
+}
+---
+{%- comment -%}
+  The From line of every email: "Business Name <verified sender>". See emails/sender.
+{%- endcomment -%}
+{%- liquid
+  function sender = 'emails/sender'
+  assign from = ''
+  if sender.ok
+    assign from = sender.name | append: ' < ' | append: sender.email | append: ' >' | strip
+  endif
+-%}
+{{ from }}

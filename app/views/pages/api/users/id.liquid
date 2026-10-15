@@ -1,0 +1,71 @@
+---
+slug: api/users/:id
+format: json
+method: patch
+layout: ''
+authorization_policies:
+  - is_user_logged_in
+  - is_user_allowed
+searchable: false
+metadata: {
+    "api_endpoint_name": "update-user",
+    "status": "published",
+    "open_graph:url": "",
+    "open_graph:type": "",
+    "open_graph:image": "",
+    "open_graph:title": "Update User API",
+    "open_graph:description": "Update User API",
+    "open_graph:site_name": "",
+    "meta_title": "Update User API",
+    "page_title": "Update User API",
+    "meta_description": "Update User API",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "sitemap_enabled": false,
+    "sitemap_priority": "1.0",
+    "sitemap_order": "9999",
+    "sitemap_changefreq": "never"
+}
+---
+
+
+{%- liquid
+  comment
+    The policies above refuse anyone not signed in. A signed-in user can change only
+    their own account: the id in the address must be theirs, and the save always goes to
+    context.current_user whatever the address says.
+  endcomment
+  assign user_id = context.params.id | default: '' | append: ''
+  assign current_user_id = context.current_user.id | append: ''
+
+  if user_id != current_user_id
+    response_status 403
+    assign errors = { "authorization": ["You can only update your own account"] }
+    render 'api/error_response', error_type: 'authorization', errors: errors, status_code: 403
+    break
+  endif
+
+  function result = 'account/details/save', first_name: context.params.first_name, last_name: context.params.last_name, email: context.params.email
+  unless result.valid
+    assign field_errors = {}
+    for pair in result.errors
+      function message = 'account/details/messages', field: pair[0], code: pair[1]
+      assign messages = []
+      assign messages = messages | array_add: message
+      assign field_errors[pair[0]] = messages
+    endfor
+    response_status 422
+    render 'api/error_response', error_type: 'validation', errors: field_errors, status_code: 422
+    break
+  endunless
+
+  assign response = {}
+  assign response['success'] = true
+  assign response['valid'] = true
+  assign response['data'] = {}
+  assign response['data']['id'] = result.user.id
+  assign response['data']['email'] = result.user.email
+  assign response['data']['first_name'] = result.user.first_name
+  assign response['data']['last_name'] = result.user.last_name
+-%}
+{{ response }}

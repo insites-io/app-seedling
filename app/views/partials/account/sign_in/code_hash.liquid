@@ -1,0 +1,22 @@
+---
+metadata: {
+    partial_name: "Sign In | Code Hash",
+}
+---
+{%- comment -%}
+  The stored form of a sign-in code. Called with:
+    function code_hash = 'account/sign_in/code_hash', email: email, code: code
+  An HMAC of "email:code" keyed with the SIGN_IN_HMAC_KEY constant, so a code issued to
+  one address can never match another address's request, and the table never holds a code.
+  Returns blank when the key is not set, and every caller treats blank as a refusal.
+  The migration 20261015000000_sign_in_code_hmac_key sets the key.
+{%- endcomment -%}
+{%- liquid
+  assign code_hash = ''
+  assign key = context.constants.SIGN_IN_HMAC_KEY
+  if key != blank
+    assign message = email | append: ':' | append: code
+    assign code_hash = message | compute_hmac: key
+  endif
+  return code_hash
+-%}

@@ -1,0 +1,141 @@
+---
+slug: sign-in/code
+method: post
+layout: ''
+searchable: false
+metadata: {
+    page_name: "Sign In With Code - Submit",
+}
+---
+
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
+
+  comment
+    A post without a valid authenticity token is not refused: it arrives with an empty
+    session. The form page sets this flag, so its absence means the token was missing or wrong.
+  endcomment
+  if context.session.sign_in_form != 'on'
+    redirect_to '/sign-in/code?error=session'
+    break
+  endif
+
+  assign email = context.params.email | default: '' | strip | downcase
+  assign code = context.params.code | default: '' | append: '' | remove: ' ' | strip
+  graphql remembered = 'account/create_session', name: 'sign_in_code_email', value: email
+
+  comment
+    A code is exactly 6 digits. Anything else is refused before it can use a guess.
+  endcomment
+  assign non_digits = code | replace_regex: '[0-9]', ''
+  if email == blank or code.size != 6 or non_digits != blank
+    redirect_to '/sign-in/code?error=invalid'
+    break
+  endif
+
+  comment
+    Across all codes for one address: 10 wrong codes, or 50 from one IP address, in an
+    hour stop further checks. Only wrong codes are recorded (below). Within one code,
+    the 5 try slots are the limit, and they hold even under concurrent requests.
+  endcomment
+  function allowed = 'account/rate_limit/allow', action: 'sign_in_code_check', key: email, max_per_key: 10, max_per_ip: 50, window: 3600, count_only: true
+  unless allowed
+    redirect_to '/sign-in/code?error=too_many'
+    break
+  endunless
+
+  comment
+    Only the newest request for the address counts. A request with no account (miss) goes
+    through exactly the same steps as a real one, expiry and try slots included, and is
+    refused only at the end, so the answers never tell which addresses have accounts.
+  endcomment
+  graphql found = 'account/sign_in/find_code_request', email: email
+  assign request = found.requests.results | first
+  assign now_unix = 'now' | date: '%s' | plus: 0
+  assign result = 'invalid'
+  assign checked = false
+  assign guess = 0
+
+  if request.status == 'killed'
+    assign result = 'too_many'
+  elsif request.status == 'pending' or request.status == 'miss'
+    assign expires_unix = request.expires_at | date: '%s' | plus: 0
+    if expires_unix <= now_unix
+      assign result = 'expired'
+    else
+      assign checked = true
+    endif
+  endif
+
+  if checked
+    comment
+      Every guess first claims one of 5 try slots. A right code then claims the single use
+      slot, so neither the guess limit nor "works once" can be beaten by sending many
+      requests at once.
+    endcomment
+    function guess = 'account/sign_in/take_slot', table: 'sign_in_code', key: request.id, label: 'try', count: 5
+    if guess == 0
+      assign result = 'too_many'
+    else
+      function code_hash = 'account/sign_in/code_hash', email: email, code: code
+      function account = 'account/sign_in/allowed_user', email: email
+      if code_hash != blank and code_hash == request.code_hash and request.status == 'pending' and account.id != blank
+        comment
+          After 3 2FA lockouts in 24 hours the account needs a password reset, the same as
+          for password sign-in. Check it before the code is used, so the code still works
+          once the password has been reset. Only someone who has the right code gets this
+          answer, so it tells nobody else anything.
+        endcomment
+        function reset_required = 'account/two_factor_reset_required', user_id: account.id
+        if reset_required
+          assign result = 'reset'
+        else
+          function used = 'account/sign_in/take_slot', table: 'sign_in_code', key: request.id, label: 'use', count: 1
+          if used == 1
+            assign result = 'ok'
+          endif
+        endif
+      endif
+      if result == 'invalid'
+        function recorded = 'account/rate_limit/record', action: 'sign_in_code_check', key: email, window: 3600
+      endif
+    endif
+
+    comment
+      A wrong fifth guess, or no try slot left, ends the request: the right code after it
+      is refused too, and the person asks for a new one.
+    endcomment
+    assign kill = false
+    if result == 'too_many'
+      assign kill = true
+    elsif result == 'invalid' and guess == 5
+      assign kill = true
+    endif
+    if kill
+      graphql killed = 'account/sign_in/set_request_status', table: 'sign_in_code', id: request.id, from: request.status, to: 'killed'
+      assign result = 'too_many'
+    endif
+  endif
+
+  if result != 'ok'
+    assign goto = '/sign-in/code?error=' | append: result
+    redirect_to goto
+    break
+  endif
+
+  graphql consumed = 'account/sign_in/set_request_status', table: 'sign_in_code', id: request.id, from: 'pending', to: 'consumed'
+  graphql cleared_email = 'account/delete_session', name: 'sign_in_code_email'
+
+  comment
+    2FA is passed per session. Clear any earlier value before signing in, so this sign-in
+    has to pass 2FA again when the account has it turned on.
+  endcomment
+  graphql cleared_2fa = 'account/delete_session', name: 'two_factor_user_id'
+  sign_in user_id: account.id
+
+  function goto = 'account/sign_in/destination', otp_configured: account.otp_configured, return_to: request.return_to
+  redirect_to goto
+-%}

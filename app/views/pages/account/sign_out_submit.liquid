@@ -1,0 +1,21 @@
+---
+slug: sign-out
+method: post
+layout: ''
+searchable: false
+metadata: {
+    page_name: "Sign Out - Submit",
+}
+---
+
+{%- liquid
+  comment
+    A post without a valid authenticity token arrives with no signed-in user, so another
+    site cannot sign anyone out. Clear this session's 2FA pass before signing out.
+  endcomment
+  if context.current_user
+    graphql cleared = 'account/delete_session', name: 'two_factor_user_id'
+    graphql signed_out = 'account/sign_out'
+  endif
+  redirect_to '/sign-out'
+-%}

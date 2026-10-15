@@ -1,0 +1,42 @@
+---
+slug: register
+method: get
+layout: dashboard_account
+searchable: false
+max_deep_level: 1
+metadata: {
+    "status": "published",
+    "open_graph_url": "{{ context.exports.global.company_url | strip }}",
+    "open_graph_type": "",
+    "open_graph_image": "",
+    "open_graph_title": "Register",
+    "open_graph_description": "Register",
+    "open_graph_site_name": "{{ context.exports.global.company_name | strip }}",
+    "meta_title": "Register",
+    "page_title": "Register | Seedling",
+    "page_name": "Register",
+    "meta_description": "Register",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "is_sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "0", ## secondary order (ASC)
+    "sitemap_change_frequency": "never",
+}
+---
+
+
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
+
+  comment
+    The POST page checks this flag. A post without a valid authenticity token arrives with
+    an empty session, so a missing flag means the token was missing or forged.
+  endcomment
+  graphql flagged = 'account/create_session', name: 'register_form', value: 'on'
+-%}
+
+{%- render 'account/register_form', values: null, errors: null, notice: context.params.error -%}

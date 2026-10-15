@@ -1,0 +1,26 @@
+---
+metadata: {
+    partial_name: "Layout | Technical head",
+}
+---
+{%- comment -%}
+  Everything every page loads in <head>: meta tags, the CMS SEO tags, fonts, favicons, the
+  Insites components and this app's stylesheets. Called from every layout with:
+    render 'layout/technical_head'
+  Load anything only some pages need (a map API, a chart library) from those pages instead,
+  so every page stays small.
+{%- endcomment -%}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<meta content="authenticity_token" name="csrf-param">
+<meta content="{{ context.authenticity_token }}" name="csrf-token">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+{%- include 'modules/insites_cms/seo' -%}
+
+{%- render 'layout/head/google_fonts' -%}
+{%- render 'layout/head/favicons' -%}
+{%- render 'layout/head/msapplication' -%}
+{%- render 'layout/head/vendor_assets' -%}
+{%- render 'layout/head/insites_assets' -%}
+{%- render 'layout/project_assets' -%}

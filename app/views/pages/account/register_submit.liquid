@@ -1,0 +1,81 @@
+---
+slug: register
+method: post
+layout: dashboard_account
+searchable: false
+metadata: {
+    "page_name": "Register - Submit",
+    "page_title": "Register | Seedling",
+    "meta_title": "Register",
+    "is_visible_to_search_engines": false,
+    "is_sitemap_enabled": false
+}
+---
+
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
+
+  assign values = {}
+  assign values['first_name'] = context.params.first_name | default: '' | append: '' | strip
+  assign values['last_name'] = context.params.last_name | default: '' | append: '' | strip
+  assign values['email'] = context.params.email | default: '' | append: '' | strip | downcase
+  assign password = context.params.password | default: '' | append: ''
+
+  comment
+    A post without a valid authenticity token is not refused: it arrives with an empty
+    session. The register page sets this flag, so its absence means the token was missing
+    or wrong.
+  endcomment
+  if context.session.register_form != 'on'
+    redirect_to '/register?error=session'
+    break
+  endif
+
+  comment
+    The server decides, whatever the browser checked. The browser's email check is only
+    there to answer early.
+  endcomment
+  function errors = 'account/details/check', first_name: values.first_name, last_name: values.last_name, email: values.email
+  if password == blank
+    assign errors['password'] = 'required'
+  elsif password.size < 6
+    assign errors['password'] = 'short'
+  endif
+  if errors != empty
+    response_status 422
+    render 'account/register_form', values: values, errors: errors, notice: null
+    break
+  endif
+
+  comment
+    The platform refuses a second user with the same email. That is what stops two
+    registrations sent at the same moment from both creating an account: the check above
+    can pass for both, and only one create succeeds.
+  endcomment
+  graphql created = 'account/register_user', email: values.email, password: password, first_name: values.first_name, last_name: values.last_name
+  if created.errors != blank or created.user.id == blank
+    graphql found = 'account/check_user_email_signup', email: values.email
+    assign errors = {}
+    if found.items.total_entries > 0
+      assign errors['email'] = 'taken'
+      response_status 422
+      render 'account/register_form', values: values, errors: errors, notice: null
+    else
+      response_status 500
+      render 'account/register_form', values: values, errors: null, notice: 'failed'
+    endif
+    break
+  endif
+
+  assign log = {}
+  assign log['first_name'] = values.first_name
+  assign log['last_name'] = values.last_name
+  assign log['email'] = values.email
+  background logged = 'events/log_event', description: 'New Registration', log: log
+
+  graphql cleared = 'account/delete_session', name: 'register_form'
+  redirect_to '/account-created'
+-%}

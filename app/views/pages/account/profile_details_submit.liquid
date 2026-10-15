@@ -1,0 +1,30 @@
+---
+slug: profile/details
+method: post
+layout: ''
+searchable: false
+metadata: {
+    page_name: "Profile - Save Details",
+}
+authorization_policies:
+  - is_user_logged_in
+  - is_user_allowed
+---
+
+{%- liquid
+  function result = 'account/details/save', first_name: context.params.first_name, last_name: context.params.last_name, email: context.params.email
+  if result.valid
+    redirect_to '/profile?status=saved'
+    break
+  endif
+
+  comment
+    Report the first refused field, for example /profile?error=email_taken.
+  endcomment
+  assign goto = '/profile?error=details'
+  for pair in result.errors
+    assign goto = '/profile?error=' | append: pair[0] | append: '_' | append: pair[1]
+    break
+  endfor
+  redirect_to goto
+-%}

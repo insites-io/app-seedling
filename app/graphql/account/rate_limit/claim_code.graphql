@@ -1,0 +1,25 @@
+---
+metadata: {
+    graphql_name: "claim_code"
+}
+---
+# Purpose: Claims a 2FA code for a user so it cannot be used again
+# Used by: app/views/partials/account/two_factor_claim_code.liquid
+# Parameters:
+#   - $external_id: otp_used-<user id>-<code>; unique, so only one request can claim a code
+#   - $key: User id
+# Returns: The new record id, or an error when the code was already claimed
+mutation claim_code($external_id: ID!, $key: String!) {
+  record_create(
+    record: {
+      table: "auth_attempt"
+      external_id: $external_id
+      properties: [
+        { name: "action", value: "otp_used" }
+        { name: "attempt_key", value: $key }
+      ]
+    }
+  ) {
+    id
+  }
+}

@@ -1,127 +1,61 @@
-# Form Validation Strategy
+# Forms and validation
 
-## Overview
+Every form in Seedling is a plain HTML `<form>` that posts to a page of its own. There are
+no form definitions with the `{% form %}` tag (see the Insites Logic Engine rule
+`forms-no-form-tag`).
 
-This project uses a **two-layer validation approach**:
-1. **Client-side validation** (JavaScript) - Provides immediate feedback and better UX
-2. **Server-side validation** (Liquid form definitions) - Source of truth, always enforced
+## Two layers
 
-## Validation Flow
+1. **The browser** checks the fields first, for quick feedback. It can be skipped, so it
+   never decides anything.
+2. **The page the form posts to** checks everything again on the server and decides.
 
-```
-User Input → Client-side Validation → If Valid → Submit Form → Server-side Validation → Success/Error
-                                    → If Invalid → Show Errors (no submit)
-```
+## A form
 
-### Client-side validation
-- Runs before form submission
-- Provides immediate feedback
-- Uses `App.validation` helpers and custom validators
-- **Never trust client-side validation alone** - it can be bypassed
-
-### Server-side validation
-- Always runs on form submission
-- Defined in form YAML frontmatter
-- Returns errors that are displayed in the form
-- **This is the authoritative validation**
-
-## Standardized Validation Handler
-
-All forms use `FormValidation.validateAndSubmit(event, options)` which:
-- Prevents default submission
-- Validates all fields in the form or specified container
-- Returns `{ valid: boolean, errors: object }`
-- Submits the form automatically if validation passes
-
-### Usage Pattern
-
-```javascript
-// In form html-onsubmit attribute
-html-onsubmit:"return FormValidation.validateAndSubmit(event);"
-
-// Or with options
-html-onsubmit:"return FormValidation.validateAndSubmit(event, { 
-  containerId: 'personal-details-container',
-  validateTel: true,
-  checkEmail: true 
-});"
+```liquid
+<form id="forgot-password-form" action="/forgot-password" method="post" novalidate
+      onsubmit="return FormValidation.validateAndSubmit(event);">
+  <input type="hidden" name="authenticity_token" value="{{ context.authenticity_token }}">
+  <ins-input validate id="email" label="Email" field="email" name="email"
+             error-message="Please use a valid email address"></ins-input>
+  <ins-button label="SUBMIT" solid type="submit"></ins-button>
+</form>
 ```
 
-## Validation Schema Standards
+- Every form that posts carries the authenticity token.
+- `FormValidation.validateAndSubmit(event, options)` (in `app/assets/scripts/login-scripts.js`)
+  checks every `[validate]` field, then submits. While it runs, a second click does nothing.
+  `options.containerId` limits the check to one part of the form, and `options.checkEmail`
+  makes the register form wait for the "email already used" check.
+- The profile forms use `UserProfileScript.methods.validateForm(event)` in
+  `app/assets/scripts/user-profile.js`, which also asks before a password change.
 
-All form validation schemas should use consistent structure:
+## The page a form posts to
 
-```yaml
-fields:
-  email:
-    validation: 
-      presence:
-        message: Please use a valid email address
-      email: 
-        message: Please use a valid email address
-      unique:  # Only for registration
-        message: Email already exists
-  password:
-    validation: 
-      presence:
-        message: Password is required
-      confirmation: true  # For password confirmation fields
-```
+A page with `method: post` and the same slug as the form page, for example
+`app/views/pages/account/forgot_password_submit.liquid`:
 
-**Avoid** boolean-only validation (e.g., `presence: true`) - always provide message objects.
+1. **Check the session.** A post without a valid authenticity token is not refused by the
+   platform: it arrives with an empty session and no signed-in user. Signed-out forms set a
+   session flag when the form page renders, and the post refuses to continue without it.
+   Signed-in forms are protected by their page's authorization policies instead.
+2. **Check every field,** whatever the browser did. Shared checks live in function partials,
+   for example `account/details/check` for a name and email.
+3. **Answer.** On a refused post, either show the form again with the errors and a 422
+   status (register, forgot password), or redirect with an error code
+   (`/profile?error=email_taken`).
 
-## Form Types and Their Validation
+## The register form and duplicate emails
 
-### Sign In Form
-- **Handler**: `FormValidation.validateAndSubmit(event)`
-- **Validations**: Email format, password presence
-- **No special handling needed**
+The register form asks `/api/check-user-email-signup` whether the email is free, when the
+email field loses focus and again on submit if the email has changed. Submit waits for the
+answer, so a quick submit cannot overtake the check.
 
-### Registration Form
-- **Handler**: `FormValidation.validateAndSubmit(event, { containerId: 'personal-details-container', validateTel: true, checkEmail: true })`
-- **Validations**: Email uniqueness (async check), telephone format, all required fields
-- **Special**: Email uniqueness check runs on blur, form submits after validation
+The server is still the authority. The register page checks again, and the platform refuses
+a second user with the same email when the user is created, so two registrations sent at
+the same moment cannot both make an account.
 
-### Forgot Password Form
-- **Handler**: `FormValidation.validateAndSubmit(event)`
-- **Validations**: Email format and presence
-- **Simple validation only**
+## Messages
 
-### Change Password Form
-- **Handler**: `FormValidation.validateAndSubmit(event)`
-- **Validations**: Password confirmation match, minimum length
-- **Uses**: `UserProfileScript` for password-specific validation
-
-## Custom Validators
-
-### Email Uniqueness Check
-- Runs asynchronously on email field blur
-- Updates `emailInputInfo.status` with: `'clean'`, `'update'`, or `'error'`
-- Form submission respects this status
-
-### Telephone Validation
-- Validates international phone number formats
-- Uses regex: `/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/g`
-- Applied to fields with `field="tel"` attribute
-
-### Password Validation
-- Minimum 6 characters
-- Confirmation must match original password
-- Validated both client and server-side
-
-## Error Handling
-
-All validation errors follow this pattern:
-- Client-side: Set `field.hasError = true` and `field.errorMessage = "message"`
-- Server-side: Errors returned in `form.errors['field_name']`
-- Display: Use `{% if form.errors['field'] %} has-error {% endif %}` in templates
-
-## Migration Guide
-
-To update existing forms to use the unified handler:
-
-1. Replace custom `html-onsubmit` handlers with `FormValidation.validateAndSubmit(event, options)`
-2. Ensure validation schemas use message objects (not booleans)
-3. Remove hard-coded form ID checks from JavaScript
-4. Use options object to specify special behaviors (tel validation, email check, etc.)
-
+Error messages live in `account/details/messages`, keyed by field and code (`required`,
+`invalid`, `taken`, `short`, `mismatch`), so the browser and the server say the same thing.

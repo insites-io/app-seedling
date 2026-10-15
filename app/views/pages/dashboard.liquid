@@ -1,0 +1,36 @@
+---
+slug: dashboard
+method: get
+layout: dashboard_default
+searchable: false
+max_deep_level: 1
+metadata: {
+    "status": "published",
+    "page_name": "Dashboard",
+    "open_graph_url": "",
+    "open_graph_type": "",
+    "open_graph_image": "",
+    "open_graph_title": "Dashboard | Seedling",
+    "open_graph_description": "Dashboard | Seedling",
+    "open_graph_site_name": "",
+    "meta_title": "Dashboard | Seedling",
+    "page_title": "Dashboard | Seedling",
+    "meta_description": "Dashboard | Seedling",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "is_sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "1", ## secondary order (ASC)
+    "sitemap_change_frequency": "never"
+}
+authorization_policies:
+  - is_user_logged_in
+  - is_user_allowed
+---
+
+{%- comment -%}
+  Not cached: the dashboard greets the signed-in user by name, so a cached copy could show
+  one user's page to another.
+{%- endcomment -%}
+{%- graphql found = 'dashboard/get_documentations' -%}
+{%- render 'dashboard/dashboard_content', documentations: found.items.results, first_name: context.current_user.first_name -%}

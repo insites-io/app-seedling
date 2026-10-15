@@ -1,0 +1,41 @@
+---
+metadata: {
+    partial_name: "Account | Details | Messages",
+}
+---
+{%- comment -%}
+  The words for each error code that account/details/check and the account pages return.
+  Called with:
+    function message = 'account/details/messages', field: 'email', code: 'taken'
+{%- endcomment -%}
+{%- liquid
+  assign message = ''
+  case code
+    when 'required'
+      case field
+        when 'first_name'
+          assign message = 'First name is required'
+        when 'last_name'
+          assign message = 'Last name is required'
+        when 'email'
+          assign message = 'Please use a valid email address'
+        when 'password'
+          assign message = 'Password is required'
+        else
+          assign message = 'This field is required'
+      endcase
+    when 'invalid'
+      if field == 'email'
+        assign message = 'Please use a valid email address'
+      else
+        assign message = 'This value is not valid'
+      endif
+    when 'taken'
+      assign message = 'Email has already been used.'
+    when 'short'
+      assign message = 'Minimum of 6 characters'
+    when 'mismatch'
+      assign message = "Password doesn't match"
+  endcase
+  return message
+-%}

@@ -1,0 +1,23 @@
+# Purpose: Finds the newest sign-in code request for an email address
+# Used by: app/views/pages/account/sign_in_code_submit.liquid
+# Parameters:
+#   - $email: Lowercased email address
+# Returns: The newest request. Only the newest one counts: asking again makes older codes stop working.
+query find_code_request($email: String!) {
+  requests: records(
+    per_page: 1
+    sort: [{ created_at: { order: DESC } }]
+    filter: {
+      table: { value: "sign_in_code" }
+      properties: [{ name: "email", value: $email }]
+    }
+  ) {
+    results {
+      id
+      status: property(name: "status")
+      code_hash: property(name: "code_hash")
+      expires_at: property(name: "expires_at")
+      return_to: property(name: "return_to")
+    }
+  }
+}

@@ -1,0 +1,15 @@
+---
+metadata: {
+    partial_name: "2FA Functions | Commands | Execute",
+}
+---
+  
+{% liquid
+  assign selection = selection | default: 'record'
+
+  graphql r = mutation_name, args: object
+
+  assign object = r[selection]
+  assign object['valid'] = true
+  return object
+%}

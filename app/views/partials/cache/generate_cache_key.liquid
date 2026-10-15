@@ -1,0 +1,36 @@
+---
+metadata: {
+    partial_name: "Cache | Generate cache key",
+}
+---
+{%- comment -%}
+  Builds a cache key for a page's dynamic_cache. The key changes whenever a record in one of
+  the given tables changes, or any page, layout, partial, asset or form is deployed, and it
+  includes the full URL, so each set of query parameters is cached on its own. Called from
+  a page's dynamic_cache key with:
+    function key = 'cache/generate_cache_key', tables: tables
+  tables: an array of table names whose records the page shows.
+  Never cache a page that shows something only the signed-in user may see.
+  While you develop, leave dynamic_cache off, or a deploy may not show until the key moves.
+{%- endcomment -%}
+{%- liquid
+  graphql records = 'page_cache/check_records_update_date', tables: tables
+  graphql site = 'page_cache/check_site_update_date'
+
+  assign dates = []
+  assign latest_record = records.items.results | first
+  if latest_record.updated_at != blank
+    assign dates = dates | array_add: latest_record.updated_at
+  endif
+  assign groups = 'admin_liquid_partials,admin_liquid_layouts,admin_pages,admin_assets,admin_forms' | split: ','
+  for group in groups
+    assign latest = site[group].results | first
+    if latest.updated_at != blank
+      assign dates = dates | array_add: latest.updated_at
+    endif
+  endfor
+
+  assign latest_date = dates | sort | last | date: '%s'
+  assign key = context.location.url | append: '-' | append: latest_date
+  return key
+-%}

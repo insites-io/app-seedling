@@ -1,0 +1,11 @@
+---
+metadata: {
+    partial_name: "Emails | Autoresponder reply to",
+}
+---
+{%- comment -%}
+  The Reply-To of every email: company_email_1 from CMS Globals, or blank when it is not
+  set. See emails/sender.
+{%- endcomment -%}
+{%- function sender = 'emails/sender' -%}
+{{ sender.reply_to }}

@@ -1,0 +1,16 @@
+---
+metadata: {
+    partial_name: "Technical Head | Vendor assets",
+}
+---
+{%- comment -%}
+  Third-party styles and scripts. Each CDN file is pinned to one version and carries a
+  Subresource Integrity hash, so the browser refuses it if the CDN ever serves something
+  different. To upgrade one, change the version and replace its hash with the sha384 of
+  the new file.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'styles/vendor/foundation.min.css' | asset_url }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.css" integrity="sha384-snpJ3knpH6avB6cP1vPkNdmRzCYaCpom/3TNOyvo189BiogXYXQfXkyYpZ2/xADs" crossorigin="anonymous">
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.17.4/dist/sweetalert2.all.min.js" integrity="sha384-nG63iNKnRRcy5YnCp6RHLMs1kzkVkhPSMQKBuRUEhPsGlL+iHVsxwrFa0wDWMjxI" crossorigin="anonymous" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js" integrity="sha384-uuNfwJfjOG2ukYi4eAB11/t3lP4Zjf75a3UhgkLzEpiX8JpJfacpG7Ye+0tiVMxT" crossorigin="anonymous" defer></script>

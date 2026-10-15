@@ -1,0 +1,19 @@
+---
+metadata: {
+    partial_name: "Dashboard | Default images",
+}
+---
+{%- comment -%}
+  Pictures for the four seeded documentation cards, used until an image is uploaded to
+  each record. Called with:
+    function default_images = 'dashboard/default_images'
+  Returns a hash of card title to image URL. Delete it once every card has its own image.
+{%- endcomment -%}
+{%- liquid
+  assign images = {}
+  assign images['Apps'] = 'images/home/apps-img.svg' | asset_url
+  assign images['Documentation'] = 'images/home/documentation-img.svg' | asset_url
+  assign images['Developer Guide'] = 'images/home/guide-img.svg' | asset_url
+  assign images['Liquid'] = 'images/home/liquid-img.svg' | asset_url
+  return images
+-%}

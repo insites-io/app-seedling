@@ -1,0 +1,25 @@
+---
+metadata: {
+    graphql_name: "verify_otp"
+}
+---
+# Purpose: Validates OTP code for 2FA authentication
+# Used by: app/views/partials/account/2fa_functions/verify_otp/check.liquid
+# Parameters:
+#   - $id: Signed-in user ID (never an email from the request)
+#   - $otp_code: 6-digit OTP code from authenticator app
+# Returns: User ID and email if OTP is valid (authenticate.otp_code returns true)
+# Note: drift: 30 allows 30-second time window tolerance for clock skew
+query verify_otp($id: ID!, $otp_code: String!){
+    users(
+        filter: { id: { value: $id } }, per_page:1
+    ){
+        results{
+        id
+        email
+        authenticate{
+            otp_code(code: $otp_code, drift: 30)
+        }
+        }
+    }
+}

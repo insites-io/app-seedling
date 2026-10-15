@@ -1,0 +1,45 @@
+---
+slug: sign-in
+method: get
+layout: dashboard_account
+searchable: false
+max_deep_level: 1
+metadata: {
+    "status": "published",
+    "open_graph_url": "{{ context.exports.global.company_url | strip }}",
+    "open_graph_type": "",
+    "open_graph_image": "",
+    "open_graph_title": "Sign In",
+    "open_graph_description": "Sign In",
+    "open_graph_site_name": "{{ context.exports.global.company_name | strip }}",
+    "meta_title": "Sign In",
+    "page_title": "Sign In | Seedling",
+    "page_name": "Sign In",
+    "meta_description": "Sign In",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "is_sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "0", ## secondary order (ASC)
+    "sitemap_change_frequency": "never"
+}
+---
+
+{%- if context.current_user -%}    
+    {%- redirect_to '/dashboard' -%} 
+{%- endif -%} 
+
+<div class="sign-up-wrapper">
+    <div class="spacer section"></div>
+    <div class="sign-up grid-x grid-padding-x">
+        <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">
+            <h1 class="heading-1 text-center">Sign in</h1>
+            <div class="spacer x-large"></div>
+            {%- render 'account/sign_in_form', context: context -%}
+        </div>
+    </div>
+    <div class="spacer section"></div>
+</div>
+
+
+<script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>

@@ -1,0 +1,33 @@
+---
+metadata: {
+    partial_name: "Sign In | Take Slot",
+}
+---
+{%- comment -%}
+  Claims one of a fixed number of slots for a sign-in request, atomically. Called with:
+    function won = 'account/sign_in/take_slot', table: 'sign_in_code', key: request_id, label: 'try', count: 5
+  Returns the slot number won (1 to count), or 0 when every slot is taken.
+  Each slot is a record with a unique external id (<key>-<label>-<n>), so when requests race
+  for one slot exactly one create succeeds. A counter that is read and written back, or
+  increased with increment, lets concurrent requests through: with a counter, 16 wrong
+  guesses sent at once got 14 checked against a limit of 5. With slots, exactly 5.
+  Each claim is one create (claim_slot.liquid), and the loop stops at the first one won,
+  so a call makes at most count creates.
+{%- endcomment -%}
+{%- liquid
+  assign won = 0
+  assign key = key | append: ''
+  if key == blank
+    return won
+  endif
+
+  for n in (1..count)
+    assign external_id = key | append: '-' | append: label | append: '-' | append: n
+    function claimed = 'account/sign_in/claim_slot', table: table, external_id: external_id
+    if claimed
+      assign won = n
+      break
+    endif
+  endfor
+  return won
+-%}

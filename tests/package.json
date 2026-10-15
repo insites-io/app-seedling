@@ -1,0 +1,16 @@
+{
+  "name": "app-seedling",
+  "version": "2.1.0",
+  "private": true,
+  "description": "End-to-end tests for Seedling. Set INSITES_URL to the instance you want to test.",
+  "scripts": {
+    "test": "testcafe chrome:headless 'e2e/**/*.e2e.js'",
+    "test:ui": "testcafe chrome 'e2e/**/*.e2e.js'"
+  },
+  "devDependencies": {
+    "testcafe": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

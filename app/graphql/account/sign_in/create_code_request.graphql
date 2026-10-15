@@ -1,0 +1,27 @@
+# Purpose: Saves one request for a sign-in code
+# Used by: app/views/pages/account/sign_in_code_request_submit.liquid
+# Parameters:
+#   - $email: Lowercased email address
+#   - $code_hash: HMAC of "email:code"; the code itself is never stored
+#   - $expires_at: ISO date-time, 15 minutes after the request
+#   - $status: pending (an account exists and the code was emailed) or miss (no account, nothing sent)
+#   - $ip: Visitor IP address
+#   - $return_to: A path on this site to go to after sign-in, or blank
+# Returns: The new record id
+mutation create_code_request($email: String!, $code_hash: String!, $expires_at: String!, $status: String!, $ip: String!, $return_to: String!) {
+  record_create(
+    record: {
+      table: "sign_in_code"
+      properties: [
+        { name: "email", value: $email }
+        { name: "code_hash", value: $code_hash }
+        { name: "expires_at", value: $expires_at }
+        { name: "status", value: $status }
+        { name: "ip", value: $ip }
+        { name: "return_to", value: $return_to }
+      ]
+    }
+  ) {
+    id
+  }
+}

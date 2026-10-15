@@ -1,19 +1,40 @@
-# Caching strategy
+# Caching
 
-## When to enable caching
-- Marketing pages under `modules/website/public/views/pages` are static; enable caching by default.
-- GraphQL page cache helpers at `modules/website/public/graphql/page_cache` provide update timestamps; use them to decide whether to refresh client caches.
-- Authenticated dashboard pages often show user-specific data and should remain uncached unless explicitly safe (e.g., documentation pages).
+Seedling caches one page, and you can cache more the same way.
 
-## How cache invalidation works
-- Use `check_records_update_date.graphql` and `check_site_update_date.graphql` to determine if content changed. Compare timestamps and clear or bypass caches when newer than your stored values.
-- For client-side caching, store the last-seen timestamp and re-fetch when it differs from the API response.
+## How a page is cached
 
-## Safe defaults
-- Default to no caching for any response that includes `current_user` or private profile data.
-- Allow caching for static assets (CSS/JS/images) and public GraphQL queries that do not reference `current_user`.
+A page caches itself with `dynamic_cache` in its front matter. The `key` decides when the
+cached copy is replaced: a new key means a fresh render.
 
-## Enabling caching in environments
-- Configure your edge or CDN to cache GET requests to marketing routes and GraphQL page-cache endpoints with short TTLs (e.g., 5–15 minutes).
-- Bypass or set `Cache-Control: no-store` on dashboard routes and API responses that carry user data.
+```liquid
+dynamic_cache:
+  layout: true
+  key: |-
+    {%- assign tables = ["modules/insites_crm/crm_system_field"] -%}
+    {%- function key = 'cache/generate_cache_key', tables: tables -%}
+    {{ key }}-{{ context.current_user.id }}
+```
 
+`cache/generate_cache_key` builds the key from:
+
+- the full URL, so each set of query parameters is cached on its own;
+- the newest record in the `tables` you pass, from `page_cache/check_records_update_date`;
+- the newest deployed page, layout, partial, asset or form, from `page_cache/check_site_update_date`.
+
+So the cache moves on when a record in one of those tables changes or when you deploy.
+Pass the tables whose records the page shows, as `tables:`.
+
+`app/views/pages/account/account_created.html.liquid` is the example in Seedling. Its key
+ends with `context.current_user.id`, because the header in its layout shows who is signed in.
+
+## What not to cache
+
+- **Pages that show one user's data.** The dashboard greets the signed-in user by name, so
+  it is not cached: a cached copy could show one user's page to another.
+- **Anything a form posts to,** and the JSON endpoints under `app/views/pages/api/`.
+
+## While you develop
+
+Leave `dynamic_cache` off while you work on a page. With it on, a change may not show until
+the key moves.

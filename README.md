@@ -1,59 +1,147 @@
-## Project overview
+# Seedling
 
-Seedling contains the public assets that power the dashboard and marketing site. The codebase is organized as Liquid templates, GraphQL documents, and small JavaScript helpers that run in the browser (no server runtime inside this repo). The `modules/dashboard` folder owns authenticated experiences such as account, 2FA, profile management, and documentation pages; `modules/website` serves the public-facing marketing site.
+Seedling is a starter app for Insites. It gives you a public website and a signed-in dashboard with registration, sign-in (by password, emailed link or emailed code), two-factor authentication (2FA), a profile page and password reset. The whole site lives in `app/`.
 
-## Documentation
+New to Insites? Work through the [Getting Started course](https://docs.insites.io/getting-started/welcome-to-insites) first. It explains instances, the CLI and how a site is built.
 
-For detailed documentation, see the [Insites Application - Seedling Documentation v1.0.0](https://uploads.prod01.sydney.platformos.com/instances/572/property_uploads/modules/ins_console/marketplace_listings/documentation_file/bd2fd432-9819-4e48-b924-fb453a0ab338/Insites%20Application%20-%20Seedling%20Documentation%20v1.0.0.pdf) PDF.
+## Get started
 
-## Installation instructions
+1. **Get the code.** On GitHub, click **Use this template** on [insites-io/app-seedling](https://github.com/insites-io/app-seedling) to make your own copy, then clone your copy. You can also clone this repository directly:
 
-1) Clone the repository: `git clone <repo-url> && cd app-seedling`  
-2) There is no build step required to view or edit the Liquid/GraphQL files. Open the `modules/` tree in your editor and work directly against the source files.  
-3) If you use optional tooling (formatters, linters, or bundlers), install a recent Node.js LTS (18+) and add your toolchain locally; compiled assets should be checked in alongside the readable sources.  
-4) Deploy/sync the `modules/` directory to your target platform as needed (for example via your platform’s CLI or file sync).
+   ```bash
+   git clone https://github.com/insites-io/app-seedling.git
+   cd app-seedling
+   ```
 
-## Architecture overview
+2. **Install the Insites CLI.**
 
-- `modules/dashboard/public/authorization_policies`: Liquid auth policies that gate protected routes (2FA, session checks).
-- `modules/dashboard/public/graphql`: GraphQL documents used by account and dashboard flows.
-- `modules/dashboard/public/assets`: Unminified JS helpers plus minified counterparts for dashboard flows (sign in, 2FA, profile, API helpers).
-- `modules/dashboard/public/views`: Layouts, pages, and partials for authenticated experiences.
-- `modules/website/public`: Static marketing site layouts, styles, scripts, and GraphQL documents that support caching and notifications.
-- Schema, migrations, and user profile type definitions live beside the modules to keep runtime configuration close to the templates.
+   ```bash
+   npm install -g @insites/insites-cli
+   ```
+
+3. **Connect the CLI to your instance.** Use the instance UUID shown in the Insites Console. The CLI opens the Console in your browser so you can sign in.
+
+   ```bash
+   insites-cli env add staging --instance-uuid <your-instance-uuid>
+   ```
+
+4. **Send the code to your instance.** Send the whole app once with a partial deploy. Then run `sync` while you work, so each file goes up as you save it.
+
+   ```bash
+   insites-cli deploy -p staging
+   insites-cli sync staging
+   ```
+
+Always pass `-p` to `deploy`. A full deploy (without `-p`) removes files from the instance that are not in your build, and every instance carries files that are not in this repository, such as the System Pages error pages.
+
+## Installing over an older Seedling is not supported
+
+Seedling 2.1.0 moved the site from its two folders under `modules/` (dashboard and website) into `app/`. Do not install 2.1.0 on an instance that already has an older Seedling (the `modules/` layout). A partial deploy never deletes files, so the instance would end up with both copies. The database tables and the user profile type also lost their module prefix (the profile type is now `client`), so data saved by the older version is not read by 2.1.0. Start from a new instance.
+
+## What is in the repository
+
+| Path | What it holds |
+|---|---|
+| `app/views/pages/` | Pages. `index.liquid` is the home page, `account/` holds sign-in (password, emailed link and emailed code), registration, 2FA and password reset, and `api/` holds the JSON endpoints |
+| `app/views/layouts/` | `website_default`, `website_message`, `dashboard_default`, `dashboard_form` and `dashboard_account` |
+| `app/views/partials/` | Header, footer, page content, account helpers and cache helpers |
+| `app/forms/` | One form definition, `update_password_token`, which sends the password reset email when a reset token is saved. Every form on a page is a plain `<form>`; see [docs/FORM_VALIDATION.md](docs/FORM_VALIDATION.md) |
+| `app/graphql/` | Queries and mutations for accounts, 2FA, rate limiting and page caching |
+| `app/authorization_policies/` | Policies that protect signed-in pages and 2FA steps. Each one returns `true` or `false` |
+| `app/schema/`, `app/user_profile_types/` | The `auth_attempt`, `documentation`, `sign_in_code` and `sign_in_link` tables, and the `client` profile type |
+| `app/emails/` | The password reset, 2FA alert, sign-in link and sign-in code emails |
+| `app/migrations/` | Seed data for the dashboard documentation cards, and the secret that sign-in codes are hashed with |
+| `app/assets/` | Scripts, styles and images. There is one readable copy of each script and stylesheet, loaded in every environment |
+| `tests/` | End-to-end tests. See [tests/README.md](tests/README.md) |
+| `docs/` | Notes on caching, examples, forms and validation, and migrations |
+
+Seedling does not ship error pages. Every instance already has its 401, 403, 404 and 500 pages from System Pages. Seedling's `app/views/pages/index.liquid` replaces the placeholder home page that System Pages installs.
+
+## Sign-in options
+
+The sign-in page offers three ways in: a password, an emailed link, or an emailed 6-digit code.
+
+| Option | Pages | How it works |
+|---|---|---|
+| Password | `/sign-in` | Email and password, then 2FA if the account has it turned on |
+| Emailed link | `/sign-in/email-link`, then `/sign-in/link` | The email holds a link that works once, for 15 minutes. Opening it only shows a **Continue** button; pressing it signs you in |
+| Emailed code | `/sign-in/email-code`, then `/sign-in/code` | The email holds a 6-digit code that works once, for 15 minutes. 5 wrong codes end it |
+
+Two things to set up on each instance:
+
+1. **`SITE_ORIGIN`.** The link in the email is built from this constant, never from the request, so nobody can make it point at another site. Set it to the address of your site, with no trailing slash. Until it is set, the emailed link option says it is not available.
+
+   ```bash
+   insites-cli constants set staging --name SITE_ORIGIN --value https://www.example.com
+   ```
+
+2. **`SIGN_IN_HMAC_KEY`.** Codes are stored as a keyed hash, never as the code. The migration `app/migrations/20261015000000_sign_in_code_hmac_key.liquid` creates a random key the first time you deploy, and leaves it alone after that. Until it is set, the emailed code option says it is not available.
+
+How the emailed options stay safe:
+
+- **The same answer for every address.** Asking for a link or a code for an address with no account gives the same message as for a real one, and counts toward the limits the same way. Nothing is sent.
+- **Only registered accounts.** A user may sign in this way only when they have a `client` profile, which registration creates.
+- **Limits.** 5 requests per address and 20 per IP address in 15 minutes, through the same `auth_attempt` table as password sign-in. Each code allows 5 guesses, and they are counted with one row per guess, so sending many guesses at once still gets only 5 checked. Across all codes for one address, 10 wrong codes in an hour stop further checks.
+- **Works once.** Using a link or a code claims a single "use" row with a unique external id, so two requests at the same moment cannot both sign in.
+- **Email scanners cannot use a link.** Many mail systems open every link to check it. Opening the link changes nothing: it moves the link into your session, takes it out of the address bar, and shows **Continue**. Only pressing **Continue** uses it.
+- **2FA still applies.** If the account has 2FA turned on, you go to `/verify-2fa` after the link or code, exactly as after a password.
+- **`return_to`** is passed through `account/safe_return_to`, so it can only be a path on this site, with no quote, angle bracket or backtick.
+
+## Email sender
+
+Every email comes from the instance's verified sender, which the CRM module resolves
+(`modules/insites_crm/functions/email_sender/customer_sender`): the customer's own domain
+once it is verified in Insites Console, otherwise `no-reply@insites.site`. The display name
+is `company_name` from CMS Globals, and replies go to `company_email_1` from CMS Globals.
+Without `company_email_1` the mail still goes, with no Reply-To.
+
+This differs from the original 2.1.0 brief, which asked for mail to come from the Globals
+address. A customer domain that is not verified fails the receiving server's delivery checks
+(SPF, DKIM and DMARC), so that mail would be dropped. Mail is never sent from
+`notifications@insites.io` or any other address the instance cannot authenticate. If the
+instance has no sendable sender at all, the pages that send email say it is not available
+and the reason is written to the instance log.
+
+## Testing
+
+- `tests/e2e/`: TestCafe end-to-end tests for the email check endpoint. See [tests/README.md](tests/README.md).
+- `tests/qa/`: the QA suite. It deploys Seedling to a test instance, runs 132 cases across sign-in, 2FA, password reset, passwordless sign-in and the v2.1.0 clean-up work, verifies the build, then removes everything it added and compares before and after snapshots. See [tests/qa/README.md](tests/qa/README.md).
 
 ## Development guidelines
 
-- Edit the readable sources (`*.js`, `*.liquid`, `*.graphql`) first; keep minified assets in sync when they are the deployed artifacts.
-- Auth policies must explicitly echo `true` or `false` and handle missing user data defensively.
-- GraphQL documents should be shared and de-duplicated; prefer updating a single query and reusing it instead of copying.
-- Keep console logging behind a feature flag (e.g., `window.APP_DEBUG === true`) or remove it entirely before shipping.
-- Favor small, composable partials and keep forms/scripts close to their associated view for discoverability.
+- Edit the readable sources (`*.js`, `*.css`, `*.liquid`, `*.graphql`). There are no minified copies to keep in step.
+- Every page declares its `method:`. A form posts to its own page with `method: post`.
+- Use `render` for a partial that outputs HTML and `function` for one that returns a value.
+- A value that goes into an HTML attribute is escaped and written with `print` (see [docs/EXAMPLES.md](docs/EXAMPLES.md)). An output tag turns an escaped double quote back into a quote.
+- Authorization policies must return `true` or `false` explicitly and handle missing user data.
+- Reuse GraphQL documents. Update one query rather than copying it.
+- Keep console logging behind a flag (`window.APP_DEBUG === true`) or remove it before you ship.
+- Prefer small partials, and keep forms and scripts close to the page that uses them.
 
-## Common patterns and examples
+## Common patterns
 
-- **Authorization**: Policies query `modules/dashboard/account/check_2fa_setup` and echo booleans based on 2FA and session state (`authorization_policies/*.liquid`).
-- **GraphQL usage**: Templates request data with `{% graphql variable = 'modules/dashboard/account/check_2fa_setup' %}` then consume it with Liquid assignments.
-- **Form validation**: All forms use the unified `FormValidation.validateAndSubmit(event, options)` handler. Client-side validation provides immediate feedback; server-side validation (defined in form YAML) is the source of truth. See `docs/FORM_VALIDATION.md` for the complete strategy.
-- **API helpers**: `modules/dashboard/public/assets/services/apiServices.js` wraps Axios; error logging is gated by `window.APP_DEBUG` to avoid noisy consoles in production. A similar helper exists for marketing forms at `modules/website/public/assets/services/formServices.js`.
+- **Authorization:** policies run `account/check_2fa_setup` and return a boolean based on the 2FA and session state (`app/authorization_policies/*.liquid`).
+- **Signed-out visitors:** a signed-in page sends a signed-out visitor to `/sign-in`, and the platform adds `return_to` so they come back after signing in. When several policies on a page fail, the platform uses the redirect of the policy that was created first, not the first one listed, so each policy's `redirect_to` checks whether someone is signed in rather than relying on the order.
+- **GraphQL:** templates load data with `{% graphql check_2fa_setup = 'account/check_2fa_setup' %}` and read the result with Liquid assignments.
+- **Form validation:** every form uses `FormValidation.validateAndSubmit(event, options)` in the browser for quick feedback. The page each form posts to checks everything again and decides. See [docs/FORM_VALIDATION.md](docs/FORM_VALIDATION.md).
+- **API helpers:** `app/assets/services/apiServices.js` wraps Axios (pinned, with an integrity hash, in `app/views/partials/layout/axios.liquid`). It logs errors only when `window.APP_DEBUG` is `true`.
+- **API errors:** the JSON endpoints answer with the real HTTP status (400, 403, 422, 429, 500) and the body from `api/error_response`.
 
-More examples live in `docs/EXAMPLES.md`.
+More examples are in [docs/EXAMPLES.md](docs/EXAMPLES.md).
 
-## Caching strategy
+## Caching
 
-- Cache static marketing pages by default; see `modules/website/public/graphql/page_cache` for update timestamps to drive cache invalidation.
-- Avoid caching routes that reference `current_user` or private profile data.
-- Use short TTLs (5–15 minutes) on public GraphQL page-cache endpoints; bypass caching for dashboard API responses.
-- Details in `docs/CACHING.md`.
+- A page caches itself with `dynamic_cache`, keyed by `cache/generate_cache_key` with the tables it shows. The account-created page is the example.
+- Never cache a page that shows one user's data. The dashboard is not cached.
+- Details are in [docs/CACHING.md](docs/CACHING.md).
 
-## Environment configuration examples
+## Event log
 
-- Front-end flags such as `APP_DEBUG`, `API_BASE_URL`, and `FORMS_API_BASE_URL` can be injected via inline script tags or your platform’s environment settings.
-- Keep CSRF token selectors consistent with `CSRF_TOKEN_NAME` (default `csrf-token`).
-- See `docs/ENVIRONMENT.md` for example snippets and guidance.
+Registration and profile changes add an entry to the instance's event stream, from a
+background job that calls the CRM module's event stream controller
+(`crm/controller/event-streams/create`) in the same request. No API key is sent anywhere.
 
-## Migrations cleanup guide
+## Migrations
 
-- Migrations live in `modules/dashboard/public/migrations/`; clean obsolete seeds and duplicates carefully.
-- Follow the safety checklist in `docs/MIGRATIONS_CLEANUP.md` before removing or consolidating files.
-
+- Migrations live in `app/migrations/`.
+- Follow [docs/MIGRATIONS_CLEANUP.md](docs/MIGRATIONS_CLEANUP.md) before you remove or merge any.

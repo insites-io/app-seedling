@@ -1,0 +1,32 @@
+# Purpose: Checks the three parts of an emailed sign-in link
+# Used by: app/views/partials/account/sign_in/check_link.liquid
+# Parameters:
+#   - $nonce: The n parameter of the link
+#   - $email: The e parameter of the link, lowercased
+#   - $token: The t parameter of the link (a platform temporary token)
+# Returns: The pending request for the nonce, and whether the token is live for that email's account
+query check_link($nonce: String!, $email: String!, $token: String!) {
+  requests: records(
+    per_page: 1
+    filter: {
+      table: { value: "sign_in_link" }
+      properties: [
+        { name: "nonce", value: $nonce }
+        { name: "status", value: "pending" }
+      ]
+    }
+  ) {
+    results {
+      id
+      email: property(name: "email")
+      expires_at: property(name: "expires_at")
+      return_to: property(name: "return_to")
+    }
+  }
+  user(email: $email, is_deleted: false) {
+    id
+    authenticate {
+      temporary_token(token: $token)
+    }
+  }
+}

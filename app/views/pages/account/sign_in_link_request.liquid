@@ -1,0 +1,102 @@
+---
+slug: sign-in/email-link
+method: get
+layout: dashboard_account
+searchable: false
+metadata: {
+    "status": "published",
+    "open_graph_url": "{{ context.exports.global.company_url | strip }}",
+    "open_graph_type": "",
+    "open_graph_image": "",
+    "open_graph_title": "Email Me a Sign-In Link",
+    "open_graph_description": "Email Me a Sign-In Link",
+    "open_graph_site_name": "{{ context.exports.global.company_name | strip }}",
+    "meta_title": "Email Me a Sign-In Link",
+    "page_title": "Email Me a Sign-In Link | Seedling",
+    "page_name": "Email Me a Sign-In Link",
+    "meta_description": "Email Me a Sign-In Link",
+    "canonical_url": "",
+    "is_visible_to_search_engines": false,
+    "is_sitemap_enabled": false,
+    "sitemap_priority": "1.0",## primary order (DESC)
+    "sitemap_order": "0", ## secondary order (ASC)
+    "sitemap_change_frequency": "never"
+}
+---
+
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
+
+  comment
+    The POST page checks this flag. A post without a valid authenticity token arrives with
+    an empty session, so a missing flag means the token was missing or forged.
+  endcomment
+  graphql flagged = 'account/create_session', name: 'sign_in_form', value: 'on'
+  function return_to = 'account/safe_return_to', path: context.params.return_to
+  comment
+    An output tag on this platform turns an escaped double quote back into a quote, so a
+    value that goes into an attribute is escaped here and written with print.
+  endcomment
+  assign return_to_attr = return_to | escape
+-%}
+
+<div class="sign-up-wrapper">
+    <div class="spacer section"></div>
+    <div class="sign-up grid-x grid-padding-x">
+        <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">
+            <h1 class="heading-1 text-center">Email me a sign-in link</h1>
+            <div class="spacer x-small"></div>
+            <p class="text-center">Enter your email address. We will send you a link that signs you in. It works once, for 15 minutes.</p>
+            <div class="spacer x-large"></div>
+
+            <form id="sign-in-link-form" action="/sign-in/email-link" method="post" novalidate onsubmit="return FormValidation.validateAndSubmit(event);">
+                <input type="hidden" name="authenticity_token" value="{{ context.authenticity_token }}">
+                <input type="hidden" name="return_to" value="{% print return_to_attr %}">
+
+                <div class="grid-x grid-padding-x">
+                    <div class="small-12 cell">
+                        <ins-input validate
+                            id="email"
+                            label="Email"
+                            field="email"
+                            name="email"
+                            error-message="Please use a valid email address"
+                            placeholder="Email">
+                        </ins-input>
+                    </div>
+
+                    <div class="small-12 cell spacer x-large">
+                        <div class="spacer medium"></div>
+                        {%- if context.params.sent == '1' -%}
+                            <p>If that address has an account, a sign-in link is on its way. It works once, for 15 minutes.</p>
+                        {%- elsif context.params.error == 'invalid' -%}
+                            <p class="error-message">Please use a valid email address.</p>
+                        {%- elsif context.params.error == 'too_many' -%}
+                            <p class="error-message">Too many requests. Please wait 15 minutes and try again.</p>
+                        {%- elsif context.params.error == 'stale' -%}
+                            <p class="error-message">That link has been used or has expired. Enter your email address for a new one.</p>
+                        {%- elsif context.params.error == 'session' -%}
+                            <p class="error-message">Your session has expired. Please try again.</p>
+                        {%- elsif context.params.error == 'reset' -%}
+                            <p class="error-message">For your security, this account needs a <a href="/forgot-password">password reset</a> before you can sign in.</p>
+                        {%- elsif context.params.error == 'unavailable' -%}
+                            <p class="error-message">Sign-in by email link is not available right now. Please sign in with your password.</p>
+                        {%- endif -%}
+                    </div>
+
+                    <div class="small-12 cell text-center">
+                        <ins-button id="submit-btn" label="EMAIL ME A LINK" class="full" solid color="blue" type="submit"></ins-button>
+                        <div class="spacer x-large"></div>
+                        <p class="seedling-form-container-link">Back to <a href="/sign-in">sign in</a></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="spacer section"></div>
+</div>
+
+<script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>

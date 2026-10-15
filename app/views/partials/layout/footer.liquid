@@ -1,0 +1,28 @@
+---
+metadata: {
+    partial_name: "Layout | Footer",
+}
+---
+{%- comment -%}
+  The site footer, and the scripts every page loads at the end. Called with:
+    render 'layout/footer', sticky_footer: true
+  sticky_footer keeps the footer at the bottom of a short page.
+{%- endcomment -%}
+<footer class="blocks-footer-05 footer{% if sticky_footer %} stick-footer{% endif %}">
+  <div class="wrapper bottom-footer footerSubItems">
+    <div class="grid-container">
+      <div class="grid-x">
+        <div class="large-12 medium-12 small-12 cell medium-text-left text-center">
+          <p class="subHeading footer-p text-center">Copyright © <span id="year-container"></span>. Powered by <a class="footer-links" target="_blank" rel="noopener" href="https://www.insites.io/">Insites</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+</footer>
+
+<script>
+  document.getElementById("year-container").textContent = new Date().getFullYear();
+</script>
+
+{%- render 'layout/technical_foot' -%}

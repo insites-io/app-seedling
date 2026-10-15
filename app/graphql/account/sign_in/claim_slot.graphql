@@ -1,0 +1,17 @@
+# Purpose: Claims one numbered slot for a sign-in request, such as one code guess or the one use
+# Used by: app/views/partials/account/sign_in/take_slot.liquid
+# Parameters:
+#   - $table: sign_in_code or sign_in_link
+#   - $external_id: <request id>-<label>-<n>; unique per table, so only one request can claim each slot
+# Returns: The new record id, or an error when the slot was already claimed
+mutation claim_slot($table: String!, $external_id: ID!) {
+  record_create(
+    record: {
+      table: $table
+      external_id: $external_id
+      properties: [{ name: "status", value: "slot" }]
+    }
+  ) {
+    id
+  }
+}

@@ -1,0 +1,32 @@
+---
+metadata: {
+    partial_name: "Rate Limit | Record",
+}
+---
+{%- comment -%}
+  Records one attempt at an action and deletes that action's attempts older than the window.
+  allow.liquid calls it for every allowed attempt; sign-in calls it only after a wrong password.
+  Called with:
+    function recorded = 'account/rate_limit/record', action: 'sign_in', key: email
+  @params
+    action - sign_in, otp, forgot_password, email_check, sign_in_link, sign_in_code, sign_in_code_check
+    key    - what the attempt is about (email or user id)
+    window - seconds, default 900 (15 minutes)
+{%- endcomment -%}
+{%- liquid
+  assign window = window | default: 900
+  assign key = key | default: '' | append: '' | downcase | strip
+  function ip = 'account/rate_limit/client_ip'
+
+  assign now_unix = 'now' | date: '%s' | plus: 0
+  assign since_iso = now_unix | minus: window | date: '%Y-%m-%dT%H:%M:%SZ'
+
+  graphql recorded = 'account/rate_limit/record_attempt', action: action, key: key, ip: ip
+
+  comment
+    Only attempts inside the window are ever counted, so delete older ones for this action.
+    This keeps the table to the last window instead of growing forever.
+  endcomment
+  graphql cleared = 'account/rate_limit/delete_old_attempts', action: action, before: since_iso
+  return true
+-%}

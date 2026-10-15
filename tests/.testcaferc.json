@@ -1,0 +1,30 @@
+{
+  "screenshots": {
+    "path": "screenshots",
+    "takeOnFails": true,
+    "pathPattern": "${DATE}_${TIME}/test-${TEST_INDEX}/${USERAGENT}/${FILE_INDEX}.png"
+  },
+  "reporter": [
+    {
+      "name": "spec"
+    },
+    {
+      "name": "json",
+      "output": "reports/report.json"
+    }
+  ],
+  "skipJsErrors": true,
+  "skipUncaughtErrors": true,
+  "quarantineMode": false,
+  "debugMode": false,
+  "debugOnFail": false,
+  "selectorTimeout": 10000,
+  "assertionTimeout": 3000,
+  "pageLoadTimeout": 3000,
+  "browserInitTimeout": 60000,
+  "testExecutionTimeout": 180000,
+  "runExecutionTimeout": 0,
+  "concurrency": 1,
+  "speed": 1
+}
+

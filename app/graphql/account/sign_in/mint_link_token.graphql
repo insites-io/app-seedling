@@ -1,0 +1,13 @@
+# Purpose: Issues a short-lived platform token for one account, for an emailed sign-in link
+# Used by: app/views/pages/account/sign_in_link_request_submit.liquid
+# Parameters:
+#   - $email: Lowercased email address of an account that may sign in
+#   - $hours: Lifetime in HOURS, as a Float (0.25 is 15 minutes)
+# Returns: The token. Opening a link does not use it up, so single use is enforced by the
+#          sign_in_link request it is paired with, never by the token.
+query mint_link_token($email: String!, $hours: Float!) {
+  user(email: $email, is_deleted: false) {
+    id
+    temporary_token(expires_in: $hours)
+  }
+}

@@ -1,0 +1,71 @@
+name: sign_in_code
+metadata:
+  label: "Sign-In Code"
+  groups:
+  - id: "d24f563f-f1f1-40e3-a624-174c0f8550ec"
+    name: "Request"
+    weight: 0
+  - id: "fba75258-3884-451a-8af0-851d7c3651cd"
+    name: "State"
+    weight: 1
+  is_archived: false
+properties:
+- name: email
+  type: string
+  metadata:
+    label: "Email"
+    group_id: "d24f563f-f1f1-40e3-a624-174c0f8550ec"
+    weight: 0
+    ui_element: "input"
+    is_searchable: true
+    is_shown_in_table: true
+    help_text_tooltip: "The address the code was asked for, lowercased. Blank on slot rows."
+- name: ip
+  type: string
+  metadata:
+    label: "IP Address"
+    group_id: "d24f563f-f1f1-40e3-a624-174c0f8550ec"
+    weight: 1
+    ui_element: "input"
+    is_searchable: true
+    is_shown_in_table: true
+    help_text_tooltip: "The visitor address that asked for the code."
+- name: return_to
+  type: string
+  metadata:
+    label: "Return To"
+    group_id: "d24f563f-f1f1-40e3-a624-174c0f8550ec"
+    weight: 2
+    ui_element: "input"
+    is_shown_in_table: false
+    help_text_tooltip: "A path on this site to open after sign-in, or blank. Checked again before it is used."
+- name: status
+  type: string
+  metadata:
+    label: "Status"
+    group_id: "fba75258-3884-451a-8af0-851d7c3651cd"
+    weight: 0
+    ui_element: "input"
+    is_sortable: true
+    is_searchable: true
+    is_shown_in_table: true
+    help_text_tooltip: "A stored code. pending: emailed and not used yet. consumed: used to sign in. killed: 5 wrong codes. miss: no account for the address, nothing sent. slot: one claimed guess or use of a request (external id <request id>-try-<n> or <request id>-use-1)."
+- name: expires_at
+  type: datetime
+  metadata:
+    label: "Expires At"
+    group_id: "fba75258-3884-451a-8af0-851d7c3651cd"
+    weight: 1
+    ui_element: "date_time"
+    is_sortable: true
+    is_shown_in_table: true
+    help_text_tooltip: "15 minutes after the request. The code is refused after this time."
+- name: code_hash
+  type: string
+  metadata:
+    label: "Code Hash"
+    group_id: "fba75258-3884-451a-8af0-851d7c3651cd"
+    weight: 2
+    ui_element: "input"
+    is_shown_in_table: false
+    help_text_tooltip: "HMAC of email:code with the SIGN_IN_HMAC_KEY constant. The code itself is never stored."

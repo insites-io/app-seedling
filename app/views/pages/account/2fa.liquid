@@ -1,0 +1,76 @@
+---
+slug: account/2fa
+method: post
+layout: ''
+metadata: {
+    page_name: "API - 2FA Config",
+}
+authorization_policies:
+  - is_user_logged_in
+---
+
+{% liquid
+  assign otp_code = context.params['2fa']['otp_code']
+  assign from_page = context.params.from_page
+  function return_to = 'account/safe_return_to', path: context.params.return_to
+
+  comment
+    The code is always checked against the signed-in user, never an email from the request.
+  endcomment
+  assign object = {}
+  assign object['id'] = context.current_user.id
+  assign object['otp_code'] = otp_code
+
+  comment
+    After 3 lockouts in 24 hours no code is accepted until the user resets their password.
+    Hitting the per-user code limit records a lockout and emails the user once.
+  endcomment
+  assign object['valid'] = false
+  function reset_required = 'account/two_factor_reset_required', user_id: context.current_user.id
+  unless reset_required
+    function allowed = 'account/rate_limit/allow', action: 'otp', key: context.current_user.id, max_per_key: 5, max_per_ip: 50
+    if allowed
+      function object = 'account/2fa_functions/verify_otp', object: object
+      comment
+        A correct code works once: claim it, and refuse it if it was already used.
+      endcomment
+      if object.valid
+        function claimed = 'account/two_factor_claim_code', user_id: context.current_user.id, code: object.otp_code
+        unless claimed
+          assign object['valid'] = false
+        endunless
+      endif
+    else
+      function locked = 'account/two_factor_lockout', user_id: context.current_user.id, email: context.current_user.email, max_per_key: 5
+    endif
+  endunless
+
+  assign now = "now" | date: "%Y-%m-%d %H:%M"
+
+  if object.valid
+    graphql configure_user_otp = 'account/2fa/configure_user_otp', id: context.current_user.id, otp_configured: true
+    graphql passed_2fa = 'account/create_session', name: "two_factor_user_id", value: context.current_user.id
+    graphql update_last_login_date = 'account/log_last_login_date', id: context.current_user.id, date: now
+
+    if from_page == 'profile'
+      assign goto = '/profile?status=success'
+    else
+      assign goto = '/dashboard'
+    endif
+
+    comment
+      Redirect to the original destination only when it is a path on this site.
+    endcomment
+    if return_to != blank
+      assign goto = return_to
+    endif
+    redirect_to goto
+  else
+    assign goto = '/verify-2fa?status=failed'
+    if from_page == 'profile'
+      assign goto = '/profile?status=failed'
+    endif
+
+    redirect_to goto
+  endif
+%}
