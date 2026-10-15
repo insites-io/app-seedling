@@ -22,6 +22,14 @@ let UserProfileScript = (function () {
                     field.errorMessage = "Password is required";
                 }
             },
+            validateCurrentPassword(field) {
+                if (field.value) {
+                    field.hasError = false;
+                } else {
+                    field.hasError = true;
+                    field.errorMessage = "Current password is required";
+                }
+            },
             validatePasswordConfirm(field) {
                 const passwordField = document.getElementById('password');
                 if (passwordField) {
@@ -37,6 +45,8 @@ let UserProfileScript = (function () {
                 containerEl.querySelectorAll('[validate]').forEach(field => {
                     if (field.id === 'password_confirmation') {
                         this.validatePasswordConfirm(field);
+                    } else if (field.id === 'current_password') {
+                        this.validateCurrentPassword(field);
                     } else {
                         this.validatePasswordField(field);
                     }

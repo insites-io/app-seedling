@@ -86,6 +86,17 @@ How the emailed options stay safe:
 - **Email scanners cannot use a link.** Many mail systems open every link to check it. Opening the link changes nothing: it moves the link into your session, takes it out of the address bar, and shows **Continue**. Only pressing **Continue** uses it.
 - **2FA still applies.** If the account has 2FA turned on, you go to `/verify-2fa` after the link or code, exactly as after a password.
 - **`return_to`** is passed through `account/safe_return_to`, so it can only be a path on this site, with no quote, angle bracket or backtick.
+- **A link that is no longer valid says so.** A link that was sent to the address but has passed its 15 minutes, or was sent before the account's password changed (for example by a password reset), answers `/sign-in/email-link?error=expired`. A link that matches no pending request for that address (made-up, already used, or for another address) answers `error=stale`. A request with no valid form session still answers `error=session`. The answer depends only on the link, never on whether an account exists.
+
+## Changing a password
+
+The **Update Password** form on `/profile` posts to `/profile/password` and needs the **current password** as well as the new one. The server checks it with the platform's own password check (`account/authenticate_password`), never with its own comparison.
+
+- **A wrong current password changes nothing.** It answers `/profile?error=current_invalid` and counts as a failed sign-in: the same `auth_attempt` action, key and limits as `/sign-in` (10 per email and 50 per IP address in 15 minutes). A guess on the form and a guess on the sign-in page share one allowance.
+- **At the limit** the form answers `/profile?error=too_many`, the same answer as sign-in, even when the current password is right, until the 15 minutes have passed.
+- **A blank current password** answers `/profile?error=current_required` and is not counted.
+- **A correct one** changes the password and signs the user out, as before.
+- **Forgot password is unchanged.** Someone who has forgotten the password resets it from the emailed link, which needs no current password.
 
 ## Email sender
 
@@ -105,7 +116,7 @@ and the reason is written to the instance log.
 ## Testing
 
 - `tests/e2e/`: TestCafe end-to-end tests for the email check endpoint. See [tests/README.md](tests/README.md).
-- `tests/qa/`: the QA suite. It deploys Seedling to a test instance, runs 132 cases across sign-in, 2FA, password reset, passwordless sign-in and the v2.1.0 clean-up work, verifies the build, then removes everything it added and compares before and after snapshots. See [tests/qa/README.md](tests/qa/README.md).
+- `tests/qa/`: the QA suite. It deploys Seedling to a test instance, runs 138 cases across sign-in, 2FA, password reset, passwordless sign-in, the v2.1.0 clean-up work and the two fixes after it, verifies the build, then removes everything it added and compares before and after snapshots. See [tests/qa/README.md](tests/qa/README.md).
 
 ## Development guidelines
 

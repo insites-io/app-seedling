@@ -21,12 +21,16 @@ metadata: {
           assign message = 'Please use a valid email address'
         when 'password'
           assign message = 'Password is required'
+        when 'current'
+          assign message = 'Current password is required'
         else
           assign message = 'This field is required'
       endcase
     when 'invalid'
       if field == 'email'
         assign message = 'Please use a valid email address'
+      elsif field == 'current'
+        assign message = 'That is not your current password'
       else
         assign message = 'This value is not valid'
       endif
@@ -36,6 +40,8 @@ metadata: {
       assign message = 'Minimum of 6 characters'
     when 'mismatch'
       assign message = "Password doesn't match"
+    when 'too_many'
+      assign message = 'Too many attempts. Please wait 15 minutes and try again.'
   endcase
   return message
 -%}

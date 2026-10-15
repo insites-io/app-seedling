@@ -218,9 +218,12 @@ def b_link():
     for k, d in variants.items():
         X = S("c18"); a, b = open_link(X, mk(d)); outs[k] = (p(a), p(b) if b else None)
     rr = row_by_id(link_rows(em), row["id"])
-    ok = all(v == ("/sign-in/link", "/sign-in/email-link?error=stale") for v in outs.values())
+    # A token that is not live for the account, with a real nonce and address, is a link that is no longer valid: expired.
+    # Everything that does not match a pending request for that address is stale, as before.
+    expired_kinds = ("changed t", "t from another account")
+    ok = all(v == ("/sign-in/link", "/sign-in/email-link?error=" + ("expired" if k in expired_kinds else "stale")) for k, v in outs.items())
     ctrl = S("c18-ctrl"); a, b = open_link(ctrl, link)
-    result("18 tampered links", ok and rr["status"] == "pending" and b[0] == 200, f"{outs}; untouched link still opens: {b[0]}; row {rr['status']}")
+    result("18 tampered links", ok and rr["status"] == "pending" and b[0] == 200, f"{outs} (a token the platform does not accept answers expired, since the nonce and address are a real pending request; a wrong nonce or address answers stale); untouched link still opens: {b[0]}; row {rr['status']}")
 
 
 @block("pwl", "code_basic", ["3 wrong code", "2 right code", "2 right code (first try)", "6 reused code from a fresh session", "7 A's code with another address", "9 malformed code"])
@@ -575,7 +578,7 @@ def b_expiry():
     Y = S("exp-unk"); r2 = submit_code(Y, unk, "123456"); sl2 = slots("sign_in_code", urid)
     result("5b unknown address after 15 min", p(r2) == "/sign-in/code?error=expired" and sl2 == [], f"miss row expired 60 s ago; a code -> {p(r2)}; slots {sl2}")
     Z = S("exp-link"); a, b = open_link(Z, link); lr = row_by_id(link_rows(em), lrid)
-    result("18 expired link", p(a) == "/sign-in/link" and b and p(b) == "/sign-in/email-link?error=stale" and lr["status"] == "pending" and signed_in(Z)[0] == 302,
+    result("18 expired link", p(a) == "/sign-in/link" and b and p(b) == "/sign-in/email-link?error=expired" and lr["status"] == "pending" and signed_in(Z)[0] == 302,
            f"request expired 60 s ago: open -> {p(a)} then {p(b) if b else None}; row {lr['status']}, slots {slots('sign_in_link', lrid)}")
 
 

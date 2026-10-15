@@ -56,6 +56,10 @@ authorization_policies:
       assign details_errors['email'] = code
     when 'password'
       assign password_errors['password'] = code
+    when 'current'
+      assign password_errors['current'] = code
+    when 'too'
+      assign password_errors['current'] = 'too_many'
   endcase
 
   graphql check_2fa_setup = 'account/check_2fa_setup'

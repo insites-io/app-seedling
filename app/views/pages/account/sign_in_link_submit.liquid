@@ -35,8 +35,14 @@ metadata: {
   graphql cleared_nonce = 'account/delete_session', name: 'sign_in_link_n'
 
   function link = 'account/sign_in/check_link', email: link_email, token: link_token, nonce: link_nonce
+  comment
+    A link that is no longer valid answers expired when it was a real one for this address (its
+    15 minutes passed, or the password changed since it was sent), and stale for anything else.
+    Both come from account/sign_in/check_link, which says which.
+  endcomment
   unless link.ok
-    redirect_to '/sign-in/email-link?error=stale'
+    assign failed_url = '/sign-in/email-link?error=' | append: link.reason
+    redirect_to failed_url
     break
   endunless
 

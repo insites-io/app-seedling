@@ -76,8 +76,10 @@ metadata: {
                             <p class="error-message">Please use a valid email address.</p>
                         {%- elsif context.params.error == 'too_many' -%}
                             <p class="error-message">Too many requests. Please wait 15 minutes and try again.</p>
+                        {%- elsif context.params.error == 'expired' -%}
+                            <p class="error-message">That link has expired. Enter your email address for a new one.</p>
                         {%- elsif context.params.error == 'stale' -%}
-                            <p class="error-message">That link has been used or has expired. Enter your email address for a new one.</p>
+                            <p class="error-message">That link has already been used or is not valid. Enter your email address for a new one.</p>
                         {%- elsif context.params.error == 'session' -%}
                             <p class="error-message">Your session has expired. Please try again.</p>
                         {%- elsif context.params.error == 'reset' -%}

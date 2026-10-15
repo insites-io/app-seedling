@@ -46,7 +46,8 @@ def select(suites=None, block_name=None, case=None):
     cases in a block share state. Asking for one block or one case also runs its suite's setup blocks."""
     out = [b for b in BLOCKS if not suites or b["suite"] in suites]
     if block_name or case:
-        want = [b for b in out if (block_name and b["name"] == block_name) or (case and any(case.lower() in c.lower() for c in b["cases"]))]
+        names_wanted = {x.strip() for x in (block_name or "").split(",") if x.strip()}
+        want = [b for b in out if (b["name"] in names_wanted) or (case and any(case.lower() in c.lower() for c in b["cases"]))]
         if not want:
             raise SystemExit(f"no block or case matches {block_name or case!r}; see --list")
         names = {(b["suite"], b["name"]) for b in want}
