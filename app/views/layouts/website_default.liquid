@@ -3,25 +3,19 @@ metadata: {
     layout_name: Website - Default
 }
 ---
-{%- include "cache/layout_fragment_cache_key" -%}
-
+{%- comment -%} Public website pages, such as the home page. {%- endcomment -%}
 <!doctype html>
 <html class="no-js" lang="en">
 <head>
-    {% include 'layout/technical_head' %}
+  {%- render 'layout/technical_head' -%}
 </head>
 <body class="flex-container flex-dir-column body-height-100">
-    <div class="main-wrap">      
-        {% include 'layout/header' %} 
-        {% include 'layout/header_mobile' %}
-        {{ content_for_layout }}
-    </div>
+  <div class="main-wrap">
+    {%- render 'layout/header' -%}
+    {%- render 'layout/header_mobile' -%}
+    {{ content_for_layout }}
+  </div>
 
-    {% if context.params.slug == blank %}
-        {% assign stickyFooter = true %}
-    {% endif %}
-
-    {% include 'layout/footer', stickyFooter: stickyFooter %}
-
+  {%- render 'layout/footer', sticky_footer: true -%}
 </body>
 </html>

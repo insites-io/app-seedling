@@ -1,5 +1,6 @@
 ---
 slug: /
+method: get
 layout: website_default
 searchable: true
 max_deep_level: 1
@@ -26,15 +27,6 @@ metadata: {
     
 <div class="home-wrapper">
     <div class="spacer section"></div>
-        {% include 'content/home/home_content' %} 
+        {%- render 'content/home/home_content' -%} 
     <div class="spacer section"></div>
 </div>
-
-{%- if context.environment == "staging" -%}
-    <link rel="preload" as="script" href="{{ 'scripts/app.js' | asset_url }}" >
-    <script src="{{ 'scripts/app.js' | asset_url }}"></script>
-{% else %}
-    <!-- minified --> 
-    <link rel="preload" as="script" href="{{ 'scripts/app.min.js' | asset_url }}" >
-    <script src="{{ 'scripts/app.min.js' | asset_url }}"></script>
-{%- endif -%}

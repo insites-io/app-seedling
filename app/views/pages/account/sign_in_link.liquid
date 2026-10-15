@@ -1,5 +1,6 @@
 ---
 slug: sign-in/link
+method: get
 layout: dashboard_account
 searchable: false
 metadata: {
@@ -86,8 +87,4 @@ metadata: {
     <div class="spacer section"></div>
 </div>
 
-{%- if context.environment == "staging" -%}
-    <script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>
-{%- else -%}
-    <script defer src="{{ 'scripts/login-scripts.min.js' | asset_url }}"></script>
-{%- endif -%}
+<script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>

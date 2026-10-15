@@ -3,30 +3,23 @@ metadata: {
     layout_name: Dashboard - Account
 }
 ---
-{%- comment -%} Used by the fragment cache in the layout {%- endcomment -%}
-{% comment %} ? Enable Fragment cache after Installation {% endcomment %}
-{% comment %} {%- include "cache/layout_fragment_cache_key" -%} {% endcomment %}
-
+{%- comment -%} Sign-in, registration, 2FA and password pages. {%- endcomment -%}
 <!doctype html>
 <html class="no-js" lang="en">
 <head>
-    {% include 'layout/technical_head' %}
-    
-  <script type="module" src="https://components.insites.io/v2/latest/insites.esm.js"></script>
-  <script nomodule src="https://components.insites.io/v2/latest/insites.js"></script>
-  {%- include 'insites_forms/insites_form_scripts' -%}
-
+  {%- render 'layout/technical_head' -%}
+  {%- render 'insites_forms/insites_form_scripts' -%}
 </head>
 <body class="system-page flex-container flex-dir-column">
-    {% include 'layout/header' %} 
-    {% include 'layout/header_mobile' %}
+  {%- render 'layout/header' -%}
+  {%- render 'layout/header_mobile' -%}
 
   <div class="wrapper">
     <div class="system-content grid-container">
       {{ content_for_layout }}
     </div>
   </div>
-    {% include 'layout/footer' %}
-    
+
+  {%- render 'layout/footer', sticky_footer: false -%}
 </body>
 </html>
