@@ -1,0 +1,25 @@
+---
+name: sign_in_link
+to: '{{ data.to }}'
+from: >
+  {%- include 'emails/autoresponder_from' -%}
+reply_to: >
+  {%- include 'emails/autoresponder_reply_to' -%}
+subject: Your sign-in link
+metadata: {
+  email_name: 'Sign-In Link'
+}
+---
+{%- comment -%}
+  Sent by app/views/pages/account/sign_in_link_request_submit.liquid through
+  app/graphql/account/sign_in/send_sign_in_link.graphql. data: { to, link, minutes }.
+  The link is built from the SITE_ORIGIN constant, never from the request.
+{%- endcomment -%}
+<div style="font-family: arial, helvetica, sans-serif; font-size: 16px; line-height: 24px; color: #333333; text-align: center; padding: 24px;">
+  <p style="font-size: 24px;"><strong>Sign in</strong></p>
+  <p>Use the button below to sign in. It works once, for {{ data.minutes | escape }} minutes.</p>
+  <p style="padding: 16px 0;">
+    <a href="{{ data.link | escape }}" target="_blank" style="background-color: #333333; border-radius: 4px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: 700; padding: 16px 40px; text-decoration: none;">Sign in</a>
+  </p>
+  <p>If you did not ask for a link, ignore this email. Nobody can use it unless they can read your email.</p>
+</div>

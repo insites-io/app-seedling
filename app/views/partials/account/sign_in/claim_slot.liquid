@@ -1,0 +1,18 @@
+---
+metadata: {
+    partial_name: "Sign In | Claim Slot",
+}
+---
+{%- comment -%}
+  Tries to claim one exact slot. Called by take_slot.liquid:
+    function claimed = 'account/sign_in/claim_slot', table: table, external_id: external_id
+  Returns true when this request created the slot, false when it already existed.
+  external_id is unique per table, so of two requests racing for one slot, exactly one wins.
+{%- endcomment -%}
+{%- liquid
+  graphql slot = 'account/sign_in/claim_slot', table: table, external_id: external_id
+  if slot.record_create.id != blank
+    return true
+  endif
+  return false
+-%}

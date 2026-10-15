@@ -1,0 +1,12 @@
+{%- comment -%}
+  Creates the secret that emailed sign-in codes are hashed with (SIGN_IN_HMAC_KEY), once.
+  The key is random, made here, and never printed. If it is already set, it is left alone:
+  changing it makes every code that is still live stop working.
+  See app/views/partials/account/sign_in/code_hash.liquid.
+{%- endcomment -%}
+{%- liquid
+  if context.constants.SIGN_IN_HMAC_KEY == blank
+    assign key = 64 | random_string
+    graphql saved = 'account/sign_in/set_hmac_key', value: key
+  endif
+-%}

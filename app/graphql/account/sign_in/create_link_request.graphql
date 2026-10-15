@@ -1,0 +1,27 @@
+# Purpose: Saves one request for a sign-in link
+# Used by: app/views/pages/account/sign_in_link_request_submit.liquid
+# Parameters:
+#   - $email: Lowercased email address
+#   - $nonce: Random string sent in the link. The platform token sent with it is never stored
+#   - $expires_at: ISO date-time, 15 minutes after the request
+#   - $status: pending (an account exists and the link was emailed) or miss (no account, nothing sent)
+#   - $ip: Visitor IP address
+#   - $return_to: A path on this site to go to after sign-in, or blank
+# Returns: The new record id
+mutation create_link_request($email: String!, $nonce: String!, $expires_at: String!, $status: String!, $ip: String!, $return_to: String!) {
+  record_create(
+    record: {
+      table: "sign_in_link"
+      properties: [
+        { name: "email", value: $email }
+        { name: "nonce", value: $nonce }
+        { name: "expires_at", value: $expires_at }
+        { name: "status", value: $status }
+        { name: "ip", value: $ip }
+        { name: "return_to", value: $return_to }
+      ]
+    }
+  ) {
+    id
+  }
+}

@@ -7,7 +7,7 @@ metadata: {
   Counts recent attempts at an action and records this one if it is allowed. Called with:
     function allowed = 'account/rate_limit/allow', action: 'sign_in', key: email, max_per_key: 10, max_per_ip: 50
   @params
-    action      - sign_in, otp, forgot_password, email_check
+    action      - sign_in, otp, forgot_password, email_check, sign_in_link, sign_in_code, sign_in_code_check
     key         - what the attempt is about (email or user id); blank limits by IP only
     max_per_key - attempts allowed per key in the window
     max_per_ip  - attempts allowed per IP address in the window

@@ -1,0 +1,30 @@
+---
+metadata: {
+    partial_name: "Sign In | Destination",
+}
+---
+{%- comment -%}
+  Where to send someone who has just signed in with an emailed link or code. Called with:
+    function goto = 'account/sign_in/destination', otp_configured: account.otp_configured, return_to: path
+  With 2FA turned on the person must still pass it, so they go to /verify-2fa, which passes
+  return_to on once the code is right. The dashboard pages refuse them until then anyway.
+  return_to is checked again here, whatever the caller did with it.
+{%- endcomment -%}
+{%- liquid
+  function return_to = 'account/safe_return_to', path: return_to
+
+  if otp_configured == true
+    assign goto = '/verify-2fa'
+    if return_to != blank
+      assign encoded = return_to | url_encode
+      assign goto = '/verify-2fa?return_to=' | append: encoded
+    endif
+    return goto
+  endif
+
+  assign goto = '/dashboard'
+  if return_to != blank
+    assign goto = return_to
+  endif
+  return goto
+-%}

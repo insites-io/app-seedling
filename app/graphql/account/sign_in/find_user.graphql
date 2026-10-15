@@ -1,0 +1,15 @@
+# Purpose: Finds the account an emailed sign-in link or code may sign in to
+# Used by: app/views/partials/account/sign_in/allowed_user.liquid
+# Parameters:
+#   - $email: Lowercased email address
+# Returns: The user, with the client profile when there is one. Only a user with a
+#          client profile (a registered Seedling account) may sign in this way.
+query find_user($email: String!) {
+  user(email: $email, is_deleted: false) {
+    id
+    client: profiles(profile_type: "client") {
+      id
+      otp_configured: property_boolean(name: "otp_configured")
+    }
+  }
+}

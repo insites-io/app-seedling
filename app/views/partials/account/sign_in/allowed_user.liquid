@@ -1,0 +1,33 @@
+---
+metadata: {
+    partial_name: "Sign In | Allowed User",
+}
+---
+{%- comment -%}
+  The account an emailed sign-in link or code may sign in to. Called with:
+    function account = 'account/sign_in/allowed_user', email: email
+  Returns { "id": ..., "otp_configured": true|false }. id is blank when no account may sign in.
+  Only a user with a client profile may sign in this way: that is a registered Seedling
+  account. Other user records (for example contacts created by the CRM) have no client
+  profile and are refused, so a link or code never signs in someone who never registered.
+{%- endcomment -%}
+{%- liquid
+  assign account = {}
+  assign account['id'] = ''
+  assign account['otp_configured'] = false
+
+  assign email = email | default: '' | append: '' | strip | downcase
+  if email == blank
+    return account
+  endif
+
+  graphql found = 'account/sign_in/find_user', email: email
+  assign profile = found.user.client | first
+  if found.user.id != blank and profile.id != blank
+    assign account['id'] = found.user.id
+    if profile.otp_configured == true
+      assign account['otp_configured'] = true
+    endif
+  endif
+  return account
+-%}

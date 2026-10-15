@@ -6,7 +6,7 @@ metadata: {
 # Purpose: Records one attempt at a rate-limited action
 # Used by: partials account/rate_limit/record.liquid, account/two_factor_lockout.liquid
 # Parameters:
-#   - $action: Action name (sign_in, otp, forgot_password, email_check)
+#   - $action: Action name (sign_in, otp, forgot_password, email_check, sign_in_link, sign_in_code, sign_in_code_check)
 #   - $key: What the attempt is about (email or user id)
 #   - $ip: Visitor IP address
 # Returns: The new record id

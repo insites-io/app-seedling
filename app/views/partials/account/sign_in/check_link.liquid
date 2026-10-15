@@ -1,0 +1,48 @@
+---
+metadata: {
+    partial_name: "Sign In | Check Link",
+}
+---
+{%- comment -%}
+  Checks an emailed sign-in link. Called with:
+    function link = 'account/sign_in/check_link', email: email, token: token, nonce: nonce
+  Returns { "ok": true|false, "request_id": ..., "user_id": ..., "return_to": ... }.
+  ok only when all four hold:
+    1. The nonce belongs to a pending sign_in_link request
+    2. That request was made for this email
+    3. The request has not expired
+    4. The platform accepts the token as live for this email's account
+  Checking changes nothing. The caller uses the link with take_slot, so it works once.
+{%- endcomment -%}
+{%- liquid
+  assign link = {}
+  assign link['ok'] = false
+
+  assign email = email | default: '' | append: '' | strip | downcase
+  assign token = token | default: '' | append: ''
+  assign nonce = nonce | default: '' | append: ''
+  if email == blank or token == blank or nonce == blank
+    return link
+  endif
+
+  graphql found = 'account/sign_in/check_link', nonce: nonce, email: email, token: token
+  assign request = found.requests.results | first
+  if request.id == blank or request.email != email
+    return link
+  endif
+  if found.user.id == blank or found.user.authenticate.temporary_token != true
+    return link
+  endif
+
+  assign now_unix = 'now' | date: '%s' | plus: 0
+  assign expires_unix = request.expires_at | date: '%s' | plus: 0
+  if expires_unix <= now_unix
+    return link
+  endif
+
+  assign link['ok'] = true
+  assign link['request_id'] = request.id
+  assign link['user_id'] = found.user.id
+  assign link['return_to'] = request.return_to
+  return link
+-%}

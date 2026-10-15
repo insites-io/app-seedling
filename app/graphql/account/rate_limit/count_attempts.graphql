@@ -6,7 +6,7 @@ metadata: {
 # Purpose: Counts recent attempts at one action, by key and by IP address
 # Used by: app/views/partials/account/rate_limit/allow.liquid
 # Parameters:
-#   - $action: Action name (sign_in, otp, forgot_password, email_check)
+#   - $action: Action name (sign_in, otp, forgot_password, email_check, sign_in_link, sign_in_code, sign_in_code_check)
 #   - $key: What the attempt is about (email or user id); blank counts by IP only
 #   - $ip: Visitor IP address
 #   - $since: ISO date-time; only attempts created after it are counted
