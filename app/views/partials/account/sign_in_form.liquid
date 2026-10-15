@@ -18,6 +18,7 @@ metadata: {
 
 <form id="sign-in-form" action="/sign-in" method="post" novalidate enctype="multipart/form-data" onsubmit="return FormValidation.validateAndSubmit(event);">
 	{% render 'modules/insites_crm/authenticity_token', context: context %}
+	<input type="hidden" name="return_to" value="{{ return_to | escape }}">
 
 	<div class="grid-x grid-padding-x">
 		<div class="small-12 cell">

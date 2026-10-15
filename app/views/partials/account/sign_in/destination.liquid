@@ -4,7 +4,7 @@ metadata: {
 }
 ---
 {%- comment -%}
-  Where to send someone who has just signed in with an emailed link or code. Called with:
+  Where to send someone who has just signed in, by password, emailed link or code. Called with:
     function goto = 'account/sign_in/destination', otp_configured: account.otp_configured, return_to: path
   With 2FA turned on the person must still pass it, so they go to /verify-2fa, which passes
   return_to on once the code is right. The dashboard pages refuse them until then anyway.

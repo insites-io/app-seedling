@@ -1,6 +1,6 @@
 ---
 name: is_user_allowed
-redirect_to: 'verify-2fa'
+redirect_to: '{% if context.current_user %}/verify-2fa{% else %}/sign-in{% endif %}'
 metadata: {
     "auth_policy_name": "User Permission"
 }
@@ -14,6 +14,12 @@ metadata: {
   comment
     User must exist. If the profile is missing, deny rather than redirecting by
     default to prevent accidental access on partially-created accounts.
+
+    When several policies on a page fail, the platform uses the redirect of the
+    policy that was created first, not the first one listed in the page. So this
+    redirect does not rely on is_user_logged_in winning: a signed-out visitor is
+    sent to /sign-in from here too, and only a signed-in user who still has to
+    pass 2FA goes to /verify-2fa.
   endcomment
   if user == blank
     echo false
