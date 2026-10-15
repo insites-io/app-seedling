@@ -3,6 +3,18 @@ metadata: {
     partial_name: "Account | Sign In Form",
 }
 ---
+{%- comment -%}
+  Three ways to sign in: password (this form), an emailed link, or an emailed code.
+  A return_to that is a path on this site is passed on to the emailed options.
+{%- endcomment -%}
+{%- liquid
+  function return_to = 'account/safe_return_to', path: context.params.return_to
+  assign passwordless_query = ''
+  if return_to != blank
+    assign encoded_return_to = return_to | url_encode
+    assign passwordless_query = '?return_to=' | append: encoded_return_to
+  endif
+-%}
 
 <form id="sign-in-form" action="/sign-in" method="post" novalidate enctype="multipart/form-data" onsubmit="return FormValidation.validateAndSubmit(event);">
 	{% render 'modules/insites_crm/authenticity_token', context: context %}
@@ -45,7 +57,13 @@ metadata: {
 
 		<div class="small-12 cell text-center">
 			<ins-button id="submit-btn" label="SIGN IN" class="full" solid color="blue" type="submit" ></ins-button>
+			<div class="spacer medium"></div>
+			<p>Or sign in without your password:</p>
 			<div class="spacer small"></div>
+			<a href="/sign-in/email-link{{ passwordless_query }}"><ins-button id="email-link-btn" type="button" label="EMAIL ME A LINK" class="full" color="white" ></ins-button></a>
+			<div class="spacer small"></div>
+			<a href="/sign-in/email-code{{ passwordless_query }}"><ins-button id="email-code-btn" type="button" label="EMAIL ME A CODE" class="full" color="white" ></ins-button></a>
+			<div class="spacer medium"></div>
 			<a href="/register"><ins-button id="register-btn" type="button" label="REGISTER" class="full"  color="white" ></ins-button></a>
 		</div>
 	</div>

@@ -1,6 +1,6 @@
 # Seedling
 
-Seedling is a starter app for Insites. It gives you a public website and a signed-in dashboard with registration, sign-in, two-factor authentication (2FA), a profile page and password reset. The whole site lives in `app/`.
+Seedling is a starter app for Insites. It gives you a public website and a signed-in dashboard with registration, sign-in (by password, emailed link or emailed code), two-factor authentication (2FA), a profile page and password reset. The whole site lives in `app/`.
 
 New to Insites? Work through the [Getting Started course](https://docs.insites.io/getting-started/welcome-to-insites) first. It explains instances, the CLI and how a site is built.
 
@@ -42,20 +42,50 @@ Seedling 2.1.0 moved the site from its two folders under `modules/` (dashboard a
 
 | Path | What it holds |
 |---|---|
-| `app/views/pages/` | Pages. `index.liquid` is the home page, `account/` holds sign-in, registration, 2FA and password reset, and `api/` holds the JSON endpoints |
+| `app/views/pages/` | Pages. `index.liquid` is the home page, `account/` holds sign-in (password, emailed link and emailed code), registration, 2FA and password reset, and `api/` holds the JSON endpoints |
 | `app/views/layouts/` | `website_default`, `website_message`, `dashboard_default`, `dashboard_form` and `dashboard_account` |
 | `app/views/partials/` | Header, footer, page content, account helpers and cache helpers |
 | `app/forms/` | Form definitions: register, sign out, my details, change password, forgot password |
 | `app/graphql/` | Queries and mutations for accounts, 2FA, rate limiting and page caching |
 | `app/authorization_policies/` | Policies that protect signed-in pages and 2FA steps. Each one returns `true` or `false` |
-| `app/schema/`, `app/user_profile_types/` | The `auth_attempt`, `documentation` and `reset_password` tables, and the `client` profile type |
-| `app/emails/`, `app/api_calls/` | The password reset and 2FA alert emails, and the event log API call |
-| `app/migrations/` | Seed data for the dashboard documentation cards |
+| `app/schema/`, `app/user_profile_types/` | The `auth_attempt`, `documentation`, `reset_password`, `sign_in_code` and `sign_in_link` tables, and the `client` profile type |
+| `app/emails/`, `app/api_calls/` | The password reset, 2FA alert, sign-in link and sign-in code emails, and the event log API call |
+| `app/migrations/` | Seed data for the dashboard documentation cards, and the secret that sign-in codes are hashed with |
 | `app/assets/` | Scripts, styles and images. Readable sources sit beside their minified copies |
 | `tests/` | End-to-end tests. See [tests/README.md](tests/README.md) |
 | `docs/` | Notes on caching, environment flags, examples, form validation and migrations |
 
 Seedling does not ship error pages. Every instance already has its 401, 403, 404 and 500 pages from System Pages. Seedling's `app/views/pages/index.liquid` replaces the placeholder home page that System Pages installs.
+
+## Sign-in options
+
+The sign-in page offers three ways in: a password, an emailed link, or an emailed 6-digit code.
+
+| Option | Pages | How it works |
+|---|---|---|
+| Password | `/sign-in` | Email and password, then 2FA if the account has it turned on |
+| Emailed link | `/sign-in/email-link`, then `/sign-in/link` | The email holds a link that works once, for 15 minutes. Opening it only shows a **Continue** button; pressing it signs you in |
+| Emailed code | `/sign-in/email-code`, then `/sign-in/code` | The email holds a 6-digit code that works once, for 15 minutes. 5 wrong codes end it |
+
+Two things to set up on each instance:
+
+1. **`SITE_ORIGIN`.** The link in the email is built from this constant, never from the request, so nobody can make it point at another site. Set it to the address of your site, with no trailing slash. Until it is set, the emailed link option says it is not available.
+
+   ```bash
+   insites-cli constants set staging --name SITE_ORIGIN --value https://www.example.com
+   ```
+
+2. **`SIGN_IN_HMAC_KEY`.** Codes are stored as a keyed hash, never as the code. The migration `app/migrations/20261015000000_sign_in_code_hmac_key.liquid` creates a random key the first time you deploy, and leaves it alone after that. Until it is set, the emailed code option says it is not available.
+
+How the emailed options stay safe:
+
+- **The same answer for every address.** Asking for a link or a code for an address with no account gives the same message as for a real one, and counts toward the limits the same way. Nothing is sent.
+- **Only registered accounts.** A user may sign in this way only when they have a `client` profile, which registration creates.
+- **Limits.** 5 requests per address and 20 per IP address in 15 minutes, through the same `auth_attempt` table as password sign-in. Each code allows 5 guesses, and they are counted with one row per guess, so sending many guesses at once still gets only 5 checked. Across all codes for one address, 10 wrong codes in an hour stop further checks.
+- **Works once.** Using a link or a code claims a single "use" row with a unique external id, so two requests at the same moment cannot both sign in.
+- **Email scanners cannot use a link.** Many mail systems open every link to check it. Opening the link changes nothing: it moves the link into your session, takes it out of the address bar, and shows **Continue**. Only pressing **Continue** uses it.
+- **2FA still applies.** If the account has 2FA turned on, you go to `/verify-2fa` after the link or code, exactly as after a password.
+- **`return_to`** is passed through `account/safe_return_to`, so it can only be a path on this site.
 
 ## Development guidelines
 
