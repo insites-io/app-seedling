@@ -45,15 +45,15 @@ Seedling 2.1.0 moved the site from its two folders under `modules/` (dashboard a
 | `app/views/pages/` | Pages. `index.liquid` is the home page, `account/` holds sign-in (password, emailed link and emailed code), registration, 2FA and password reset, and `api/` holds the JSON endpoints |
 | `app/views/layouts/` | `website_default`, `website_message`, `dashboard_default`, `dashboard_form` and `dashboard_account` |
 | `app/views/partials/` | Header, footer, page content, account helpers and cache helpers |
-| `app/forms/` | Form definitions: register, sign out, my details, change password, forgot password |
+| `app/forms/` | One form definition, `update_password_token`, which sends the password reset email when a reset token is saved. Every form on a page is a plain `<form>`; see [docs/FORM_VALIDATION.md](docs/FORM_VALIDATION.md) |
 | `app/graphql/` | Queries and mutations for accounts, 2FA, rate limiting and page caching |
 | `app/authorization_policies/` | Policies that protect signed-in pages and 2FA steps. Each one returns `true` or `false` |
-| `app/schema/`, `app/user_profile_types/` | The `auth_attempt`, `documentation`, `reset_password`, `sign_in_code` and `sign_in_link` tables, and the `client` profile type |
-| `app/emails/`, `app/api_calls/` | The password reset, 2FA alert, sign-in link and sign-in code emails, and the event log API call |
+| `app/schema/`, `app/user_profile_types/` | The `auth_attempt`, `documentation`, `sign_in_code` and `sign_in_link` tables, and the `client` profile type |
+| `app/emails/` | The password reset, 2FA alert, sign-in link and sign-in code emails |
 | `app/migrations/` | Seed data for the dashboard documentation cards, and the secret that sign-in codes are hashed with |
-| `app/assets/` | Scripts, styles and images. Readable sources sit beside their minified copies |
+| `app/assets/` | Scripts, styles and images. There is one readable copy of each script and stylesheet, loaded in every environment |
 | `tests/` | End-to-end tests. See [tests/README.md](tests/README.md) |
-| `docs/` | Notes on caching, environment flags, examples, form validation and migrations |
+| `docs/` | Notes on caching, examples, forms and validation, and migrations |
 
 Seedling does not ship error pages. Every instance already has its 401, 403, 404 and 500 pages from System Pages. Seedling's `app/views/pages/index.liquid` replaces the placeholder home page that System Pages installs.
 
@@ -85,11 +85,29 @@ How the emailed options stay safe:
 - **Works once.** Using a link or a code claims a single "use" row with a unique external id, so two requests at the same moment cannot both sign in.
 - **Email scanners cannot use a link.** Many mail systems open every link to check it. Opening the link changes nothing: it moves the link into your session, takes it out of the address bar, and shows **Continue**. Only pressing **Continue** uses it.
 - **2FA still applies.** If the account has 2FA turned on, you go to `/verify-2fa` after the link or code, exactly as after a password.
-- **`return_to`** is passed through `account/safe_return_to`, so it can only be a path on this site.
+- **`return_to`** is passed through `account/safe_return_to`, so it can only be a path on this site, with no quote, angle bracket or backtick.
+
+## Email sender
+
+Every email comes from the instance's verified sender, which the CRM module resolves
+(`modules/insites_crm/functions/email_sender/customer_sender`): the customer's own domain
+once it is verified in Insites Console, otherwise `no-reply@insites.site`. The display name
+is `company_name` from CMS Globals, and replies go to `company_email_1` from CMS Globals.
+Without `company_email_1` the mail still goes, with no Reply-To.
+
+This differs from the original 2.1.0 brief, which asked for mail to come from the Globals
+address. A customer domain that is not verified fails the receiving server's delivery checks
+(SPF, DKIM and DMARC), so that mail would be dropped. Mail is never sent from
+`notifications@insites.io` or any other address the instance cannot authenticate. If the
+instance has no sendable sender at all, the pages that send email say it is not available
+and the reason is written to the instance log.
 
 ## Development guidelines
 
-- Edit the readable sources (`*.js`, `*.liquid`, `*.graphql`) first, and keep the minified assets in step when they are the ones the pages load.
+- Edit the readable sources (`*.js`, `*.css`, `*.liquid`, `*.graphql`). There are no minified copies to keep in step.
+- Every page declares its `method:`. A form posts to its own page with `method: post`.
+- Use `render` for a partial that outputs HTML and `function` for one that returns a value.
+- A value that goes into an HTML attribute is escaped and written with `print` (see [docs/EXAMPLES.md](docs/EXAMPLES.md)). An output tag turns an escaped double quote back into a quote.
 - Authorization policies must return `true` or `false` explicitly and handle missing user data.
 - Reuse GraphQL documents. Update one query rather than copying it.
 - Keep console logging behind a flag (`window.APP_DEBUG === true`) or remove it before you ship.
@@ -98,23 +116,25 @@ How the emailed options stay safe:
 ## Common patterns
 
 - **Authorization:** policies run `account/check_2fa_setup` and return a boolean based on the 2FA and session state (`app/authorization_policies/*.liquid`).
+- **Signed-out visitors:** a signed-in page sends a signed-out visitor to `/sign-in`, and the platform adds `return_to` so they come back after signing in. When several policies on a page fail, the platform uses the redirect of the policy that was created first, not the first one listed, so each policy's `redirect_to` checks whether someone is signed in rather than relying on the order.
 - **GraphQL:** templates load data with `{% graphql check_2fa_setup = 'account/check_2fa_setup' %}` and read the result with Liquid assignments.
-- **Form validation:** every form uses `FormValidation.validateAndSubmit(event, options)`. The browser checks give quick feedback. The form definitions on the server are the source of truth. See [docs/FORM_VALIDATION.md](docs/FORM_VALIDATION.md).
-- **API helpers:** `app/assets/services/apiServices.js` wraps Axios for the dashboard, and `app/assets/services/formServices.js` does the same for website forms. Both log errors only when `window.APP_DEBUG` is `true`.
+- **Form validation:** every form uses `FormValidation.validateAndSubmit(event, options)` in the browser for quick feedback. The page each form posts to checks everything again and decides. See [docs/FORM_VALIDATION.md](docs/FORM_VALIDATION.md).
+- **API helpers:** `app/assets/services/apiServices.js` wraps Axios (pinned, with an integrity hash, in `app/views/partials/layout/axios.liquid`). It logs errors only when `window.APP_DEBUG` is `true`.
+- **API errors:** the JSON endpoints answer with the real HTTP status (400, 403, 422, 429, 500) and the body from `api/error_response`.
 
 More examples are in [docs/EXAMPLES.md](docs/EXAMPLES.md).
 
 ## Caching
 
-- Cache public website pages by default. The queries in `app/graphql/page_cache/` return the update times that drive cache invalidation.
-- Do not cache pages that use `current_user` or private profile data.
+- A page caches itself with `dynamic_cache`, keyed by `cache/generate_cache_key` with the tables it shows. The account-created page is the example.
+- Never cache a page that shows one user's data. The dashboard is not cached.
 - Details are in [docs/CACHING.md](docs/CACHING.md).
 
-## Environment flags
+## Event log
 
-- Browser flags such as `APP_DEBUG`, `API_BASE_URL` and `FORMS_API_BASE_URL` can be set in an inline script tag.
-- Keep CSRF token selectors consistent with `CSRF_TOKEN_NAME` (default `csrf-token`).
-- See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
+Registration and profile changes add an entry to the instance's event stream, from a
+background job that calls the CRM module's event stream controller
+(`crm/controller/event-streams/create`) in the same request. No API key is sent anywhere.
 
 ## Migrations
 

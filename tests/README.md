@@ -23,12 +23,12 @@ The tests stop with an error when `INSITES_URL` is missing. There is no default 
 
 ## Test files
 
-- `e2e/email-api.e2e.js`: tests the email check endpoint used by registration (`/api/check-user-email-signup`).
+- `e2e/email-api.e2e.js`: tests the email check endpoint used by registration (`/api/check-user-email-signup`): a new email, a missing email (400), a malformed email (422), and that no user id is ever returned. Set `EXISTING_EMAIL` to an address registered on the instance to also check the "already used" answer.
 
 ## Before you run them
 
 1. Deploy Seedling to the instance and make sure it loads at `INSITES_URL`.
-2. Set up any test data a test needs.
+2. Set up any test data a test needs (for example `EXISTING_EMAIL`).
 3. Use Node.js 18 or later.
 
 ## Writing new tests
@@ -38,4 +38,3 @@ The tests stop with an error when `INSITES_URL` is missing. There is no default 
 3. Build every URL from `process.env.INSITES_URL`. Never write an instance address into a test.
 4. Follow the structure of the existing test.
 
-Liquid unit tests that run on the instance are described in [README_UNIT_TESTS.md](README_UNIT_TESTS.md).

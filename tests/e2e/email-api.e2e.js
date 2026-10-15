@@ -65,10 +65,9 @@ test('Should return valid status for new email', async t => {
         .expect(body.message).eql('Email is valid');
 });
 
-test('Should return invalid status for email with CRM profile', async t => {
-    // Note: This test assumes you have a test email with a CRM profile
-    // Update the email or set up test data accordingly
-    const existingEmail = 'existing@example.com';
+test('Should never return a user id for an email', async t => {
+    // Set EXISTING_EMAIL to an address registered on the instance to also check the "taken" answer.
+    const existingEmail = process.env.EXISTING_EMAIL || 'existing@example.com';
     const url = `${BASE_URL}${EMAIL_API_PATH}?email=${encodeURIComponent(existingEmail)}`;
 
     logRequest('Existing email request', url);
@@ -87,15 +86,18 @@ test('Should return invalid status for email with CRM profile', async t => {
         .expect('message' in body).ok('message should exist in body');
     
     // Any existing user is reported as taken, and the user id is never returned
-    if (body.email_status === 'invalid') {
-        await t.expect(body.message).eql('Email has already been used.');
+    if (process.env.EXISTING_EMAIL) {
+        await t
+            .expect(body.email_status).eql('invalid')
+            .expect(body.message).eql('Email has already been used.');
     }
     await t
-        .expect(body.email_status).notEql('no-profile')
-        .expect('email_id' in body).notOk('email_id must never be returned');
+        .expect(['valid', 'invalid']).contains(body.email_status)
+        .expect('email_id' in body).notOk('email_id must never be returned')
+        .expect('id' in body).notOk('id must never be returned');
 });
 
-test('Should handle missing email parameter gracefully', async t => {
+test('Should answer 400 when the email parameter is missing', async t => {
     const url = `${BASE_URL}${EMAIL_API_PATH}`;
 
     logRequest('Missing email param request', url);
@@ -104,17 +106,16 @@ test('Should handle missing email parameter gracefully', async t => {
     const body = getJsonBody(response);
 
     await t
-        .expect(response.status).eql(200)
-        .expect(response.headers['content-type']).ok()
+        .expect(response.status).eql(400)
         .expect(response.headers['content-type']).contains('application/json');
 
     await t
-        .expect(body).ok('Response body should be present')
-        .expect('email_status' in body).ok('email_status should exist in body')
-        .expect('message' in body).ok('message should exist in body');
+        .expect(body.success).eql(false)
+        .expect(body.status_code).eql(400)
+        .expect(body.errors.email).ok('errors.email should name the problem');
 });
 
-test('Should handle invalid email format', async t => {
+test('Should answer 422 for an invalid email format', async t => {
     const invalidEmail = 'not-an-email';
     const url = `${BASE_URL}${EMAIL_API_PATH}?email=${encodeURIComponent(invalidEmail)}`;
 
@@ -124,14 +125,13 @@ test('Should handle invalid email format', async t => {
     const body = getJsonBody(response);
 
     await t
-        .expect(response.status).eql(200)
-        .expect(response.headers['content-type']).ok()
+        .expect(response.status).eql(422)
         .expect(response.headers['content-type']).contains('application/json');
 
     await t
-        .expect(body).ok('Response body should be present')
-        .expect('email_status' in body).ok('email_status should exist in body')
-        .expect('message' in body).ok('message should exist in body');
+        .expect(body.success).eql(false)
+        .expect(body.status_code).eql(422)
+        .expect(body.errors.email).ok('errors.email should name the problem');
 });
 
 test('Should log API requests correctly', async t => {
