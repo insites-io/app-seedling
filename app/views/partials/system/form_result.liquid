@@ -3,24 +3,24 @@ metadata: {
     partial_name: "System | Form result",
 }
 ---
-
+{%- comment -%}
+  A confirmation shown after a form is sent. Called with:
+    render 'system/form_result', title: 'Success', message: message
+  message is HTML written by the caller, never text from the request.
+{%- endcomment -%}
 <div class="form-result-wrapper">
     <div class="spacer section"></div>
     <div class="thank-you">
-            <div class="grid-x grid-padding-x text-center">
-                <div class="large-12 medium-12 small-12 cell">
-
-                    <div class="thank-you-img spacer">
-                        <i class="icon-number-of-checks"></i>
-                    </div>
-
-                    <h1 class="heading-1">{{ messageInfo.title }}</h1>
-                    <div class="spacer"></div>
-                    <div>{{ messageInfo.message | html_safe }}</div>
-
+        <div class="grid-x grid-padding-x text-center">
+            <div class="large-12 medium-12 small-12 cell">
+                <div class="thank-you-img spacer">
+                    <i class="icon-number-of-checks"></i>
                 </div>
+                <h1 class="heading-1">{{ title | escape }}</h1>
+                <div class="spacer"></div>
+                <div>{% print message %}</div>
             </div>
+        </div>
     </div>
     <div class="spacer section"></div>
 </div>
-

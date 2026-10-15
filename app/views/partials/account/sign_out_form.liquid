@@ -1,0 +1,13 @@
+---
+metadata: {
+    partial_name: "Account | Sign Out Form",
+}
+---
+{%- comment -%}
+  The sign-out button, used in the header and the mobile menu. Called with:
+    render 'account/sign_out_form'
+{%- endcomment -%}
+<form class="sign-out-form" action="/sign-out" method="post">
+  <input type="hidden" name="authenticity_token" value="{{ context.authenticity_token }}">
+  <ins-button class="signOutCustom" label="Sign out" type="submit" size="normal"></ins-button>
+</form>

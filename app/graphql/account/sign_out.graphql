@@ -1,0 +1,7 @@
+# Purpose: Signs the current user out by ending this session
+# Used by: app/views/pages/account/sign_out_submit.liquid, app/views/pages/account/profile_password_submit.liquid
+# Note: the platform has a sign_in tag but no sign_out tag, so sign-out is this mutation,
+#       the same one the Insites admin uses
+mutation sign_out {
+  user_session_destroy
+}

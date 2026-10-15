@@ -1,0 +1,52 @@
+---
+metadata: {
+    partial_name: "Account | Details | Save",
+}
+---
+{%- comment -%}
+  Checks and saves the signed-in user's name and email. Used by the profile form
+  (POST /profile/details) and the JSON endpoint (PATCH /api/users/:id). Called with:
+    function result = 'account/details/save', first_name: first_name, last_name: last_name, email: email
+  It always saves to context.current_user, never to an id from the request.
+  Returns { "valid": true|false, "errors": { field: code }, "user": { id, email, first_name, last_name } }.
+{%- endcomment -%}
+{%- liquid
+  assign result = {}
+  assign result['valid'] = false
+  assign first_name = first_name | default: '' | append: '' | strip
+  assign last_name = last_name | default: '' | append: '' | strip
+  assign email = email | default: '' | append: '' | strip | downcase
+  assign user_id = context.current_user.id | append: ''
+
+  if user_id == blank
+    assign result['errors'] = { "authorization": "required" }
+    return result
+  endif
+
+  function errors = 'account/details/check', first_name: first_name, last_name: last_name, email: email, user_id: user_id
+  if errors != empty
+    assign result['errors'] = errors
+    return result
+  endif
+
+  comment
+    The platform refuses an email another user has, so two saves at once cannot give
+    two accounts the same address.
+  endcomment
+  graphql saved = 'account/update_details', id: user_id, email: email, first_name: first_name, last_name: last_name
+  if saved.errors != blank or saved.user.id == blank
+    assign result['errors'] = { "email": "taken" }
+    return result
+  endif
+
+  assign log = {}
+  assign log['first_name'] = first_name
+  assign log['last_name'] = last_name
+  assign log['email'] = email
+  background logged = 'events/log_event', description: 'My Details Updated', log: log
+
+  assign result['valid'] = true
+  assign result['errors'] = {}
+  assign result['user'] = saved.user
+  return result
+-%}

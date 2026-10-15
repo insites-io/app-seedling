@@ -1,0 +1,37 @@
+---
+metadata: {
+    partial_name: "Account | Register Form",
+}
+---
+{%- comment -%}
+  The register form. The register page shows it empty, and the register POST page shows it
+  again with the name, email and errors when it refuses a post (never the password).
+  Called with:
+    render 'account/register_form', values: values, errors: errors, notice: notice
+  notice: 'session' or 'failed' for a message under the form, or blank.
+{%- endcomment -%}
+<div class="register-wrapper">
+    <div class="spacer section"></div>
+    <div class="sign-up grid-x grid-padding-x">
+        <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">
+            <h1 class="heading-1 text-center">Create Account</h1>
+            <div class="spacer x-large"></div>
+            <form id="register-form" class="insites-form insites-form-code" action="/register" method="post" novalidate onsubmit="return FormValidation.validateAndSubmit(event, { containerId: 'personal-details-container', checkEmail: true });">
+                <input type="hidden" name="authenticity_token" value="{{ context.authenticity_token }}">
+                <div class="insites-form-grid">
+                    {%- render 'account/details_fields', values: values, errors: errors, mode: 'register' -%}
+                </div>
+                {%- if notice == 'session' -%}
+                    <p class="error-message">Your session has expired. Please try again.</p>
+                {%- elsif notice == 'failed' -%}
+                    <p class="error-message">We could not create your account. Please try again.</p>
+                {%- endif -%}
+            </form>
+        </div>
+    </div>
+    <div class="spacer section"></div>
+</div>
+
+{%- render 'layout/axios' -%}
+<script defer src="{{ 'services/apiServices.js' | asset_url }}"></script>
+<script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>

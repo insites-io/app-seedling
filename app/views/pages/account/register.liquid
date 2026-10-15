@@ -1,5 +1,6 @@
 ---
 slug: register
+method: get
 layout: dashboard_account
 searchable: false
 max_deep_level: 1
@@ -23,70 +24,19 @@ metadata: {
     "sitemap_change_frequency": "never",
 }
 ---
-    
-{%- if context.current_user -%}
-    
-    {%- redirect_to '/dashboard' -%}
-    
-{%- endif -%} 
-
-<div class="register-wrapper">
-    <div class="spacer section"></div>
-    <div class="sign-up grid-x grid-padding-x">
-        <div class="large-5 medium-offset-3 medium-6 small-12 cell seedling-form-container">  
-            <h1 class="heading-1 text-center">Create Account</h1>
-            <div class="spacer x-large"></div>
-        {%- include_form 'register' -%}
-        </div>
-    </div>
-    <div class="spacer section"></div>
-</div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
-{%- if context.environment == "staging" -%}
-    <script src="{{ 'services/apiServices.js' | asset_url }}"></script>
-    <script src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>
-{%- else -%}
-    <script src="{{ 'services/apiServices.min.js' | asset_url }}"></script>
-    <script src="{{ 'scripts/login-scripts.min.js' | asset_url }}"></script>
-{%- endif -%}
+{%- liquid
+  if context.current_user
+    redirect_to '/dashboard'
+    break
+  endif
 
-<script>
-    const registerStepper = document.getElementById("register-stepper");
-    const registerForm = document.getElementById('register-form');
-    const cancelButton = document.getElementById('cancel-button');
+  comment
+    The POST page checks this flag. A post without a valid authenticity token arrives with
+    an empty session, so a missing flag means the token was missing or forged.
+  endcomment
+  graphql flagged = 'account/create_session', name: 'register_form', value: 'on'
+-%}
 
-    const step1 = document.getElementById("submit-personal-details");
-    
- 
-    const step1Container = document.getElementById('personal-details-container');
-    const step2Container = document.getElementById('company-details-container');
-    const step3Container = document.getElementById('confirmation-container');
-
-    // Disable Submit on 'Enter' in Sign up form
-    if(registerForm){
-        window.addEventListener('keydown', function(e) {
-            if (e.keyIdentifier == 'U+000A' || e.keyIdentifier == 'Enter' || e.keyCode == 13) {
-                if (e.target.nodeName == 'INPUT' && e.target.type == 'text') {
-                    e.preventDefault();
-                    return false;
-                }
-            }
-        }, true);
-    }
-
-    // Handle submit button click (form validation is handled by FormValidation.validateAndSubmit)
-    if(step1) {
-        step1.addEventListener('insClick', async function(event) {
-            // FormValidation.validateAndSubmit will handle validation and submission
-            // This is just a fallback for button clicks
-            const form = document.getElementById('register-form');
-            if (form) {
-                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-            }
-        });
-    }
-
-    
-</script>
+{%- render 'account/register_form', values: null, errors: null, notice: context.params.error -%}

@@ -1,0 +1,90 @@
+---
+metadata: {
+    partial_name: "Account | Details Fields",
+}
+---
+{%- comment -%}
+  The name and email fields, shared by the register form and the profile form. Called with:
+    render 'account/details_fields', values: values, errors: errors, mode: 'register'
+  values: first_name, last_name, email to show again after a refused post.
+  errors: field name to error code, from account/details/check (or blank).
+  mode: 'register' adds the password field and the Register button; 'profile' adds Save.
+{%- endcomment -%}
+{%- liquid
+  function first_name_error = 'account/details/messages', field: 'first_name', code: errors.first_name
+  function last_name_error = 'account/details/messages', field: 'last_name', code: errors.last_name
+  function email_error = 'account/details/messages', field: 'email', code: errors.email
+  function password_error = 'account/details/messages', field: 'password', code: errors.password
+  comment
+    An output tag on this platform turns an escaped double quote back into a quote, so a
+    value that goes into an attribute is escaped here and written with print.
+  endcomment
+  assign first_name_attr = values.first_name | escape
+  assign last_name_attr = values.last_name | escape
+  assign email_attr = values.email | escape
+-%}
+<div id="personal-details-container" class="form-group fadeIn" active>
+  <div class="column-1">
+    <ins-input validate
+      id="first-name"
+      label="First Name"
+      name="first_name"
+      value="{% print first_name_attr %}"
+      {% if first_name_error != blank %}has-error{% endif %}
+      error-message="{{ first_name_error | default: 'First name is required' | escape }}"
+      placeholder="First Name">
+    </ins-input>
+  </div>
+
+  <div class="column-1">
+    <ins-input validate
+      id="last-name"
+      label="Last Name"
+      name="last_name"
+      value="{% print last_name_attr %}"
+      {% if last_name_error != blank %}has-error{% endif %}
+      error-message="{{ last_name_error | default: 'Last name is required' | escape }}"
+      placeholder="Last Name">
+    </ins-input>
+  </div>
+
+  <div class="column-1">
+    <ins-input validate
+      id="email"
+      label="Email"
+      field="email"
+      name="email"
+      value="{% print email_attr %}"
+      {% if email_error != blank %}has-error{% endif %}
+      error-message="{{ email_error | default: 'Please use a valid email address' | escape }}"
+      placeholder="Email">
+    </ins-input>
+  </div>
+
+  {%- if mode == 'register' -%}
+    <div class="column-1">
+      <ins-input validate
+        id="password"
+        label="Password"
+        field="password"
+        name="password"
+        {% if password_error != blank %}has-error{% endif %}
+        error-message="{{ password_error | default: 'Password is required' | escape }}"
+        placeholder="Password">
+      </ins-input>
+    </div>
+
+    <div class="column-1">
+      <div class="spacer small"></div>
+      <div class="grid-x">
+        <div class="cell large-6 medium-6 small-12"><a href="/"><ins-button type="button" id="cancel-button" label="CANCEL" outlined></ins-button></a></div>
+        <div class="cell show-for-small-only spacer"></div>
+        <div class="cell large-6 medium-6 small-12 text-right"><ins-button type="submit" id="submit-personal-details" class="submit-btn" label="Register" icon-right="icon-arrow-forward" solid></ins-button></div>
+      </div>
+    </div>
+  {%- else -%}
+    <div class="column-1 profile-buttons">
+      <ins-button type="submit" id="submit-personal-details" class="submit-btn" label="SAVE" icon="icon-check-2" solid></ins-button>
+    </div>
+  {%- endif -%}
+</div>

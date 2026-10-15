@@ -1,5 +1,6 @@
 ---
 slug: profile
+method: get
 layout: dashboard_form
 searchable: false
 max_deep_level: 1
@@ -28,92 +29,117 @@ authorization_policies:
   - is_user_allowed
 ---
 
-{%- graphql user = 'account/get_current_user' | dig: 'current_user' -%}  
 
-<div id="myDetails" class="my-details">    
+{%- liquid
+  graphql current = 'account/get_current_user'
+  assign user = current.current_user
+  assign values = {}
+  assign values['first_name'] = user.first_name
+  assign values['last_name'] = user.last_name
+  assign values['email'] = user.email
+
+  comment
+    The two forms post to /profile/details and /profile/password. When one is refused,
+    that page comes back here with error=<field>_<code>, for example email_taken.
+  endcomment
+  assign error = context.params.error | default: '' | append: ''
+  assign details_errors = {}
+  assign password_errors = {}
+  assign field = error | split: '_' | first
+  assign code = error | remove_first: field | remove_first: '_'
+  case field
+    when 'first', 'last'
+      assign field = field | append: '_name'
+      assign code = code | remove_first: 'name_'
+      assign details_errors[field] = code
+    when 'email'
+      assign details_errors['email'] = code
+    when 'password'
+      assign password_errors['password'] = code
+  endcase
+
+  graphql check_2fa_setup = 'account/check_2fa_setup'
+  assign profile = check_2fa_setup.current_user.client | first
+-%}
+
+<div id="myDetails" class="my-details">
     <div class="spacer x-large"></div>
     <div class="grid-container">
       <div class="grid-x">
         <div class="large-4 medium-4 small-12 cell profile-form-left">
           <h3 class="heading-3">Personal Information</h3>
           <div class="spacer x-small"></div>
-          <p>Update your account’s profile information and email address.</p>
+          <p>Update your account's profile information and email address.</p>
         </div>
         <div class="large-8 medium-8 small-12 cell profile-form-right">
-          {%- include_form 'my_details', id: user.id, data: contact -%}
+          <form id="user-profile-form" class="insites-form insites-form-code" action="/profile/details" method="post" novalidate onsubmit="return UserProfileScript.methods.validateForm(event);">
+            <input type="hidden" name="authenticity_token" value="{{ context.authenticity_token }}">
+            <div class="insites-form-grid seedling-form-container seedling-form-container-profile">
+              {%- render 'account/details_fields', values: values, errors: details_errors, mode: 'profile' -%}
+            </div>
+          </form>
         </div>
       </div>
 
       <div class="spacer xxxx-large"></div>
       <div class="grid-x">
-          <div class="large-4 medium-4 small-12 cell profile-form-left"> 
+          <div class="large-4 medium-4 small-12 cell profile-form-left">
             <h3 class="heading-3">Update Password</h3>
             <div class="spacer x-small"></div>
             <p>Ensure your account is using a long, random password to stay secure.</p>
           </div>
           <div class="large-8 medium-8 small-12 cell profile-form-right">
-            {%- include_form 'change_password', id: user.id -%}
+            {%- render 'account/change_password_form', errors: password_errors -%}
           </div>
       </div>
 
       <div class="spacer xxxx-large"></div>
       <div class="grid-x">
-          <div class="large-4 medium-4 small-12 cell profile-form-left"> 
+          <div class="large-4 medium-4 small-12 cell profile-form-left">
             <h3 class="heading-3">Two-Factor Authentication</h3>
             <div class="spacer x-small"></div>
             <p>Add additional security to your account using two-factor authentication.</p>
           </div>
           <div class="large-8 medium-8 small-12 cell profile-form-right">
-            {% graphql check_2fa_setup = 'account/check_2fa_setup'%}
-            {% assign otp_configured = check_2fa_setup.current_user.client[0].otp_configured %}
-            {%- if otp_configured == true -%}
-              {% include 'account/2fa_activated' %}
-            {% else %}
-              {% include 'account/setup_2fa' %}
-            {% endif %}
+            {%- if profile.otp_configured == true -%}
+              {%- render 'account/2fa_activated' -%}
+            {%- else -%}
+              {%- render 'account/setup_2fa' -%}
+            {%- endif -%}
           </div>
       </div>
     </div>
-        
+
     <div class="spacer x-large"></div>
 </div>
 
+<script defer src="{{ 'scripts/user-profile.js' | asset_url }}"></script>
 
-{%- if context.params.status == 'success'  -%}
-  <script>
+{%- liquid
+  assign notice = ''
+  assign notice_type = 'success'
+  case context.params.status
+    when 'success'
+      assign notice = 'Your two-factor authentication was set up successfully.'
+    when 'failed'
+      assign notice = 'That code is not valid. Please try again.'
+      assign notice_type = 'error'
+    when 'saved'
+      assign notice = 'Your account details have been updated.'
+  endcase
+  if error != blank
+    assign notice = 'Your changes were not saved. Please check the form.'
+    assign notice_type = 'error'
+  endif
+-%}
+{%- if notice != blank -%}
+<script>
+  window.addEventListener('load', () => {
     const url = new URL(window.location);
     url.searchParams.delete('status');
+    url.searchParams.delete('error');
     window.history.replaceState({}, document.title, url);
-      setTimeout(() => {
-          App.events.notyf("success", 
-              "Your two-factor authentication was setup successfully.");
-      }, 200)
-  </script>
-{% endif -%}
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
-{%- if context.environment == "staging" -%}
-  <script src="{{ 'scripts/user-profile.js' | asset_url }}"></script>
-{%- else -%}
-  <script src="{{ 'scripts/user-profile.min.js' | asset_url }}"></script>
-{%- endif -%}
-
-{%- if context.flash and context.flash.notice == "Success-My-Details" -%}
-<script>
-setTimeout(() => {
-    App.events.notyf('success', "Account details has been updated.");
-}, 200);
+    App.events.notyf({{ notice_type | json }}, {{ notice | json }});
+  });
 </script>
-{% endif -%}
-
-{%- if context.flash and context.flash.alert == "Error-My-Details" -%}
-<script>
-setTimeout(() => {
-    App.events.notyf('error', "Error updating account detail.");
-}, 200);
-</script>
-{% endif -%}
-
-{%- if context.environment == "staging" -%}
-<!-- end page: my-details  -->
 {%- endif -%}

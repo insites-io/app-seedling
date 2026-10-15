@@ -3,54 +3,53 @@ metadata: {
     partial_name: "2FA | 2FA activated",
 }
 ---
-
+{%- comment -%}
+  Shown on the profile page when 2FA is on. Turning it off posts a current code from the
+  authenticator app to /api/disable-2fa. Called with:
+    render 'account/2fa_activated'
+{%- endcomment -%}
 <div class="seedling-form-container seedling-form-container-profile">
     <h4>Your account is protected with two-factor authentication</h4>
     <div class="spacer small"></div>
     <p>Turning off this two-factor authentication will make your account less secure, as it will no longer require a second step to verify your identity.</p>
     <div class="spacer medium"></div>
-    <ins-button id="turn-off-2fa" label="Turn Off Two-Factor Authentication"  outlined  type="submit" ></ins-button>
+    <ins-button id="turn-off-2fa" label="Turn Off Two-Factor Authentication" outlined type="button"></ins-button>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 
-{%- if context.environment == "staging" -%}
-    <script src="{{ 'services/apiServices.js' | asset_url }}"></script>
-{%- else -%}
-    <script src="{{ 'services/apiServices.min.js' | asset_url }}"></script>
-{%- endif -%}
+{%- render 'layout/axios' -%}
+<script defer src="{{ 'services/apiServices.js' | asset_url }}"></script>
 
 <script>
-    let twoFactorButton = document.getElementById('turn-off-2fa')
-    const customIcon = `<i class="icon-alert-circle"></i>`; 
-    
-    twoFactorButton.addEventListener('insClick', async ()=> {
-        let confirm = await Swal.fire({
-                    title: customIcon + `Turn Off Two-Factor Authentication`,
-                    html: `Turning off two-factor authentication will remove the extra security on your account. Enter the current code from your authentication app to confirm.`,
-                    input: 'text',
-                    inputAttributes: { inputmode: 'numeric', maxlength: 6, autocomplete: 'one-time-code' },
-                    inputValidator: (value) => /^[0-9]{6}$/.test(value) ? null : 'Enter the 6-digit code.',
-                    confirmButtonText: `TURN OFF`,
-                    showCancelButton: true,
-                    cancelButtonText: `Cancel`,
-                    allowOutsideClick: false,
-                    customClass: "swal-user-account swal-remove-access"
-                    }).then( async (result) => {
-                        if (result.isConfirmed) {
-                            let url = '/disable-2fa'
-                            // The page has no csrf-token meta tag, so send this session's token explicitly
-                            let headers = {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-Token': {{ context.authenticity_token | json }}
-                            };
-                            let response = await apiServices.processRequest('post', url, { otp_code: result.value }, headers);
-                            if (response.state) {
-                                window.location.href = "/profile";
-                            } else {
-                                App.events.notyf('error', 'The code is not valid. Please try again.');
-                            }
-                        }
-                    });
-    })
+    const twoFactorButton = document.getElementById('turn-off-2fa');
+    const customIcon = `<i class="icon-alert-circle"></i>`;
+
+    twoFactorButton.addEventListener('insClick', async () => {
+        await Swal.fire({
+            title: customIcon + `Turn Off Two-Factor Authentication`,
+            html: `Turning off two-factor authentication will remove the extra security on your account. Enter the current code from your authentication app to confirm.`,
+            input: 'text',
+            inputAttributes: { inputmode: 'numeric', maxlength: 6, autocomplete: 'one-time-code' },
+            inputValidator: (value) => /^[0-9]{6}$/.test(value) ? null : 'Enter the 6-digit code.',
+            confirmButtonText: `TURN OFF`,
+            showCancelButton: true,
+            cancelButtonText: `Cancel`,
+            allowOutsideClick: false,
+            customClass: "swal-user-account swal-remove-access"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                // Send this session's authenticity token with the request, as a form would
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-Token': {{ context.authenticity_token | json }}
+                };
+                const response = await apiServices.processRequest('post', '/disable-2fa', { otp_code: result.value }, headers);
+                if (response.state) {
+                    window.location.href = "/profile";
+                } else {
+                    App.events.notyf('error', 'The code is not valid. Please try again.');
+                }
+            }
+        });
+    });
 </script>

@@ -1,0 +1,35 @@
+# Purpose: Creates a Seedling account: the user and its client profile, with 2FA off
+# Used by: app/views/pages/account/register_submit.liquid
+# Parameters:
+#   - $email: Lowercased email address. The platform refuses an email that another user has,
+#             so two registrations for one address cannot both succeed
+#   - $password, $first_name, $last_name
+# Returns: The new user id and email, or errors
+mutation register_user(
+  $email: String!
+  $password: String!
+  $first_name: String!
+  $last_name: String!
+) {
+  user: user_create(
+    user: {
+      email: $email
+      password: $password
+      first_name: $first_name
+      last_name: $last_name
+      profiles: [
+        {
+          name: "client"
+          values: {
+            properties: [
+              { name: "otp_configured", value_boolean: false }
+            ]
+          }
+        }
+      ]
+    }
+  ) {
+    id
+    email
+  }
+}

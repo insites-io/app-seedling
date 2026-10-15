@@ -1,0 +1,27 @@
+# Purpose: Saves a user's name and email
+# Used by: app/views/partials/account/details/save.liquid
+# Parameters:
+#   - $id: User ID. Callers pass the signed-in user's id, never one from the request
+#   - $email: Lowercased email address. The platform refuses an email that another user has
+#   - $first_name, $last_name
+# Returns: The saved user, or errors
+mutation update_details(
+  $id: ID!
+  $email: String!
+  $first_name: String!
+  $last_name: String!
+) {
+  user: user_update(
+    id: $id
+    user: {
+      email: $email
+      first_name: $first_name
+      last_name: $last_name
+    }
+  ) {
+    id
+    email
+    first_name
+    last_name
+  }
+}

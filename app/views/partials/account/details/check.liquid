@@ -1,0 +1,46 @@
+---
+metadata: {
+    partial_name: "Account | Details | Check",
+}
+---
+{%- comment -%}
+  Checks a name and email before they are saved, on the server. The checks in the browser
+  are only for quick feedback; these are the ones that count. Called with:
+    function errors = 'account/details/check', first_name: first_name, last_name: last_name, email: email, user_id: user_id
+  user_id is the account being changed, or blank for a new one. Returns a hash of field
+  name to error code ('required', 'invalid' or 'taken'), empty when everything is fine.
+  'taken' here gives quick feedback only. The platform refuses an email another user has
+  when the user is saved, and that refusal is what keeps two accounts off one address.
+{%- endcomment -%}
+{%- liquid
+  assign errors = {}
+  assign first_name = first_name | default: '' | append: '' | strip
+  assign last_name = last_name | default: '' | append: '' | strip
+  assign email = email | default: '' | append: '' | strip | downcase
+  assign user_id = user_id | default: '' | append: ''
+
+  if first_name == blank
+    assign errors['first_name'] = 'required'
+  endif
+  if last_name == blank
+    assign errors['last_name'] = 'required'
+  endif
+
+  if email == blank
+    assign errors['email'] = 'required'
+  else
+    assign email_ok = email | is_email_valid
+    if email_ok
+      graphql found = 'account/check_user_email_signup', email: email
+      assign existing = found.items.results | first
+      assign existing_id = existing.id | append: ''
+      if existing_id != blank and existing_id != user_id
+        assign errors['email'] = 'taken'
+      endif
+    else
+      assign errors['email'] = 'invalid'
+    endif
+  endif
+
+  return errors
+-%}
