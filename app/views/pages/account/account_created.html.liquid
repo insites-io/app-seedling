@@ -1,5 +1,6 @@
 ---
 slug: account-created
+method: get
 layout: website_message
 max_deep_level: 1
 metadata: {
@@ -7,12 +8,12 @@ metadata: {
     "open_graph_url": "",
     "open_graph_type": "",
     "open_graph_image": "",
-    "open_graph_title": "Account Created | Insites",
-    "open_graph_description": "Account Created | Insites",
+    "open_graph_title": "Account Created | Seedling",
+    "open_graph_description": "Account Created | Seedling",
     "open_graph_site_name": "",
-    "meta_title": "Account Created | Insites",
-    "page_title": "Account Created | Insites",
-    "meta_description": "Account Created | Insites",
+    "meta_title": "Account Created | Seedling",
+    "page_title": "Account Created | Seedling",
+    "meta_description": "Account Created | Seedling",
     "canonical_url": "",
     "is_visible_to_search_engines": false,
     "is_sitemap_enabled": false,
@@ -24,24 +25,15 @@ metadata: {
 dynamic_cache:
   layout: true
   key: |-
-    {%- parse_json models -%}
-    [
-      "modules/insites_crm/crm_system_field",
-      "modules/insites_site_manager/insites_global_content"
-    ]
-    {%- endparse_json -%}
-    {%- include "cache/generate_cache_key", models: models -%}
+    {%- assign tables = ["modules/insites_crm/crm_system_field", "modules/insites_site_manager/insites_global_content"] -%}
+    {%- function key = 'cache/generate_cache_key', tables: tables -%}
+    {{ key }}-{{ context.current_user.id }}
 ---
 
 {%- comment -%}
 Default 'success / thank you' page
 Design & content changes per project as needed
 {%- endcomment -%}
-
-{%- if context.environment == "staging" -%}
-<!-- start page: thank you page  -->
-{%- endif -%}
-
 
 <div class="thank-you account-created">
     <div class="spacer section"></div>
@@ -61,6 +53,3 @@ Design & content changes per project as needed
     <div class="spacer section"></div>
 </div>
 
-{%- if context.environment == "staging" -%}
-<!-- end page: thank you page  -->
-{%- endif -%}

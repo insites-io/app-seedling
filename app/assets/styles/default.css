@@ -1471,16 +1471,6 @@ ins-tag span.ins-tag {
     color: var(--font-color-inv);
 }
 
-.component-background {
-    background: url('../images/components.jpg') no-repeat;
-    background-size: cover;
-    color: var(--font-color-inv);
-}
-
-.component-background .heading-2 {
-    color: var(--font-color-inv);
-}
-
 .header-top-bar .logo,
 .header .logo {
     height: 56px;

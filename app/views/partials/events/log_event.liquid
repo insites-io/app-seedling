@@ -3,15 +3,23 @@ metadata: {
     partial_name: "Event | Log event",
 }
 ---
-
-{%- parse_json data -%}
-{
-    "font_icon": "{{ info.font_icon | default: "icon-info" }}",
-    "font_icon_color": "{{ info.font_icon_color | default: "#451278" }}",
-    "description": "{{ info.description | default: "" }}",
-    "details": "{{ info.details | default: "" }}"    
-}
-{%- endparse_json -%}
-{%- assign data = data | add_hash_key: "log", info.log -%}
-
-{%- graphql add_events = 'trigger_api_call', name: "add_events", data: data -%}
+{%- comment -%}
+  Adds an entry to the instance's event stream. Run it as a background job, so the page
+  does not wait for it:
+    background logged = 'events/log_event', description: 'New Registration', log: log
+  description: a short line shown in the event stream.
+  log: a hash of details. details, font_icon and font_icon_color are optional.
+  It calls the CRM module's event stream controller in the same request, so no API key
+  is sent anywhere by this app. The controller is a path alias inside the installed CRM
+  module, which the linter cannot see, hence the disable comment.
+{%- endcomment -%}
+{%- liquid
+  assign event = {}
+  assign event['description'] = description | default: ''
+  assign event['details'] = details | default: ''
+  assign event['font_icon'] = font_icon | default: 'icon-info'
+  assign event['font_icon_color'] = font_icon_color | default: '#451278'
+  assign event['log'] = log | default: null
+-%}
+{%- comment -%}insites-check-disable-next-line MissingPartial{%- endcomment -%}
+{%- function added = 'crm/controller/event-streams/create', params: event -%}

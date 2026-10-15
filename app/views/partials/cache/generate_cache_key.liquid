@@ -4,66 +4,33 @@ metadata: {
 }
 ---
 {%- comment -%}
-`models` (Array) argument are list of models that has the dynamic content on the page
-Add/remove model names as needed base on your page content
-
-For development phase you might want to turn the dynamic cache
-You might want to disable or comment out 'dynamic_cache' during development and testing phase.
-as your code updates will not reflect on the site when you sync/deploy
-because the page will be cached base on the cache key
+  Builds a cache key for a page's dynamic_cache. The key changes whenever a record in one of
+  the given tables changes, or any page, layout, partial, asset or form is deployed, and it
+  includes the full URL, so each set of query parameters is cached on its own. Called from
+  a page's dynamic_cache key with:
+    function key = 'cache/generate_cache_key', tables: tables
+  tables: an array of table names whose records the page shows.
+  Never cache a page that shows something only the signed-in user may see.
+  While you develop, leave dynamic_cache off, or a deploy may not show until the key moves.
 {%- endcomment -%}
+{%- liquid
+  graphql records = 'page_cache/check_records_update_date', tables: tables
+  graphql site = 'page_cache/check_site_update_date'
 
-{% comment %} GraphQL will pull the latest updated data / record {% endcomment %}
-{%- graphql record_last_updated = "page_cache/check_records_update_date", 
-    models: models 
-    | fetch: 'items' | fetch: 'results' | first -%}
-
-{% comment %} GraphQL will pull the latest updated files / assets {% endcomment %}
-{%- graphql site_last_updated = "page_cache/check_site_update_date" -%}
-
-
-{% comment %} 
-Initialize empty array using split trick (Liquid doesn't have array literal syntax).
-This collects all update timestamps to find the most recent change.
-{% endcomment %}
-{%- assign date_array = ',' | split: "," -%}
-
-{% comment %} Add values on the array for the update dates {% endcomment %}
-{%- assign date_array = date_array | add_to_array: record_last_updated.updated_at -%}
-
-{% liquid
-    if site_last_updated.admin_liquid_partials.results.size > 0
-        assign this_result = site_last_updated.admin_liquid_partials.results | first
-        assign date_array = date_array | add_to_array: this_result.updated_at
+  assign dates = []
+  assign latest_record = records.items.results | first
+  if latest_record.updated_at != blank
+    assign dates = dates | array_add: latest_record.updated_at
+  endif
+  assign groups = 'admin_liquid_partials,admin_liquid_layouts,admin_pages,admin_assets,admin_forms' | split: ','
+  for group in groups
+    assign latest = site[group].results | first
+    if latest.updated_at != blank
+      assign dates = dates | array_add: latest.updated_at
     endif
+  endfor
 
-    if site_last_updated.admin_liquid_layouts.results.size > 0
-        assign this_result = site_last_updated.admin_liquid_layouts.results | first
-        assign date_array = date_array | add_to_array: this_result.updated_at
-    endif
-
-    if site_last_updated.admin_pages.results.size > 0
-        assign this_result = site_last_updated.admin_pages.results | first
-        assign date_array = date_array | add_to_array: this_result.updated_at
-    endif
-
-    if site_last_updated.admin_assets.results.size > 0
-        assign this_result = site_last_updated.admin_assets.results | first
-        assign date_array = date_array | add_to_array: this_result.updated_at
-    endif
-
-    if site_last_updated.admin_forms.results.size > 0
-        assign this_result = site_last_updated.admin_forms.results | first
-        assign date_array = date_array | add_to_array: this_result.updated_at
-    endif
-%}
-
-{% comment %} 
-Sort array ascending, then use .last to get most recent timestamp.
-Convert to Unix timestamp (%s) and prepend URL to create unique cache key per page/params.
-This ensures cache invalidates when any tracked content or the page URL changes.
-{% endcomment %}
-{%- assign date_array = date_array | sort -%}
-
-{% comment %} Prepend context.location.url to be added in key as it contains all of the params (which allows for paginated caching) {% endcomment %}
-{{ date_array.last | date: '%s' | prepend: context.location.url }}
+  assign latest_date = dates | sort | last | date: '%s'
+  assign key = context.location.url | append: '-' | append: latest_date
+  return key
+-%}
