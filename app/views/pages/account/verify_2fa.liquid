@@ -1,5 +1,6 @@
 ---
 slug: verify-2fa
+method: get
 layout: dashboard_account
 searchable: false
 metadata: {
@@ -11,7 +12,7 @@ metadata: {
     "open_graph_description": "Verify 2FA",
     "open_graph_site_name": "{{ context.exports.global.company_name | strip }}",
     "meta_title": "Verify 2FA",
-    "page_title": "Verify 2FA | Insites",
+    "page_title": "Verify 2FA | Seedling",
     "page_name": "Verify 2FA",
     "meta_description": "Verify 2FA",
     "canonical_url": "",
@@ -26,18 +27,25 @@ authorization_policies:
   - allow_2fa_verification
 ---
 
-{% assign hashed = 16 | random_string | compute_hmac: "nonce", "MD4" %}
-{%- content_for 'page_nonce' -%}{{ context.instance.uuid | base64_encode |  append: hashed }}{%- endcontent_for -%}
-{%- capture page_nonce -%}{%- yield 'page_nonce' -%}{%- endcapture -%}
-{% include "modules/insites_crm/sessions/delete_session_variables" %}
-{% function return_to = 'account/safe_return_to', path: context.params.return_to %}
+{%- liquid
+  comment
+    Clears the session flags the Insites admin keeps for its own 2FA and single sign-on.
+  endcomment
+  include 'modules/insites_crm/sessions/delete_session_variables'
+  function return_to = 'account/safe_return_to', path: context.params.return_to
+  assign action = '/account/2fa'
+  if return_to != blank
+    assign encoded_return_to = return_to | url_encode
+    assign action = '/account/2fa?return_to=' | append: encoded_return_to
+  endif
+-%}
 <div class="verify-2fa-wrapper">
 
 
 <div class="spacer section"></div>
 
-<form action="{% if context.flash.alert == "Your 2FA has already been setup." %}/account/2fa{% else %}/account/2fa?return_to={{ return_to | url_encode }}{% endif %}" method="post">
-    {% render 'modules/insites_crm/authenticity_token', context: context %}
+<form action="{{ action }}" method="post">
+    <input type="hidden" name="authenticity_token" value="{{ context.authenticity_token }}">
     <div class="setup-2fa-container verification">
         <div class="grid-x">
             <div class="large-12 cell text-center">
@@ -53,7 +61,7 @@ authorization_policies:
 
                     <div class="otp-input-wrapper">
                         <input name="2fa[otp_code]" type="hidden">
-                        <input name="from_page" type="hidden" value="{{ context.params.slug }}">
+                        <input name="from_page" type="hidden" value="verify-2fa">
 
 
                         <div class="otp_input_fields">
@@ -79,8 +87,4 @@ authorization_policies:
 
 <div class="spacer section"></div>
 </div>
-{%- if context.environment == "staging" -%}
-    <script nonce="{{ page_nonce }}" src="{{ 'scripts/2fa/otp.js' | asset_url }}"></script>
-{% else %}
-    <script nonce="{{ page_nonce }}" src="{{ 'scripts/2fa/otp.min.js' | asset_url }}"></script>
-{%- endif -%}
+<script src="{{ 'scripts/2fa/otp.js' | asset_url }}"></script>

@@ -5,7 +5,7 @@ metadata: {
 ---
 
 {% liquid
-  assign c = '{ "errors": {}, "valid": true }' | parse_json
+  assign c = { "errors": {}, "valid": true }
 
   function c = 'account/2fa_functions/validations/presence', c: c, object: object, field_name: 'id'
   function c = 'account/2fa_functions/validations/presence', c: c, object: object, field_name: 'otp_code'
@@ -20,15 +20,15 @@ metadata: {
   endif
 
   if c.valid
-    function r = 'account/2fa_functions/commands/execute', mutation_name: 'account/verify_otp' object: object, selection: 'users'
+    function r = 'account/2fa_functions/commands/execute', mutation_name: 'account/verify_otp', object: object, selection: 'users'
     assign user = r.results.first
 
     function c = 'account/2fa_functions/validations/truthy', c: c, field_name: 'otp_code', object: user.authenticate, message: 'The code you’ve entered is not valid. Please retry or try again if the code has expired.'
-    hash_assign object['id'] = user.id
+    assign object['id'] = user.id
   endif
 
-  hash_assign object['valid'] = c.valid
-  hash_assign object['errors'] = c.errors
+  assign object['valid'] = c.valid
+  assign object['errors'] = c.errors
 
   return object
 %}

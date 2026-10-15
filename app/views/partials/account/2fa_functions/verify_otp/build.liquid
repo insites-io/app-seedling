@@ -3,15 +3,12 @@ metadata: {
     partial_name: "2FA Functions | Verify OTP | Build",
 }
 ---
-
-
-{% parse_json object %}
-  {
-    "id": {{ object.id | json }},
-    "otp_code": {{ object.otp_code | append: '' | strip | json }}
-  }
-{% endparse_json %}
-
-{% liquid
-  return object
-%}
+{%- comment -%}
+  Build step: copies only the fields the check needs, as strings.
+{%- endcomment -%}
+{%- liquid
+  assign built = {}
+  assign built['id'] = object.id
+  assign built['otp_code'] = object.otp_code | append: '' | strip
+  return built
+-%}

@@ -10,6 +10,6 @@ metadata: {
   graphql r = mutation_name, args: object
 
   assign object = r[selection]
-  hash_assign object['valid'] = true
+  assign object['valid'] = true
   return object
 %}

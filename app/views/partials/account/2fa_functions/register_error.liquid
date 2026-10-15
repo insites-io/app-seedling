@@ -19,12 +19,15 @@ metadata: {
   endif
 
   assign errors = contract.errors
+  assign field_errors = errors[field_name]
+  if field_errors == blank
+    assign field_errors = []
+  endif
+  assign field_errors = field_errors | array_add: msg
 
-  assign field_erorrs = errors[field_name] | default: '[]' | parse_json
-  assign field_erorrs = field_erorrs | add_to_array: msg
-
-  hash_assign errors[field_name] = field_erorrs
-  hash_assign contract['valid'] = false
+  assign errors[field_name] = field_errors
+  assign contract['errors'] = errors
+  assign contract['valid'] = false
 
   return contract
 %}

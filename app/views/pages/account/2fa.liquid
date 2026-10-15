@@ -1,5 +1,7 @@
 ---
+slug: account/2fa
 method: post
+layout: ''
 metadata: {
     page_name: "API - 2FA Config",
 }
@@ -8,7 +10,7 @@ authorization_policies:
 ---
 
 {% liquid
-  assign otp_code = context.params | fetch: "2fa" | fetch: "otp_code"
+  assign otp_code = context.params['2fa']['otp_code']
   assign from_page = context.params.from_page
   function return_to = 'account/safe_return_to', path: context.params.return_to
 
@@ -65,10 +67,6 @@ authorization_policies:
     redirect_to goto
   else
     assign goto = '/verify-2fa?status=failed'
-    if from_page == 'setup-2fa'
-      assign goto = '/setup-2fa?status=failed'
-    endif
-
     if from_page == 'profile'
       assign goto = '/profile?status=failed'
     endif
