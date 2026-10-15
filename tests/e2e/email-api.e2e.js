@@ -32,6 +32,11 @@ function getJsonBody(response) {
 // API endpoint path
 const EMAIL_API_PATH = '/api/check-user-email-signup';
 
+// Ask for JSON explicitly. The instance picks a page's format from the Accept header, and a
+// request with no Accept header, or a list such as "application/json, text/plain, */*",
+// gets the Not Found page (404) instead of the JSON endpoint.
+const getJson = (t, url) => t.request({ url, headers: { Accept: 'application/json' } });
+
 // Request logger to capture API responses
 const emailApiLogger = RequestLogger(
     { url: new RegExp(`${EMAIL_API_PATH}.*`), method: 'get' },
@@ -48,7 +53,7 @@ test('Should return valid status for new email', async t => {
     const url = `${BASE_URL}${EMAIL_API_PATH}?email=${encodeURIComponent(testEmail)}`;
 
     logRequest('Valid email request', url);
-    const response = await t.request(url);
+    const response = await getJson(t, url);
 
     const body = getJsonBody(response);
 
@@ -71,7 +76,7 @@ test('Should never return a user id for an email', async t => {
     const url = `${BASE_URL}${EMAIL_API_PATH}?email=${encodeURIComponent(existingEmail)}`;
 
     logRequest('Existing email request', url);
-    const response = await t.request(url);
+    const response = await getJson(t, url);
 
     const body = getJsonBody(response);
 
@@ -101,7 +106,7 @@ test('Should answer 400 when the email parameter is missing', async t => {
     const url = `${BASE_URL}${EMAIL_API_PATH}`;
 
     logRequest('Missing email param request', url);
-    const response = await t.request(url);
+    const response = await getJson(t, url);
 
     const body = getJsonBody(response);
 
@@ -120,7 +125,7 @@ test('Should answer 422 for an invalid email format', async t => {
     const url = `${BASE_URL}${EMAIL_API_PATH}?email=${encodeURIComponent(invalidEmail)}`;
 
     logRequest('Invalid email format request', url);
-    const response = await t.request(url);
+    const response = await getJson(t, url);
 
     const body = getJsonBody(response);
 
@@ -139,7 +144,7 @@ test('Should log API requests correctly', async t => {
     const url = `${BASE_URL}${EMAIL_API_PATH}?email=${encodeURIComponent(testEmail)}`;
 
     logRequest('Logger verification request', url);
-    await t.request(url);
+    await getJson(t, url);
     
     // Check that the request was logged
     await t

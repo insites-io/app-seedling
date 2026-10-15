@@ -16,6 +16,12 @@ INSITES_URL=https://your-instance.example.com npm run test:ui  # visible Chrome
 
 The tests stop with an error when `INSITES_URL` is missing. There is no default instance.
 
+On macOS, TestCafe needs Screen Recording permission to drive a local browser. Grant it in System Settings, or run the tests in remote mode and open the printed connect URL in any browser:
+
+```bash
+INSITES_URL=https://your-instance.example.com npx testcafe remote 'e2e/**/*.e2e.js'
+```
+
 ## Configuration
 
 - `INSITES_URL`: the instance to test, for example `https://your-instance.example.com`.
