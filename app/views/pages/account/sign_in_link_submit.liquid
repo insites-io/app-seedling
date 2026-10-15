@@ -40,6 +40,26 @@ metadata: {
     break
   endunless
 
+  function account = 'account/sign_in/allowed_user', email: link_email
+  assign account_id = account.id | append: ''
+  assign link_user_id = link.user_id | append: ''
+  if account_id == blank or account_id != link_user_id
+    redirect_to '/sign-in/email-link?error=stale'
+    break
+  endif
+
+  comment
+    After 3 2FA lockouts in 24 hours the account needs a password reset, the same as for
+    password sign-in. Check it before the link is used, so the link still works once the
+    password has been reset. Only someone who can read the inbox gets this far, so saying
+    so tells nobody else anything.
+  endcomment
+  function reset_required = 'account/two_factor_reset_required', user_id: account_id
+  if reset_required
+    redirect_to '/sign-in/email-link?error=reset'
+    break
+  endif
+
   comment
     Use the link. The one use is a slot with a unique external id, so when the same link
     is posted twice at once exactly one post wins. Marking the row consumed alone is a
@@ -51,25 +71,6 @@ metadata: {
     break
   endunless
   graphql consumed = 'account/sign_in/set_request_status', table: 'sign_in_link', id: link.request_id, from: 'pending', to: 'consumed'
-
-  function account = 'account/sign_in/allowed_user', email: link_email
-  assign account_id = account.id | append: ''
-  assign link_user_id = link.user_id | append: ''
-  if account_id == blank or account_id != link_user_id
-    redirect_to '/sign-in/email-link?error=stale'
-    break
-  endif
-
-  comment
-    After 3 2FA lockouts in 24 hours the account needs a password reset, the same as for
-    password sign-in. Only someone who can read the inbox gets this far, so saying so tells
-    nobody else anything.
-  endcomment
-  function reset_required = 'account/two_factor_reset_required', user_id: account_id
-  if reset_required
-    redirect_to '/sign-in/email-link?error=reset'
-    break
-  endif
 
   comment
     2FA is passed per session. Clear any earlier value before signing in, so this sign-in

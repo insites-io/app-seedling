@@ -83,9 +83,20 @@ metadata: {
       function code_hash = 'account/sign_in/code_hash', email: email, code: code
       function account = 'account/sign_in/allowed_user', email: email
       if code_hash != blank and code_hash == request.code_hash and request.status == 'pending' and account.id != blank
-        function used = 'account/sign_in/take_slot', table: 'sign_in_code', key: request.id, label: 'use', count: 1
-        if used == 1
-          assign result = 'ok'
+        comment
+          After 3 2FA lockouts in 24 hours the account needs a password reset, the same as
+          for password sign-in. Check it before the code is used, so the code still works
+          once the password has been reset. Only someone who has the right code gets this
+          answer, so it tells nobody else anything.
+        endcomment
+        function reset_required = 'account/two_factor_reset_required', user_id: account.id
+        if reset_required
+          assign result = 'reset'
+        else
+          function used = 'account/sign_in/take_slot', table: 'sign_in_code', key: request.id, label: 'use', count: 1
+          if used == 1
+            assign result = 'ok'
+          endif
         endif
       endif
       if result == 'invalid'
@@ -97,11 +108,15 @@ metadata: {
       A wrong fifth guess, or no try slot left, ends the request: the right code after it
       is refused too, and the person asks for a new one.
     endcomment
-    if result != 'ok'
-      if result == 'too_many' or guess == 5
-        graphql killed = 'account/sign_in/set_request_status', table: 'sign_in_code', id: request.id, from: request.status, to: 'killed'
-        assign result = 'too_many'
-      endif
+    assign kill = false
+    if result == 'too_many'
+      assign kill = true
+    elsif result == 'invalid' and guess == 5
+      assign kill = true
+    endif
+    if kill
+      graphql killed = 'account/sign_in/set_request_status', table: 'sign_in_code', id: request.id, from: request.status, to: 'killed'
+      assign result = 'too_many'
     endif
   endif
 
@@ -113,16 +128,6 @@ metadata: {
 
   graphql consumed = 'account/sign_in/set_request_status', table: 'sign_in_code', id: request.id, from: 'pending', to: 'consumed'
   graphql cleared_email = 'account/delete_session', name: 'sign_in_code_email'
-
-  comment
-    After 3 2FA lockouts in 24 hours the account needs a password reset, the same as for
-    password sign-in. Only someone who can read the inbox gets this far.
-  endcomment
-  function reset_required = 'account/two_factor_reset_required', user_id: account.id
-  if reset_required
-    redirect_to '/sign-in/code?error=reset'
-    break
-  endif
 
   comment
     2FA is passed per session. Clear any earlier value before signing in, so this sign-in
