@@ -1,5 +1,6 @@
 ---
 slug: sign-in/code
+method: get
 layout: dashboard_account
 searchable: false
 metadata: {
@@ -31,6 +32,11 @@ metadata: {
 
   graphql flagged = 'account/create_session', name: 'sign_in_form', value: 'on'
   assign code_email = context.session.sign_in_code_email | default: ''
+  comment
+    An output tag on this platform turns an escaped double quote back into a quote, so a
+    value that goes into an attribute is escaped here and written with print.
+  endcomment
+  assign code_email_attr = code_email | escape
 -%}
 
 <div class="sign-up-wrapper">
@@ -52,7 +58,7 @@ metadata: {
                             label="Email"
                             field="email"
                             name="email"
-                            value="{{ code_email | escape }}"
+                            value="{% print code_email_attr %}"
                             error-message="Please use a valid email address"
                             placeholder="Email">
                         </ins-input>
@@ -99,8 +105,4 @@ metadata: {
     <div class="spacer section"></div>
 </div>
 
-{%- if context.environment == "staging" -%}
-    <script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>
-{%- else -%}
-    <script defer src="{{ 'scripts/login-scripts.min.js' | asset_url }}"></script>
-{%- endif -%}
+<script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>

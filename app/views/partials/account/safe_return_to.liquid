@@ -6,7 +6,8 @@ metadata: {
 {%- comment -%}
   Returns path when it is a path on this site, otherwise blank. Called with:
     function return_to = 'account/safe_return_to', path: context.params.return_to
-  Allowed: starts with a single / (not // and not /\), contains no backslash, no control character and no character outside ASCII.
+  Allowed: starts with a single / (not // and not /\), contains no backslash, no control character, no character outside ASCII,
+  and no " ' < > or backtick.
   The 2FA pages themselves and .json endpoints are excluded to prevent redirect loops.
 {%- endcomment -%}
 {%- liquid
@@ -33,6 +34,15 @@ metadata: {
     return ''
   endif
   if encoded_path contains '%8' or encoded_path contains '%9' or encoded_path contains '%A' or encoded_path contains '%B' or encoded_path contains '%C' or encoded_path contains '%D' or encoded_path contains '%E' or encoded_path contains '%F'
+    return ''
+  endif
+
+  comment
+    No quote, angle bracket or backtick either. A path never needs them, and refusing them
+    is a second lock behind escaping, so a return_to written into an attribute cannot
+    break out of it.
+  endcomment
+  if encoded_path contains '%22' or encoded_path contains '%27' or encoded_path contains '%3C' or encoded_path contains '%3E' or encoded_path contains '%60'
     return ''
   endif
 

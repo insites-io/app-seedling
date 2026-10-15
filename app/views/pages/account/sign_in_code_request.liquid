@@ -1,5 +1,6 @@
 ---
 slug: sign-in/email-code
+method: get
 layout: dashboard_account
 searchable: false
 metadata: {
@@ -35,6 +36,11 @@ metadata: {
   endcomment
   graphql flagged = 'account/create_session', name: 'sign_in_form', value: 'on'
   function return_to = 'account/safe_return_to', path: context.params.return_to
+  comment
+    An output tag on this platform turns an escaped double quote back into a quote, so a
+    value that goes into an attribute is escaped here and written with print.
+  endcomment
+  assign return_to_attr = return_to | escape
 -%}
 
 <div class="sign-up-wrapper">
@@ -48,7 +54,7 @@ metadata: {
 
             <form id="sign-in-code-request-form" action="/sign-in/email-code" method="post" novalidate onsubmit="return FormValidation.validateAndSubmit(event);">
                 <input type="hidden" name="authenticity_token" value="{{ context.authenticity_token }}">
-                <input type="hidden" name="return_to" value="{{ return_to | escape }}">
+                <input type="hidden" name="return_to" value="{% print return_to_attr %}">
 
                 <div class="grid-x grid-padding-x">
                     <div class="small-12 cell">
@@ -89,8 +95,4 @@ metadata: {
     <div class="spacer section"></div>
 </div>
 
-{%- if context.environment == "staging" -%}
-    <script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>
-{%- else -%}
-    <script defer src="{{ 'scripts/login-scripts.min.js' | asset_url }}"></script>
-{%- endif -%}
+<script defer src="{{ 'scripts/login-scripts.js' | asset_url }}"></script>

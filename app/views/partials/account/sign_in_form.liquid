@@ -9,6 +9,11 @@ metadata: {
 {%- endcomment -%}
 {%- liquid
   function return_to = 'account/safe_return_to', path: context.params.return_to
+  comment
+    An output tag on this platform turns an escaped double quote back into a quote, so a
+    value that goes into an attribute is escaped here and written with print.
+  endcomment
+  assign return_to_attr = return_to | escape
   assign passwordless_query = ''
   if return_to != blank
     assign encoded_return_to = return_to | url_encode
@@ -18,7 +23,7 @@ metadata: {
 
 <form id="sign-in-form" action="/sign-in" method="post" novalidate enctype="multipart/form-data" onsubmit="return FormValidation.validateAndSubmit(event);">
 	{% render 'modules/insites_crm/authenticity_token', context: context %}
-	<input type="hidden" name="return_to" value="{{ return_to | escape }}">
+	<input type="hidden" name="return_to" value="{% print return_to_attr %}">
 
 	<div class="grid-x grid-padding-x">
 		<div class="small-12 cell">
