@@ -8,7 +8,7 @@ name: policy_name
 redirect_to: 403
 ---
 {% liquid
-  graphql data = 'modules/dashboard/account/check_2fa_setup'
+  graphql data = 'account/check_2fa_setup'
   assign user = data.current_user.client | first
 
   comment Explain the decision tree and defaults endcomment
@@ -27,7 +27,7 @@ redirect_to: 403
 
 ## GraphQL in Liquid templates
 ```
-{% graphql check_2fa_setup = 'modules/dashboard/account/check_2fa_setup' %}
+{% graphql check_2fa_setup = 'account/check_2fa_setup' %}
 {% assign otp_configured = check_2fa_setup.current_user.client[0].otp_configured %}
 {% if otp_configured %} ... {% endif %}
 ```
@@ -75,7 +75,7 @@ fields:
 See `docs/FORM_VALIDATION.md` for the complete validation strategy.
 
 ## API helper with debug logging
-`modules/dashboard/public/assets/services/apiServices.js` and `modules/website/public/assets/services/formServices.js` log errors only when `window.APP_DEBUG === true`:
+`app/assets/services/apiServices.js` and `app/assets/services/formServices.js` log errors only when `window.APP_DEBUG === true`:
 ```
 window.APP_DEBUG = true; // enable temporary console logging
 await apiServices.processRequest('get', '/sessions/current');

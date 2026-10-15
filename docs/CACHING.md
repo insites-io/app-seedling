@@ -1,8 +1,8 @@
 # Caching strategy
 
 ## When to enable caching
-- Marketing pages under `modules/website/public/views/pages` are static; enable caching by default.
-- GraphQL page cache helpers at `modules/website/public/graphql/page_cache` provide update timestamps; use them to decide whether to refresh client caches.
+- Public website pages such as `app/views/pages/index.liquid` are static; enable caching by default.
+- GraphQL page cache helpers at `app/graphql/page_cache` provide update timestamps; use them to decide whether to refresh client caches.
 - Authenticated dashboard pages often show user-specific data and should remain uncached unless explicitly safe (e.g., documentation pages).
 
 ## How cache invalidation works

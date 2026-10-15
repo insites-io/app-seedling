@@ -1,59 +1,92 @@
-## Project overview
+# Seedling
 
-Seedling contains the public assets that power the dashboard and marketing site. The codebase is organized as Liquid templates, GraphQL documents, and small JavaScript helpers that run in the browser (no server runtime inside this repo). The `modules/dashboard` folder owns authenticated experiences such as account, 2FA, profile management, and documentation pages; `modules/website` serves the public-facing marketing site.
+Seedling is a starter app for Insites. It gives you a public website and a signed-in dashboard with registration, sign-in, two-factor authentication (2FA), a profile page and password reset. The whole site lives in `app/`.
 
-## Documentation
+New to Insites? Work through the [Getting Started course](https://docs.insites.io/getting-started/welcome-to-insites) first. It explains instances, the CLI and how a site is built.
 
-For detailed documentation, see the [Insites Application - Seedling Documentation v1.0.0](https://uploads.prod01.sydney.platformos.com/instances/572/property_uploads/modules/ins_console/marketplace_listings/documentation_file/bd2fd432-9819-4e48-b924-fb453a0ab338/Insites%20Application%20-%20Seedling%20Documentation%20v1.0.0.pdf) PDF.
+## Get started
 
-## Installation instructions
+1. **Get the code.** On GitHub, click **Use this template** on [insites-io/app-seedling](https://github.com/insites-io/app-seedling) to make your own copy, then clone your copy. You can also clone this repository directly:
 
-1) Clone the repository: `git clone <repo-url> && cd app-seedling`  
-2) There is no build step required to view or edit the Liquid/GraphQL files. Open the `modules/` tree in your editor and work directly against the source files.  
-3) If you use optional tooling (formatters, linters, or bundlers), install a recent Node.js LTS (18+) and add your toolchain locally; compiled assets should be checked in alongside the readable sources.  
-4) Deploy/sync the `modules/` directory to your target platform as needed (for example via your platform’s CLI or file sync).
+   ```bash
+   git clone https://github.com/insites-io/app-seedling.git
+   cd app-seedling
+   ```
 
-## Architecture overview
+2. **Install the Insites CLI.**
 
-- `modules/dashboard/public/authorization_policies`: Liquid auth policies that gate protected routes (2FA, session checks).
-- `modules/dashboard/public/graphql`: GraphQL documents used by account and dashboard flows.
-- `modules/dashboard/public/assets`: Unminified JS helpers plus minified counterparts for dashboard flows (sign in, 2FA, profile, API helpers).
-- `modules/dashboard/public/views`: Layouts, pages, and partials for authenticated experiences.
-- `modules/website/public`: Static marketing site layouts, styles, scripts, and GraphQL documents that support caching and notifications.
-- Schema, migrations, and user profile type definitions live beside the modules to keep runtime configuration close to the templates.
+   ```bash
+   npm install -g @insites/insites-cli
+   ```
+
+3. **Connect the CLI to your instance.** Use the instance UUID shown in the Insites Console. The CLI opens the Console in your browser so you can sign in.
+
+   ```bash
+   insites-cli env add staging --instance-uuid <your-instance-uuid>
+   ```
+
+4. **Send the code to your instance.** Send the whole app once with a partial deploy. Then run `sync` while you work, so each file goes up as you save it.
+
+   ```bash
+   insites-cli deploy -p staging
+   insites-cli sync staging
+   ```
+
+Always pass `-p` to `deploy`. A full deploy (without `-p`) removes files from the instance that are not in your build, and every instance carries files that are not in this repository, such as the System Pages error pages.
+
+## Installing over an older Seedling is not supported
+
+Seedling 2.1.0 moved the site from its two folders under `modules/` (dashboard and website) into `app/`. Do not install 2.1.0 on an instance that already has an older Seedling (the `modules/` layout). A partial deploy never deletes files, so the instance would end up with both copies. The database tables and the user profile type also lost their module prefix (the profile type is now `client`), so data saved by the older version is not read by 2.1.0. Start from a new instance.
+
+## What is in the repository
+
+| Path | What it holds |
+|---|---|
+| `app/views/pages/` | Pages. `index.liquid` is the home page, `account/` holds sign-in, registration, 2FA and password reset, and `api/` holds the JSON endpoints |
+| `app/views/layouts/` | `website_default`, `website_message`, `dashboard_default`, `dashboard_form` and `dashboard_account` |
+| `app/views/partials/` | Header, footer, page content, account helpers and cache helpers |
+| `app/forms/` | Form definitions: register, sign out, my details, change password, forgot password |
+| `app/graphql/` | Queries and mutations for accounts, 2FA, rate limiting and page caching |
+| `app/authorization_policies/` | Policies that protect signed-in pages and 2FA steps. Each one returns `true` or `false` |
+| `app/schema/`, `app/user_profile_types/` | The `auth_attempt`, `documentation` and `reset_password` tables, and the `client` profile type |
+| `app/emails/`, `app/api_calls/` | The password reset and 2FA alert emails, and the event log API call |
+| `app/migrations/` | Seed data for the dashboard documentation cards |
+| `app/assets/` | Scripts, styles and images. Readable sources sit beside their minified copies |
+| `tests/` | End-to-end tests. See [tests/README.md](tests/README.md) |
+| `docs/` | Notes on caching, environment flags, examples, form validation and migrations |
+
+Seedling does not ship error pages. Every instance already has its 401, 403, 404 and 500 pages from System Pages. Seedling's `app/views/pages/index.liquid` replaces the placeholder home page that System Pages installs.
 
 ## Development guidelines
 
-- Edit the readable sources (`*.js`, `*.liquid`, `*.graphql`) first; keep minified assets in sync when they are the deployed artifacts.
-- Auth policies must explicitly echo `true` or `false` and handle missing user data defensively.
-- GraphQL documents should be shared and de-duplicated; prefer updating a single query and reusing it instead of copying.
-- Keep console logging behind a feature flag (e.g., `window.APP_DEBUG === true`) or remove it entirely before shipping.
-- Favor small, composable partials and keep forms/scripts close to their associated view for discoverability.
+- Edit the readable sources (`*.js`, `*.liquid`, `*.graphql`) first, and keep the minified assets in step when they are the ones the pages load.
+- Authorization policies must return `true` or `false` explicitly and handle missing user data.
+- Reuse GraphQL documents. Update one query rather than copying it.
+- Keep console logging behind a flag (`window.APP_DEBUG === true`) or remove it before you ship.
+- Prefer small partials, and keep forms and scripts close to the page that uses them.
 
-## Common patterns and examples
+## Common patterns
 
-- **Authorization**: Policies query `modules/dashboard/account/check_2fa_setup` and echo booleans based on 2FA and session state (`authorization_policies/*.liquid`).
-- **GraphQL usage**: Templates request data with `{% graphql variable = 'modules/dashboard/account/check_2fa_setup' %}` then consume it with Liquid assignments.
-- **Form validation**: All forms use the unified `FormValidation.validateAndSubmit(event, options)` handler. Client-side validation provides immediate feedback; server-side validation (defined in form YAML) is the source of truth. See `docs/FORM_VALIDATION.md` for the complete strategy.
-- **API helpers**: `modules/dashboard/public/assets/services/apiServices.js` wraps Axios; error logging is gated by `window.APP_DEBUG` to avoid noisy consoles in production. A similar helper exists for marketing forms at `modules/website/public/assets/services/formServices.js`.
+- **Authorization:** policies run `account/check_2fa_setup` and return a boolean based on the 2FA and session state (`app/authorization_policies/*.liquid`).
+- **GraphQL:** templates load data with `{% graphql check_2fa_setup = 'account/check_2fa_setup' %}` and read the result with Liquid assignments.
+- **Form validation:** every form uses `FormValidation.validateAndSubmit(event, options)`. The browser checks give quick feedback. The form definitions on the server are the source of truth. See [docs/FORM_VALIDATION.md](docs/FORM_VALIDATION.md).
+- **API helpers:** `app/assets/services/apiServices.js` wraps Axios for the dashboard, and `app/assets/services/formServices.js` does the same for website forms. Both log errors only when `window.APP_DEBUG` is `true`.
 
-More examples live in `docs/EXAMPLES.md`.
+More examples are in [docs/EXAMPLES.md](docs/EXAMPLES.md).
 
-## Caching strategy
+## Caching
 
-- Cache static marketing pages by default; see `modules/website/public/graphql/page_cache` for update timestamps to drive cache invalidation.
-- Avoid caching routes that reference `current_user` or private profile data.
-- Use short TTLs (5–15 minutes) on public GraphQL page-cache endpoints; bypass caching for dashboard API responses.
-- Details in `docs/CACHING.md`.
+- Cache public website pages by default. The queries in `app/graphql/page_cache/` return the update times that drive cache invalidation.
+- Do not cache pages that use `current_user` or private profile data.
+- Details are in [docs/CACHING.md](docs/CACHING.md).
 
-## Environment configuration examples
+## Environment flags
 
-- Front-end flags such as `APP_DEBUG`, `API_BASE_URL`, and `FORMS_API_BASE_URL` can be injected via inline script tags or your platform’s environment settings.
+- Browser flags such as `APP_DEBUG`, `API_BASE_URL` and `FORMS_API_BASE_URL` can be set in an inline script tag.
 - Keep CSRF token selectors consistent with `CSRF_TOKEN_NAME` (default `csrf-token`).
-- See `docs/ENVIRONMENT.md` for example snippets and guidance.
+- See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 
-## Migrations cleanup guide
+## Migrations
 
-- Migrations live in `modules/dashboard/public/migrations/`; clean obsolete seeds and duplicates carefully.
-- Follow the safety checklist in `docs/MIGRATIONS_CLEANUP.md` before removing or consolidating files.
-
+- Migrations live in `app/migrations/`.
+- Follow [docs/MIGRATIONS_CLEANUP.md](docs/MIGRATIONS_CLEANUP.md) before you remove or merge any.
