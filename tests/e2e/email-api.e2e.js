@@ -1,8 +1,12 @@
 import { RequestLogger, Selector } from 'testcafe';
 
-// Base URL - update this to match your environment
-// Can be overridden with MPKIT_URL environment variable
-const BASE_URL = process.env.MPKIT_URL || 'http://localhost:3000';
+// The instance under test. Set INSITES_URL when you run the tests, for example
+// INSITES_URL=https://your-instance.example.com npm test
+const BASE_URL = (process.env.INSITES_URL || '').replace(/\/+$/, '');
+
+if (!/^https?:\/\//.test(BASE_URL)) {
+    throw new Error('Set INSITES_URL to the instance you want to test, for example INSITES_URL=https://your-instance.example.com npm test');
+}
 
 // Simple helper to log requests in the test output
 // Note: Using TestCafe's built-in logging instead of console.log

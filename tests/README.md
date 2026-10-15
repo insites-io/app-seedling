@@ -1,0 +1,41 @@
+# Seedling tests
+
+This folder holds the end-to-end tests for Seedling, written with TestCafe. They run against a real instance, so you tell them which one with the `INSITES_URL` environment variable.
+
+The test tooling lives here rather than at the repository root on purpose: the Insites GitHub App treats a `package.json` at the root as a project to build, and would then deploy only its `dist/` folder.
+
+## Running the tests
+
+Run these commands from this `tests/` folder:
+
+```bash
+npm install
+INSITES_URL=https://your-instance.example.com npm test       # headless Chrome
+INSITES_URL=https://your-instance.example.com npm run test:ui  # visible Chrome
+```
+
+The tests stop with an error when `INSITES_URL` is missing. There is no default instance.
+
+## Configuration
+
+- `INSITES_URL`: the instance to test, for example `https://your-instance.example.com`.
+- `.testcaferc.json` in this folder holds the TestCafe settings. Screenshots of failures go to `screenshots/` and the JSON report to `reports/report.json`, both ignored by git.
+
+## Test files
+
+- `e2e/email-api.e2e.js`: tests the email check endpoint used by registration (`/api/check-user-email-signup`).
+
+## Before you run them
+
+1. Deploy Seedling to the instance and make sure it loads at `INSITES_URL`.
+2. Set up any test data a test needs.
+3. Use Node.js 18 or later.
+
+## Writing new tests
+
+1. Create a new `.e2e.js` file in `e2e/`.
+2. Import TestCafe: `import { RequestLogger, Selector } from 'testcafe';`
+3. Build every URL from `process.env.INSITES_URL`. Never write an instance address into a test.
+4. Follow the structure of the existing test.
+
+Liquid unit tests that run on the instance are described in [README_UNIT_TESTS.md](README_UNIT_TESTS.md).

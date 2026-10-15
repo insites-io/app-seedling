@@ -1,40 +1,19 @@
-# Dashboard Module Unit Tests
+# Seedling Liquid unit tests
 
-This directory contains unit tests for the dashboard module using PlatformOS's built-in test framework.
+Seedling has one Liquid unit test. It checks the GraphQL query behind the email check that registration uses. It runs on an instance, not on your computer.
 
-## Test Structure
+## Test structure
 
-Unit tests are located in:
-- `modules/dashboard/public/views/partials/test/commands/` - Test files (must end with `_test.liquid`)
-- `modules/dashboard/public/views/partials/test/assertions/` - Assertion helpers
+- `app/views/partials/test/commands/`: test files. Each name ends in `_test.liquid`.
+- `app/views/partials/test/assertions/`: assertion helpers.
 
-## Running Tests
+## Running the tests
 
-### Prerequisites
-1. Deploy your code to a PlatformOS instance
-2. Ensure test data is set up (some tests require specific users/profiles)
+Seedling does not ship a page that runs these tests. The test builds its own `contract` object and prints it as JSON, so the way to run it today is to render the partial on a staging instance and read the result (for example with `insites-cli exec liquid`).
 
-### Running All Tests
+It is not yet wired to the `insites-cli test run` runner. That runner passes in a `contract` and reads the same object back, and this test replaces it with its own, so the runner would not see its failures.
 
-After deploying, navigate to:
-```
-https://your-instance.example.com/tests
-```
-
-This will run all available unit tests and return JSON results.
-
-### Running a Specific Test
-
-To run a specific test, use:
-```
-https://your-instance.example.com/tests/run?name=commands/account/check_user_email_signup_test
-```
-
-The test name format is: `commands/{path}/{test_name}` (without the `.liquid` extension)
-
-For example:
-- Test file: `test/commands/account/check_user_email_signup_test.liquid`
-- Test name: `commands/account/check_user_email_signup_test`
+Before you run it, deploy Seedling to the instance and set up the test data listed below.
 
 ## Available Tests
 
@@ -82,7 +61,7 @@ Example failed result:
 
 ## Writing New Tests
 
-1. Create a new test file in `modules/dashboard/public/views/partials/test/commands/`
+1. Create a new test file in `app/views/partials/test/commands/`
 2. Name it with `_test.liquid` suffix (e.g., `my_feature_test.liquid`)
 3. Use the test contract pattern:
    ```liquid
@@ -94,7 +73,7 @@ Example failed result:
    ```liquid
    {% liquid
      unless condition
-       include 'modules/dashboard/test/assertions/register_error', contract: contract, field_name: 'test_name', message: 'Error message'
+       include 'test/assertions/register_error', contract: contract, field_name: 'test_name', message: 'Error message'
      endunless
    %}
    ```
@@ -102,12 +81,11 @@ Example failed result:
    ```liquid
    {{ contract }}
    ```
-6. Add the test to the test list in `modules/dashboard/public/views/pages/tests.liquid`
 
 ## Differences from E2E Tests
 
-- **Unit Tests** (this directory): Test individual GraphQL queries, commands, and logic directly
-- **E2E Tests** (`modules/dashboard/test/*.e2e.js`): Test full API endpoints and user flows using TestCafe
+- **Unit tests** (`app/views/partials/test/`): Test individual GraphQL queries, commands, and logic directly
+- **E2E tests** (`tests/e2e/*.e2e.js`): Test full API endpoints and user flows using TestCafe
 
 Both test types complement each other:
 - Unit tests are faster and test logic in isolation

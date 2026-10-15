@@ -1,6 +1,6 @@
 {
   "screenshots": {
-    "path": "test/screenshots",
+    "path": "screenshots",
     "takeOnFails": true,
     "pathPattern": "${DATE}_${TIME}/test-${TEST_INDEX}/${USERAGENT}/${FILE_INDEX}.png"
   },
@@ -10,7 +10,7 @@
     },
     {
       "name": "json",
-      "output": "test/reports/report.json"
+      "output": "reports/report.json"
     }
   ],
   "skipJsErrors": true,
