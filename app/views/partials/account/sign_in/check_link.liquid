@@ -6,17 +6,28 @@ metadata: {
 {%- comment -%}
   Checks an emailed sign-in link. Called with:
     function link = 'account/sign_in/check_link', email: email, token: token, nonce: nonce
-  Returns { "ok": true|false, "request_id": ..., "user_id": ..., "return_to": ... }.
+  Returns { "ok": true|false, "reason": "stale"|"expired", "request_id": ..., "user_id": ..., "return_to": ... }.
   ok only when all four hold:
     1. The nonce belongs to a pending sign_in_link request
     2. That request was made for this email
     3. The request has not expired
     4. The platform accepts the token as live for this email's account
-  Checking changes nothing. The caller uses the link with take_slot, so it works once.
+  When ok is false, reason says why, and the caller sends it as error=<reason>:
+    stale    1 or 2 failed: no such request, one already used, or one made for another address.
+             Nothing here belongs to the person asking, so it says nothing more.
+    expired  1 and 2 held, so the link is a real one that was sent to this address, but it is
+             no longer valid: its 15 minutes have passed (3), or the platform no longer accepts
+             its token (4). The platform ends a token when the account's password changes, so a
+             link that was sent before a password reset lands here.
+  The reason depends only on the link itself. It does not depend on whether an account exists
+  for the address, and a request for an unknown address stores no pending request to match, so
+  nothing can tell the two apart. Checking changes nothing. The caller uses the link with
+  take_slot, so it works once.
 {%- endcomment -%}
 {%- liquid
   assign link = {}
   assign link['ok'] = false
+  assign link['reason'] = 'stale'
 
   assign email = email | default: '' | append: '' | strip | downcase
   assign token = token | default: '' | append: ''
@@ -30,15 +41,25 @@ metadata: {
   if request.id == blank or request.email != email
     return link
   endif
-  if found.user.id == blank or found.user.authenticate.temporary_token != true
+  if found.user.id == blank
     return link
   endif
 
+  comment
+    From here the request is a real, pending one for this address, so a failure means the link
+    is no longer valid, not that it is unknown.
+  endcomment
+  assign link['reason'] = 'expired'
   assign now_unix = 'now' | date: '%s' | plus: 0
   assign expires_unix = request.expires_at | date: '%s' | plus: 0
   if expires_unix <= now_unix
     return link
   endif
+  if found.user.authenticate.temporary_token != true
+    return link
+  endif
+
+  assign link['reason'] = ''
 
   assign link['ok'] = true
   assign link['request_id'] = request.id

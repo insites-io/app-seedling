@@ -28,7 +28,7 @@ sys.path.insert(0, HERE)
 from lib import registry                               # noqa: E402
 from lib.config import Config, APP_DIR, FIXTURES_DIR, FIXTURE_KEY_CONSTANT, FIXTURE_PATH_PREFIX, QA_DIR   # noqa: E402
 
-SUITES = ["sec", "pwl", "cln"]
+SUITES = ["sec", "pwl", "cln", "fix"]
 SIGN_IN_CONSTANTS = ["SIGN_IN_HMAC_KEY", "SITE_ORIGIN"]
 ACK = "--yes-create-and-delete-test-data"
 
@@ -62,7 +62,7 @@ def main():
     ap.add_argument("--guard-only", action="store_true", help="check the configuration, read the instance identity, and stop; read-only")
     ap.add_argument(ACK, dest="ack", action="store_true", help="required to run: the suite deploys to, creates users and records on, and then deletes them from the instance")
     ap.add_argument("--suite", action="append", choices=SUITES, help="run one suite (repeatable); setup blocks of that suite always run")
-    ap.add_argument("--block", help="run one block by name (see --list)")
+    ap.add_argument("--block", help="run one block by name, or several separated by commas (see --list)")
     ap.add_argument("--case", help="run the block holding the case whose title contains this text")
     ap.add_argument("--skip-browser", action="store_true", help="skip the headless Chromium blocks")
     ap.add_argument("--cleanup-only", action="store_true", help="skip the tests; remove what an earlier run left, from its logs/pre.json")

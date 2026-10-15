@@ -102,7 +102,7 @@ class S:
                 log({"s": self.name, "tag": "NETWORK-RETRY", "m": method, "path": path[:120], "err": str(getattr(e, "reason", e))})
                 if attempt == 3: raise
                 time.sleep(3)
-        safe = {k: ("<redacted>" if k in ("password", "password_confirmation") else v) for k, v in (data or {}).items()}
+        safe = {k: ("<redacted>" if k in ("password", "password_confirmation", "current_password") else v) for k, v in (data or {}).items()}
         e = {"s": self.name, "tag": tag, "m": method, "path": path[:200], "data": safe, "status": st, "loc": hd.get("Location"), "len": len(b), "secs": round(time.time() - t0, 2)}
         if keep_body or len(b) < 400: e["body"] = b[:400]
         log(e)

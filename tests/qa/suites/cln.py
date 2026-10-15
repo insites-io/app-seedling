@@ -260,9 +260,9 @@ def b_profile():
     page = A.get("/profile", tag="prof-after", keep_body=True)[2]
     result("H6 profile details save, refuse a taken email, refuse a post without the token", p(r1) == "/profile?status=saved" and p(r2) == "/profile?error=email_taken" and n_still == 1 and p(r3).startswith("/sign-in") and 'value="Saved"' in page and "Csrf" not in page,
            f"save -> {p(r1)}; taken email -> {p(r2)}; no token -> {p(r3)}; page shows last name Saved {'value=\"Saved\"' in page}")
-    r4 = A.post("/profile/password", {"password": new_password(), "password_confirmation": new_password(), "authenticity_token": tok}, tag="pw-mismatch")
+    r4 = A.post("/profile/password", {"current_password": pws[em], "password": new_password(), "password_confirmation": new_password(), "authenticity_token": tok}, tag="pw-mismatch")
     newpw = new_password()
-    r5 = A.post("/profile/password", {"password": newpw, "password_confirmation": newpw, "authenticity_token": tok}, tag="pw-change")
+    r5 = A.post("/profile/password", {"current_password": pws[em], "password": newpw, "password_confirmation": newpw, "authenticity_token": tok}, tag="pw-change")
     d5 = signed_in(A)
     B = S("pw-old"); r6 = B.sign_in(em, pws[em]); Cc = S("pw-new"); r7 = Cc.sign_in(em, newpw)
     pws[em] = newpw

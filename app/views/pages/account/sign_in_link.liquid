@@ -53,7 +53,8 @@ metadata: {
   assign link_email = context.session.sign_in_link_e | default: ''
   function link = 'account/sign_in/check_link', email: link_email, token: context.session.sign_in_link_t, nonce: context.session.sign_in_link_n
   unless link.ok
-    redirect_to '/sign-in/email-link?error=stale'
+    assign failed_url = '/sign-in/email-link?error=' | append: link.reason
+    redirect_to failed_url
     break
   endunless
 -%}

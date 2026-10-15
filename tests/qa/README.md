@@ -1,6 +1,6 @@
 # Seedling QA suite
 
-This folder holds the QA suite for Seedling's sign-in, 2FA, password reset, passwordless sign-in and the v2.1.0 clean-up work. It deploys the release to a test instance, runs 132 cases across three suites, checks that every file in `app/` reached the instance, removes everything it added, and compares a snapshot of the instance taken before the run with one taken after.
+This folder holds the QA suite for Seedling's sign-in, 2FA, password reset, passwordless sign-in and the v2.1.0 clean-up work. It deploys the release to a test instance, runs 138 cases across four suites, checks that every file in `app/` reached the instance, removes everything it added, and compares a snapshot of the instance taken before the run with one taken after.
 
 **Status.** The suite was ported from the QA harness that passed 132 of 132 cases against Seedling at commit `e88460e` on 15 October 2026. It has **not yet been run end to end in its committed form.** What has been checked so far: every Python file compiles, `--help` and `--list` work without contacting an instance, and the safety guard refuses an instance whose uuid does not match (and passes, read-only, one that does). Treat the first full run as the suite's own test, and expect to fix the suite before trusting a failure as a finding about Seedling.
 
@@ -108,6 +108,7 @@ On a staging stack every email reaches a real inbox. Earlier passes sent about 1
 | 2FA lockout alert | 2 | `sec.lock` (first lockout), `pwl.lockout_probe` (after a passwordless sign-in) |
 | Alert with the reset line | 1 | `sec.lock` (third lockout) |
 | Sign-in code with Globals as Reply-To | 1 | `cln.sender`, plus 1 more when suite `pwl` did not run first |
+| Sign-in link, for suite `fix` | 1 | `fix.fix_link_real`: a link the instance emailed, used after a password reset. The reset itself is minted, not emailed |
 
 Everything else avoids sending:
 
@@ -121,7 +122,21 @@ Each block that sends declares it first, and the run stops with a clear message 
 
 ## What it proves
 
-The 132 cases below come from the harness that passed 132 of 132 at `e88460e`. Every expectation and control was carried over. Where the method changed to save emails, the case title is the same and the printed detail says what was inserted or minted.
+Suite `fix` was added after v2.1.0 (TW#26894026) and is not part of the 132. It holds the checks for two fixes made after the release, and its blocks are named `fix_link`, `fix_link_real` and `fix_password`, so `--suite fix` runs them alone. `fix_link_real` is the only block that sends an email (1). Run it on its own with `python3 tests/qa/run.py --yes-create-and-delete-test-data --suite fix`.
+
+
+The 132 cases of suites `sec`, `pwl` and `cln` below come from the harness that passed 132 of 132 at `e88460e`. Every expectation and control was carried over. Where the method changed to save emails, the case title is the same and the printed detail says what was inserted or minted.
+
+### Suite `fix`: The two fixes after v2.1.0 (6 cases)
+
+| Block | Case |
+|---|---|
+| `fix_link` | F1 an emailed link used after a password reset answers expired (opened and used in separate browsers, and with the reset made in the same browser) |
+| `fix_link` | F1 controls: a live link signs in; a reused link, a wrong nonce, a nonce from another account and a swapped address (known or unknown) answer stale; a link past its 15 minutes answers expired; a post with no valid form session or a forged token answers session |
+| `fix_link_real` | F1 a link the instance emailed behaves the same after a reset (the one real email) |
+| `fix_password` | F2 changing a password needs the current one: no field and a blank field are refused, nothing changes |
+| `fix_password` | F2 a wrong current password is refused, counted as a sign-in attempt and limited like sign-in; the right one is refused at the limit; the right one works with 9 failures (control) |
+| `fix_password` | F2 the correct current password changes the password as before: signs out, the old password stops working, the new one works, and a post without the token is refused |
 
 ### Suite `sec`: Security: password sign-in, 2FA, password reset and the rate limits (31 cases)
 
@@ -281,7 +296,7 @@ Everything a run writes goes to `QA_LOG_DIR` (default `tests/qa/logs/`, ignored 
 | Path | What it is |
 |---|---|
 | `run.py` | The entry point |
-| `suites/sec.py`, `suites/pwl.py`, `suites/cln.py` | The three suites. Each case is declared on its block |
+| `suites/sec.py`, `suites/pwl.py`, `suites/cln.py`, `suites/fix.py` | The four suites. Each case is declared on its block |
 | `lib/config.py` | The environment variables |
 | `lib/instance.py` | The guard, `insites-cli` calls and the partial deploy |
 | `lib/client.py` | HTTP sessions, the fixture, the sent-email log, TOTP and the email budget |
